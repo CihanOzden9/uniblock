@@ -1,0 +1,61 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
+  <diagram name="Sayfa-1" id="ELvGgSujPf51fFNBoehz">
+    <mxGraphModel dx="1119" dy="432" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-7" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Ga6UUzMAo0b2yxLbVwoy-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-8" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Ga6UUzMAo0b2yxLbVwoy-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-9" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Ga6UUzMAo0b2yxLbVwoy-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-10" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="Ga6UUzMAo0b2yxLbVwoy-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Üye Olma" vertex="1">
+          <mxGeometry height="60" width="120" x="340" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-12" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Ga6UUzMAo0b2yxLbVwoy-11" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-2" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Öğrenci" vertex="1">
+          <mxGeometry height="60" width="120" x="-40" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-15" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Ga6UUzMAo0b2yxLbVwoy-14" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-4" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Kulüp" vertex="1">
+          <mxGeometry height="60" width="120" x="200" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-18" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Ga6UUzMAo0b2yxLbVwoy-16" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-5" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="İşletme" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-19" edge="1" parent="1" source="Ga6UUzMAo0b2yxLbVwoy-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Ga6UUzMAo0b2yxLbVwoy-17" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-6" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Proje takımı" vertex="1">
+          <mxGeometry height="60" width="120" x="680" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-11" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Ad&lt;div&gt;Soyad&lt;/div&gt;&lt;div&gt;Öğrenci Numarası&lt;/div&gt;&lt;div&gt;Mail Adresi&lt;/div&gt;&lt;div&gt;Şİfre&lt;/div&gt;&lt;div&gt;Fakülte&lt;/div&gt;&lt;div&gt;Bölüm&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="120" x="-40" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-14" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Logo&lt;div&gt;Ad&lt;/div&gt;&lt;div&gt;Şifre&lt;/div&gt;&lt;div&gt;Kulüp İletişim&lt;/div&gt;&lt;div&gt;Başkan&lt;/div&gt;&lt;div&gt;Başkan İletişim&lt;/div&gt;&lt;div&gt;Danışman Hoca&lt;/div&gt;&lt;div&gt;Sosyal Medya&lt;/div&gt;&lt;div&gt;Web Sayfası&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="120" x="200" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-16" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Logo&lt;div&gt;Ad&lt;/div&gt;&lt;div&gt;Şifre&lt;/div&gt;&lt;div&gt;İşletme İletişim&lt;/div&gt;&lt;div&gt;Sormlu&lt;/div&gt;&lt;div&gt;Sorumlu İletişim&lt;br&gt;&lt;/div&gt;&lt;div&gt;Fiziksel Adres&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="120" x="440" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="Ga6UUzMAo0b2yxLbVwoy-17" parent="1" style="whiteSpace=wrap;html=1;rounded=0;" value="Logo&lt;div&gt;Ad&lt;/div&gt;&lt;div&gt;Şifre&lt;/div&gt;&lt;div&gt;Takım İletişim&lt;/div&gt;&lt;div&gt;Başkan&lt;/div&gt;&lt;div&gt;Başkan İletişim&lt;/div&gt;&lt;div&gt;Danışman Hoca&lt;/div&gt;&lt;div&gt;Sosyal Medya&lt;/div&gt;&lt;div&gt;Web Sayfası&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="120" x="680" y="360" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

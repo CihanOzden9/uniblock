@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: UniBlock API
+  version: 1.0.0
+  description: UniBlock platform API sözleşmesi v1
+
+paths:
+  /auth/register:
+    post:
+      summary: Kullanıcı kaydı
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: {type: string}
+                password: {type: string}
+                role: {type: string, enum: [ogrenci, kulup, proje_takimi, isletme]}
+                department: {type: string}
+      responses:
+        '201': {description: Kullanıcı oluşturuldu}
+
+  /auth/login:
+    post:
+      summary: Giriş
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: {type: string}
+
+  /feed:
+    get:
+      summary: Kişiselleştirilmiş akış
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentItem'
+
+  /news:
+    get:
+      summary: Haberler
+      parameters:
+        - name: category
+          in: query
+          schema: {type: string}
+      responses:
+        '200': {description: Haber listesi}
+
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  schemas:
+    ContentItem:
+      type: object
+      properties:
+        id: {type: string}
+        type: {type: string, enum: [event, news, post]}
+        title: {type: string}
+        relevanceScore: {type: number}

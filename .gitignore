@@ -1,0 +1,33 @@
+# Monorepo UniBlock .gitignore
+
+## Dependencies
+**/node_modules/
+npm-debug.log*
+
+## Next.js Build
+**/.next/
+**/out/
+**/build/
+
+## Environment
+**/.env*.local
+**/.env
+
+## Logs
+*.log
+**/logs/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Editor
+.vscode/settings.json
+.idea/
+
+## Temp
+*~
+**/~*
+
+## Docs
+**/*.drawio~

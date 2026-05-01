@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniBlock — Haberler Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-page="news">
+  <header class="navbar sticky">
+    <div class="container navbar-inner">
+      <a href="./index.html" class="logo" aria-label="UniBlock Ana Sayfa">UniBlock<span>.</span></a>
+      <nav class="nav">
+        <a class="nav-link" href="./index.html">Akış</a>
+        <a class="nav-link active" href="./haberler.html">Haberler</a>
+      </nav>
+      <div class="user-meta">
+        <span class="role-pill">Öğrenci</span>
+        <div>
+          <div class="user-name">Ece Yılmaz</div>
+          <div class="user-sub">Bilgisayar Müh. • 3. Sınıf</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="news-page">
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">03 — Gündem</p>
+          <div class="divider"></div>
+        </div>
+        <h1 class="page-title">Senin için güncel içerikler</h1>
+        <p class="hero-text">Kategoriye göre filtreleyebilir, ilgi alanına göre önerileri görebilirsin.</p>
+        <div id="category-chips" class="source-filter"></div>
+      </div>
+    </section>
+
+    <section class="section section-news-bg">
+      <div class="container">
+        <div id="news-list" class="news-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
