@@ -1,65 +1,84 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen">
+      {/* Navbar - Fixed & Minimal */}
+      <header className="fixed top-0 w-full h-16 bg-white z-50 flex items-center justify-between px-8 border-b-2 border-accent transition-colors duration-300">
+        <div className="font-heading font-extrabold text-[18px] tracking-tight">
+          Uni<span className="text-accent">.</span>Block
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <nav className="flex items-center gap-6">
+          <Link href="/login" className="text-[13px] font-medium tracking-[0.05em] uppercase hover:text-accent transition-colors">
+            Giriş Yap
+          </Link>
+          <Link href="/register">
+            <Button className="px-[36px] py-[14px] text-[12px] font-semibold tracking-[0.15em] uppercase bg-accent text-white hover:bg-black hover:text-white transition-colors rounded-none">
+              Kayıt Ol
+            </Button>
+          </Link>
+        </nav>
+      </header>
+      
+      {/* Hero Section */}
+      <main 
+        className="flex-1 flex flex-col items-center justify-center text-center px-8 relative"
+        style={{
+          minHeight: "100vh",
+          paddingTop: "64px",
+          backgroundImage: `
+            linear-gradient(rgba(5,150,105,0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(5,150,105,0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: "60px 60px"
+        }}
+      >
+        <div className="max-w-[900px] w-full flex flex-col items-center pb-24">
+          <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-accent mb-6 bg-accent/10 px-4 py-1 border border-accent/20">
+            01 — KAMPÜS AĞI
+          </span>
+          <h1 className="font-heading text-[clamp(40px,10vw,120px)] leading-[1.05] tracking-tight font-light mb-8">
+            Kampüsü <br />
+            <span className="font-extrabold text-accent">Keşfet</span>
+          </h1>
+          <p className="text-[16px] leading-[1.9] text-[#525252] max-w-[600px] mb-12">
+            Öğrenciler, kulüpler, proje takımları ve işletmeleri bir araya getiren
+            minimalist, veri odaklı ekosisteme katılın.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6">
+            <Link href="/register">
+              <Button className="px-[36px] h-14 text-[12px] font-semibold tracking-[0.15em] uppercase bg-accent text-white hover:bg-black transition-colors rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                Hemen Başla
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button variant="outline" className="px-[36px] h-14 text-[12px] font-semibold tracking-[0.15em] uppercase border-accent text-accent hover:bg-accent hover:text-white transition-colors rounded-none">
+                Nasıl Çalışır?
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-accent font-semibold animate-pulse">Aşağı Kaydır</span>
+          <div className="w-[2px] h-[40px] bg-accent opacity-50"></div>
         </div>
       </main>
+      
+      {/* Footer */}
+      <footer className="bg-black text-[#525252] border-t-4 border-accent px-8 py-12">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="font-heading font-extrabold text-[16px] text-white">
+            Uni<span className="text-accent">.</span>Block
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.1em] text-accent">
+            © 2026 Tüm Hakları Saklıdır.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
