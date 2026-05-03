@@ -41,5 +41,43 @@ export default async function ClubManagePage() {
 
   const club = user.ledClubs[0];
 
-  return <ClubDashboardClient club={club} />;
+  // Kulübün anket etkileşimlerini ayrıca çekiyoruz
+  const surveyInteractions = await (prisma.interaction as any).findMany({
+    where: {
+      surveyId: { in: club.surveys.map(s => s.id) },
+      type: "VOTE"
+    },
+    select: { surveyId: true, optionId: true }
+  }) as any[];
+
+  // Kulübün postlarındaki şikayetleri çekiyoruz
+  const reports = await (prisma as any).report.findMany({
+    where: {
+      interaction: {
+        postId: { in: club.posts.map(p => p.id) }
+      }
+    },
+    include: {
+      reporter: { select: { name: true } },
+      interaction: {
+        include: {
+          user: { select: { name: true } },
+          post: { select: { title: true } }
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  }) as any[];
+
+  // Kulüp verisine etkileşimleri ekliyoruz
+  const enhancedClub = {
+    ...club,
+    surveys: club.surveys.map(s => ({
+      ...s,
+      interactions: surveyInteractions.filter(i => i.surveyId === s.id)
+    })),
+    reports: reports
+  };
+
+  return <ClubDashboardClient club={enhancedClub} />;
 }

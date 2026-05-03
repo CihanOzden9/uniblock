@@ -3,7 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Share2, User, ArrowRight, Trophy } from "lucide-react";
+import { Heart, MessageSquare, Share2, User, ArrowRight, Trophy, MoreHorizontal, AlertTriangle, Trash2, Edit2 } from "lucide-react";
 import { 
   Sheet, 
   SheetContent, 
@@ -11,9 +11,9 @@ import {
   SheetTitle, 
   SheetDescription 
 } from "@/components/ui/sheet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { likePost, commentPost, voteSurvey } from "@/app/actions/interaction";
+import { likePost, commentPost, voteSurvey, editComment, deleteComment, reportComment } from "@/app/actions/interaction";
 import { toast } from "sonner";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 
@@ -30,8 +30,19 @@ export default function FeedClient({
 }) {
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [commentText, setCommentText] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentText, setEditCommentText] = useState("");
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
+
+  // Map the real data to the structure the component expects
+  const feedPosts = useMemo(() => initialPosts.map(post => ({
+    ...post,
+    date: new Date(post.createdAt).toLocaleDateString("tr-TR"),
+    source: post.club?.name || post.author?.name || "Bilinmeyen Kaynak",
+    category: post.type === "NEWS" ? "Haber" : "Duyuru",
+    excerpt: post.content.substring(0, 150) + "..."
+  })), [initialPosts]);
 
   // Polling: Her 30 saniyede bir veriyi sessizce yeniler
   useEffect(() => {
@@ -41,6 +52,14 @@ export default function FeedClient({
 
     return () => clearInterval(interval);
   }, [router]);
+
+  // Yeni veri geldiğinde (likes/comments sonrası) açık olan post detayını günceller
+  useEffect(() => {
+    if (selectedPost) {
+      const updatedPost = feedPosts.find(p => p.id === selectedPost.id);
+      if (updatedPost) setSelectedPost(updatedPost);
+    }
+  }, [feedPosts, selectedPost]);
 
   async function handleLike(e: React.MouseEvent, postId: string) {
     e.stopPropagation();
@@ -76,14 +95,35 @@ export default function FeedClient({
     setIsPending(false);
   }
 
-  // Map the real data to the structure the component expects
-  const feedPosts = initialPosts.map(post => ({
-    ...post,
-    date: new Date(post.createdAt).toLocaleDateString("tr-TR"),
-    source: post.club?.name || post.author?.name || "Bilinmeyen Kaynak",
-    category: post.type === "NEWS" ? "Haber" : "Duyuru",
-    excerpt: post.content.substring(0, 150) + "..."
-  }));
+  async function handleEditComment(commentId: string) {
+    if (!editCommentText.trim()) return;
+    setIsPending(true);
+    const res = await editComment(commentId, currentUser.id, editCommentText);
+    if (res.success) {
+      setEditingCommentId(null);
+      toast.success("Yorum güncellendi.");
+      router.refresh();
+    }
+    setIsPending(false);
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    if (!confirm("Yorumu silmek istediğinize emin misiniz?")) return;
+    const res = await deleteComment(commentId, currentUser.id);
+    if (res.success) {
+      toast.success("Yorum silindi.");
+      router.refresh();
+    }
+  }
+
+  async function handleReportComment(commentId: string) {
+    const reason = prompt("Şikayet nedeninizi belirtin:");
+    if (!reason) return;
+    const res = await reportComment(commentId, currentUser.id, reason);
+    if (res.success) toast.success("Şikayetiniz iletildi.");
+  }
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -334,12 +374,70 @@ export default function FeedClient({
                   <div className="flex flex-col gap-4">
                     {selectedPost.interactions?.filter((i: any) => i.type === "COMMENT").length > 0 ? (
                       selectedPost.interactions.filter((i: any) => i.type === "COMMENT").map((comment: any) => (
-                        <div key={comment.id} className="bg-gray-50 p-4 border-l-4 border-black">
+                        <div key={comment.id} className="bg-gray-50 p-4 border-l-4 border-black group/comment">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-bold text-[11px] uppercase tracking-wider">{comment.user.name}</span>
-                            <span className="text-[9px] text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-[11px] uppercase tracking-wider">{comment.user.name}</span>
+                              <span className="text-[9px] text-gray-400">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 opacity-0 group-hover/comment:opacity-100 transition-opacity">
+                              {currentUser?.id === comment.userId ? (
+                                <>
+                                  <button 
+                                    onClick={() => {
+                                      setEditingCommentId(comment.id);
+                                      setEditCommentText(comment.content);
+                                    }}
+                                    className="p-1 hover:bg-gray-200 text-gray-500 transition-colors"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDeleteComment(comment.id)}
+                                    className="p-1 hover:bg-red-100 text-red-500 transition-colors"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <button 
+                                  onClick={() => handleReportComment(comment.id)}
+                                  className="p-1 hover:bg-orange-100 text-orange-500 transition-colors"
+                                  title="Bildir"
+                                >
+                                  <AlertTriangle className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-700">{comment.content}</p>
+                          
+                          {editingCommentId === comment.id ? (
+                            <div className="space-y-2">
+                              <textarea 
+                                value={editCommentText}
+                                onChange={(e) => setEditCommentText(e.target.value)}
+                                className="w-full p-2 border-2 border-black text-sm outline-none resize-none"
+                                rows={2}
+                              />
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => handleEditComment(comment.id)}
+                                  className="text-[10px] font-black uppercase bg-black text-white px-3 py-1"
+                                >
+                                  Kaydet
+                                </button>
+                                <button 
+                                  onClick={() => setEditingCommentId(null)}
+                                  className="text-[10px] font-black uppercase bg-gray-200 px-3 py-1"
+                                >
+                                  İptal
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-700">{comment.content}</p>
+                          )}
                         </div>
                       ))
                     ) : (

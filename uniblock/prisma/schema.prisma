@@ -29,6 +29,7 @@ enum InteractionType {
   SAVE
   RSVP
   VOTE
+  REPORT
 }
 
 model User {
@@ -49,6 +50,7 @@ model User {
   ledProjects     ProjectTeam[]  @relation("ProjectLeader")
   posts           Post[]         @relation("PostAuthor")
   interactions    Interaction[]
+  reports         Report[]      @relation("Reporter")
   clubMemberships ClubMember[]
 }
 
@@ -187,4 +189,19 @@ model Interaction {
   option    SurveyOption?   @relation(fields: [optionId], references: [id], onDelete: Cascade)
 
   content   String?         @db.Text // For comments
+  reports   Report[]
+}
+
+model Report {
+  id            String      @id @default(cuid())
+  reason        String?
+  status        String      @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  reporterId    String
+  reporter      User        @relation("Reporter", fields: [reporterId], references: [id])
+
+  interactionId String
+  interaction   Interaction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
 }

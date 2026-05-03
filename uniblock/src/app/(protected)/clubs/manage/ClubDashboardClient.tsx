@@ -10,7 +10,8 @@ import { createPost, updatePost, deletePost } from "@/app/actions/post";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
 import { addClubMember, removeClubMember, updateClubMemberRole } from "@/app/actions/club";
 import { toast } from "sonner";
-import { Trash2, Edit, PlusCircle, CheckCircle2, ListFilter } from "lucide-react";
+import { Trash2, Edit, PlusCircle, CheckCircle2, ListFilter, AlertCircle, ShieldAlert } from "lucide-react";
+import { resolveReport } from "@/app/actions/interaction";
 
 export default function ClubDashboardClient({ club }: { club: any }) {
   const [activeTab, setActiveTab] = useState("overview");
@@ -106,6 +107,14 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     }
   }
 
+  async function handleResolveReport(id: string, status: "RESOLVED" | "DISMISSED") {
+    setIsPending(true);
+    const result = await resolveReport(id, status);
+    if (result.success) toast.success(status === "RESOLVED" ? "Şikayet çözüldü." : "Şikayet reddedildi.");
+    else toast.error(result.error);
+    setIsPending(false);
+  }
+
   const openCreatePost = () => {
     setSheetMode("create_post");
     setEditingPost(null);
@@ -128,6 +137,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     { id: "posts", label: "İçerikler", icon: FileText },
     { id: "events", label: "Etkinlikler", icon: Calendar },
     { id: "members", label: "Üyeler", icon: Users },
+    { id: "reports", label: "Şikayetler", icon: ShieldAlert },
   ];
 
   return (
@@ -354,8 +364,18 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                             <span className="text-[10px] text-gray-400 font-bold tracking-widest">{new Date(survey.createdAt).toLocaleDateString()}</span>
                           </div>
                           <h4 className="font-bold text-lg">{survey.question}</h4>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">
-                            {survey.options?.length} Seçenek • 0 Yanıt
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {survey.options?.map((opt: any) => {
+                              const count = survey.interactions?.filter((i: any) => i.optionId === opt.id).length || 0;
+                              return (
+                                <span key={opt.id} className="text-[10px] font-bold bg-gray-50 border border-gray-200 px-2 py-1 uppercase">
+                                  {opt.text}: <span className="text-accent">{count}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase mt-2">
+                            Toplam: {survey.interactions?.length || 0} Katılımcı
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -473,6 +493,82 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               <Calendar className="w-16 h-16 text-gray-200 mb-6" />
               <h3 className="font-heading text-2xl font-extrabold uppercase tracking-tight mb-2">Etkinlik Yönetimi</h3>
               <p className="text-gray-500 mb-8 max-w-md">Etkinlik takvimi ve QR kodlu katılım sistemi yakında eklenecek.</p>
+            </div>
+          )}
+
+          {/* Reports Tab Content */}
+          {activeTab === "reports" && (
+            <div className="animate-fade-in space-y-8">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
+                  Gelen Şikayetler <span className="bg-red-500 text-white text-[10px] px-2 py-1 tracking-widest">{club.reports?.filter((r: any) => r.status === "PENDING").length || 0} BEKLEYEN</span>
+                </h3>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {club.reports?.length > 0 ? (
+                  club.reports.map((report: any) => (
+                    <div key={report.id} className={`border-2 p-6 flex flex-col gap-4 transition-all ${report.status === "PENDING" ? "border-red-100 bg-red-50/30" : "border-gray-100 bg-white opacity-60"}`}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3">
+                          <AlertCircle className={`w-5 h-5 ${report.status === "PENDING" ? "text-red-500" : "text-gray-400"}`} />
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Şikayet Nedeni</span>
+                            <p className="font-bold text-sm text-gray-800">{report.reason || "Belirtilmemiş"}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[9px] font-bold text-gray-400 block uppercase">Tarih</span>
+                          <span className="text-[10px] font-black">{new Date(report.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-200 p-4 rounded-none">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-tighter">Şikayet Edilen Yorum</span>
+                          <span className="text-[9px] font-bold text-gray-400 italic">"{report.interaction.post.title}" duyurusunda</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">"{report.interaction.content}"</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">Yorum Sahibi: {report.interaction.user.name}</p>
+                      </div>
+
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Bildiren:</span>
+                          <span className="text-[10px] font-black text-black">{report.reporter.name}</span>
+                        </div>
+                        
+                        {report.status === "PENDING" && (
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleResolveReport(report.id, "DISMISSED")}
+                              className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest border border-gray-200 hover:border-black transition-all"
+                            >
+                              Reddet
+                            </button>
+                            <button 
+                              onClick={() => handleResolveReport(report.id, "RESOLVED")}
+                              className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest bg-black text-white hover:bg-accent transition-all"
+                            >
+                              Çözüldü Olarak İşaretle
+                            </button>
+                          </div>
+                        )}
+
+                        {report.status !== "PENDING" && (
+                          <span className={`text-[10px] font-black uppercase px-2 py-1 ${report.status === "RESOLVED" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                            {report.status === "RESOLVED" ? "ÇÖZÜLDÜ" : "REDDEDİLDİ"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold italic uppercase tracking-widest text-xs">
+                    Henüz şikayet bulunmuyor.
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

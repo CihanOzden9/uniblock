@@ -1,33 +1,72 @@
-# Monorepo UniBlock .gitignore
+# UniBlock Monorepo .gitignore
 
-## Dependencies
+# Dependencies
 **/node_modules/
-npm-debug.log*
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-## Next.js Build
+# Next.js Build & Outputs
 **/.next/
 **/out/
 **/build/
+**/dist/
+.tsbuildinfo
+next-env.d.ts
 
-## Environment
-**/.env*.local
+# Environment Variables & Secrets
 **/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/*.pem
+**/*.key
 
-## Logs
+# Prisma
+**/prisma/migrations/
+**/prisma/*.db
+**/prisma/*.db-journal
+**/src/generated/prisma
+
+# Logs & Debugging
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 **/logs/
+**/.vercel
 
-## OS
+# OS Files
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
+desktop.ini
 
-## Editor
-.vscode/settings.json
+# IDEs & Tools
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
 
-## Temp
+# Testing
+**/coverage/
+**/.nyc_output
+
+# Temporary Files
 *~
 **/~*
-
-## Docs
 **/*.drawio~
+**/*.tmp

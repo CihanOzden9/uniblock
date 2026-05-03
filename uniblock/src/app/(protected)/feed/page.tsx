@@ -27,7 +27,7 @@ export default async function FeedPage() {
         select: { name: true, image: true }
       }
     }
-  });
+  }) as any[];
 
   // Postları etkileşimleriyle birleştiriyoruz
   const postsWithInteractions = posts.map(p => ({
@@ -51,18 +51,14 @@ export default async function FeedPage() {
     }
   });
 
-  // Anket etkileşimlerini ayrıca çekiyoruz (Type error'u aşmak için Raw Query kullanıyoruz)
-  const surveyIds = surveys.map(s => s.id);
-  let surveyInteractions: any[] = [];
-  
-  if (surveyIds.length > 0) {
-    surveyInteractions = await prisma.$queryRawUnsafe(`
-      SELECT "userId", "optionId", "surveyId" 
-      FROM "Interaction" 
-      WHERE "surveyId" IN (${surveyIds.map(id => `'${id}'`).join(',')}) 
-      AND "type" = 'VOTE'
-    `);
-  }
+  // Anket etkileşimlerini ayrıca çekiyoruz (IDE Type error'u aşmak için)
+  const surveyInteractions = await (prisma.interaction as any).findMany({
+    where: {
+      surveyId: { in: surveys.map(s => s.id) },
+      type: "VOTE"
+    },
+    select: { userId: true, optionId: true, surveyId: true }
+  }) as any[];
 
   // Anketleri etkileşimleriyle birleştiriyoruz
   const surveysWithInteractions = surveys.map(s => ({
