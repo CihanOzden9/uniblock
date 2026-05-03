@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UniBlock — Kulüpler ve Topluluklar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .club-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--black);
+      border: 1px solid var(--black);
+    }
+    .club-card {
+      background: var(--white);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .club-card:hover {
+      background: var(--gray-100);
+    }
+    .club-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .club-logo-circle {
+      width: 48px;
+      height: 48px;
+      background: var(--black);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .club-name h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .club-cat {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-400);
+    }
+    .manager-section {
+      margin-top: 10px;
+      padding-top: 16px;
+      border-top: 1px solid var(--gray-200);
+    }
+    .manager-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .manager-label {
+      font-weight: 700;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body data-page="clubs">
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="./index.html" class="logo">UniBlock<span>.</span></a>
+      <nav class="nav">
+        <a class="nav-link" href="./ogrenci.html">Akış</a>
+        <a class="nav-link" href="./haberler.html">Haberler</a>
+        <a class="nav-link" href="./siralamalar.html">Sıralamalar</a>
+        <a class="nav-link active" href="./kulupler.html">Kulüpler</a>
+      </nav>
+      <div class="user-actions">
+        <button class="notification-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9J"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg><span class="notification-badge">3</span></button>
+        <div class="user-meta">
+          <span class="role-pill">Öğrenci</span>
+          <div><div class="user-name">Ece Yılmaz</div><div class="user-sub">Bilgisayar Müh.</div></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero hero-grid">
+      <div class="container hero-inner">
+        <p class="eyebrow">01 — Keşfet</p>
+        <h1 class="hero-title">kampüs<span>topluluklari</span></h1>
+        <p class="hero-text">Üniversitendeki tüm kulüpleri incele, yöneticilerle iletişime geç ve topluluklara katıl.</p>
+        
+        <div class="tabs">
+          <button class="btn btn-outline active">Tüm Kulüpler</button>
+          <button class="btn btn-outline">Bilim & Teknoloji</button>
+          <button class="btn btn-outline">Kültür & Sanat</button>
+          <button class="btn btn-outline">Spor</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div id="club-list" class="club-list-grid">
+          <!-- JS ile dolacak -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

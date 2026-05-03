@@ -1,80 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+    setTimeout(() => setIsLoading(false), 1000);
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] pb-24">
-      {/* Navbar - Fixed & Minimal */}
-      <header className="w-full h-16 bg-white z-50 flex items-center justify-between px-8 border-b-2 border-accent">
-        <div className="font-heading font-extrabold text-[18px] tracking-tight">
-          Uni<span className="text-accent">.</span>Block
-        </div>
-        <nav className="flex items-center gap-6">
-          <Link href="/feed" className="text-[13px] font-medium tracking-[0.05em] uppercase hover:text-accent transition-colors">
-            Akış
-          </Link>
-          <Link href="/profile" className="text-[13px] font-medium tracking-[0.05em] uppercase text-accent transition-colors">
-            Profil
-          </Link>
-          <Button variant="outline" className="px-[20px] py-[10px] text-[12px] font-semibold tracking-[0.15em] uppercase border-accent text-accent hover:bg-accent hover:text-white transition-colors rounded-none bg-transparent">
-            Çıkış Yap
-          </Button>
-        </nav>
-      </header>
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <Navbar />
 
-      <div className="container mx-auto pt-16 px-4 md:px-8 max-w-[1100px]">
+      <main className="pt-32 pb-20 px-4 md:px-8 max-w-[1200px] mx-auto">
         <div className="mb-12">
           <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-accent mb-4 inline-block bg-accent/10 px-4 py-1 border border-accent/20">
             01 — PROFİL YÖNETİMİ
           </span>
-          <h1 className="font-heading text-4xl font-extrabold tracking-tight">Hesap Ayarları</h1>
+          <h1 className="font-heading text-4xl md:text-5xl font-extrabold tracking-tighter leading-none mb-4">
+            Hesap Ayarları
+          </h1>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-10">
-          {/* Sidebar */}
-          <aside className="w-full md:w-[320px]">
-            <Card className="border-accent border-2 shadow-[4px_4px_0px_0px_rgba(5,150,105,0.2)] rounded-none bg-white">
-              <CardContent className="pt-8 flex flex-col items-center">
-                <div className="relative group cursor-pointer mb-6 border-2 border-accent overflow-hidden" style={{ width: "140px", height: "180px" }}>
-                  <img src="https://github.com/shadcn.png" alt="@shadcn" className="w-full h-full object-cover transition-all duration-500 grayscale group-hover:grayscale-0" />
-                  <div className="absolute bottom-0 left-0 w-full bg-accent text-white text-[10px] uppercase tracking-widest text-center py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 font-semibold">
-                    Değiştir
-                  </div>
+        <div className="flex flex-col lg:flex-row gap-12">
+          <aside className="w-full lg:w-[320px] shrink-0">
+            <Card className="border-accent border-2 shadow-[12px_12px_0px_0px_rgba(5,150,105,0.1)] rounded-none bg-white overflow-hidden sticky top-32">
+              <div className="aspect-square relative overflow-hidden group">
+                <img 
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+                  alt="Profile" 
+                  className="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                  <Button variant="secondary" className="rounded-none uppercase tracking-widest text-[10px] font-bold">Fotoğrafı Değiştir</Button>
                 </div>
-                <h2 className="font-heading text-2xl font-extrabold tracking-tight">Ahmet Yılmaz</h2>
-                <p className="text-xs uppercase tracking-widest text-accent font-semibold mt-2">Öğrenci</p>
+              </div>
+              <CardContent className="p-7 text-center border-t-2 border-accent">
+                <h2 className="font-heading text-2xl font-extrabold tracking-tight mb-1">Ahmet Yılmaz</h2>
+                <p className="text-xs uppercase tracking-[0.2em] font-semibold text-accent">ÖĞRENCİ</p>
               </CardContent>
             </Card>
           </aside>
 
-          {/* Main Content */}
           <main className="flex-1 w-full overflow-hidden">
             <Tabs defaultValue="general" className="w-full">
               <TabsList className="flex flex-wrap w-full justify-start rounded-none bg-transparent p-0 border-b-2 border-accent/20 mb-8 h-auto gap-6 md:gap-10">
@@ -90,6 +68,7 @@ export default function ProfilePage() {
                 <TabsTrigger value="security" className="rounded-none px-0 pb-4 pt-2 text-[11px] md:text-[13px] uppercase tracking-wider font-semibold text-[#a3a3a3] hover:text-accent transition-colors border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:text-accent !bg-transparent !shadow-none outline-none ring-0">
                   Güvenlik
                 </TabsTrigger>
+
               </TabsList>
               
               <TabsContent value="general" className="focus-visible:outline-none focus-visible:ring-0">
@@ -243,10 +222,12 @@ export default function ProfilePage() {
                   </form>
                 </Card>
               </TabsContent>
+
+
             </Tabs>
           </main>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -119,6 +119,16 @@ function cardTemplate(item, isNews = false) {
         <span class="source">${source}</span>
         <span class="read-link">Detay →</span>
       </div>
+      <div class="interaction-bar">
+        <button class="int-btn like-btn" onclick="handleLike(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          Beğen
+        </button>
+        <button class="int-btn comment-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          Yorum
+        </button>
+      </div>
     </article>
   `;
 }
@@ -202,10 +212,96 @@ function setupRegisterForm() {
   });
 }
 
+const rankingData = [
+  { name: "Yazılım Kulübü", points: 2450 },
+  { name: "Girişimcilik Kulübü", points: 2100 },
+  { name: "Tasarım Topluluğu", points: 1850 },
+  { name: "Mobil Topluluk", points: 1600 },
+  { name: "Siber Güvenlik", points: 1420 }
+];
+
+function renderRanking() {
+  const container = document.getElementById("ranking-mini");
+  if (!container) return;
+
+  container.innerHTML = rankingData.map((club, index) => `
+    <div class="rank-item">
+      <span class="rank-no">0${index + 1}</span>
+      <div class="rank-info">
+        <span class="rank-name">${club.name}</span>
+        <span class="rank-points">${club.points} PUAN</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+window.handleLike = function(btn) {
+  const isLiked = btn.classList.toggle("active");
+  btn.style.color = isLiked ? "var(--accent)" : "var(--gray-400)";
+  btn.querySelector("svg").setAttribute("fill", isLiked ? "var(--accent)" : "none");
+};
+
+window.toggleMessages = function() {
+  document.getElementById("message-overlay").classList.toggle("active");
+};
+
+const clubsData = [
+  { name: "Yazılım Kulübü", cat: "Teknoloji", manager: "Can Demir", points: 2450, events: 12 },
+  { name: "Girişimcilik Kulübü", cat: "Girişimcilik", manager: "Ayşe Ak", points: 2100, events: 8 },
+  { name: "Tasarım Topluluğu", cat: "Sanat", manager: "Mert Soylu", points: 1850, events: 15 },
+  { name: "Mobil Topluluk", cat: "Teknoloji", manager: "Selin Gün", points: 1600, events: 6 },
+  { name: "Siber Güvenlik", cat: "Sistem", manager: "Bora Tan", points: 1420, events: 4 }
+];
+
+function renderFullRanking() {
+  const container = document.getElementById("full-ranking-body");
+  if (!container) return;
+
+  container.innerHTML = clubsData.sort((a, b) => b.points - a.points).map((club, index) => `
+    <tr>
+      <td class="rank-cell">0${index + 1}</td>
+      <td class="club-cell">${club.name}</td>
+      <td>${club.cat}</td>
+      <td>${club.events} Etkinlik</td>
+      <td class="points-cell">${club.points} PUAN</td>
+    </tr>
+  `).join("");
+}
+
+function renderClubs() {
+  const container = document.getElementById("club-list");
+  if (!container) return;
+
+  container.innerHTML = clubsData.map(club => `
+    <div class="club-card">
+      <div class="club-header">
+        <div class="club-logo-circle">${club.name.split(' ').map(n => n[0]).join('')}</div>
+        <div class="club-name">
+          <h3>${club.name}</h3>
+          <span class="club-cat">${club.cat}</span>
+        </div>
+      </div>
+      <div class="manager-section">
+        <p class="manager-label">Başkan / Yönetici</p>
+        <div class="manager-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          ${club.manager}
+        </div>
+      </div>
+      <button class="btn btn-outline" style="width: 100%; margin-top: 10px; font-size: 10px;">Yöneticilerle Konuş</button>
+    </div>
+  `).join("");
+}
+
 (function init() {
   const page = document.body.dataset.page;
-  if (page === "feed") setupFeedTabs();
+  if (page === "feed") {
+    setupFeedTabs();
+    renderRanking();
+  }
   if (page === "news") setupNewsFilters();
   if (page === "login") setupLoginForm();
   if (page === "register") setupRegisterForm();
+  if (page === "ranking") renderFullRanking();
+  if (page === "clubs") renderClubs();
 })();

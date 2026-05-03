@@ -1,0 +1,51 @@
+{
+  "faculties": [
+    {
+      "id": "engineering",
+      "name": "Mühendislik Fakültesi",
+      "rss": "https://muhendislik.istanbulc.edu.tr/tr/_/rss",
+      "departments": [
+        {
+          "id": "computer",
+          "name": "Bilgisayar Mühendisliği",
+          "rss": "https://bilgisayar.istanbulc.edu.tr/tr/_/rss"
+        },
+        {
+          "id": "software",
+          "name": "Yazılım Mühendisliği",
+          "rss": "https://yazilim.istanbulc.edu.tr/tr/_/rss"
+        }
+      ]
+    },
+    {
+      "id": "medicine",
+      "name": "Tıp Fakültesi",
+      "rss": "https://tip.istanbulc.edu.tr/tr/_/rss",
+      "departments": []
+    },
+    {
+      "id": "economics",
+      "name": "İktisadi ve İdari Bilimler",
+      "rss": "https://iibf.istanbulc.edu.tr/tr/_/rss",
+      "departments": [
+        {
+          "id": "economics_dept",
+          "name": "İktisat",
+          "rss": "https://iktisat.istanbulc.edu.tr/tr/_/rss"
+        }
+      ]
+    }
+  ],
+  "general": [
+    {
+      "id": "campus_life",
+      "name": "Kampüs Yaşamı",
+      "rss": "https://www.istanbulc.edu.tr/tr/_/rss"
+    },
+    {
+      "id": "events",
+      "name": "Etkinlikler",
+      "rss": "https://etkinlik.istanbulc.edu.tr/tr/_/rss"
+    }
+  ]
+}
