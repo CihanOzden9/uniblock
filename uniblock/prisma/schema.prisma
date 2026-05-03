@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  CLUB_ADMIN
+  PROJECT_ADMIN
+  BUSINESS_ADMIN
+  SUPER_ADMIN
+}
+
+enum PostType {
+  NEWS
+  ANNOUNCEMENT
+}
+
+enum InteractionType {
+  LIKE
+  COMMENT
+  SAVE
+  RSVP
+  VOTE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  image         String?
+  bio           String?
+  faculty       String?
+  department    String?
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  ledClubs        Club[]         @relation("ClubLeader")
+  ledProjects     ProjectTeam[]  @relation("ProjectLeader")
+  posts           Post[]         @relation("PostAuthor")
+  interactions    Interaction[]
+  clubMemberships ClubMember[]
+}
+
+model Club {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  description      String?
+  logo             String?
+  performanceScore Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  leaderId         String
+  leader           User      @relation("ClubLeader", fields: [leaderId], references: [id])
+
+  posts            Post[]
+  events           Event[]
+  surveys          Survey[]
+  members          ClubMember[]
+}
+
+model ClubMember {
+  id        String   @id @default(cuid())
+  userId    String
+  clubId    String
+  role      String   @default("MEMBER") // e.g. MEMBER, BOARD_MEMBER
+  joinedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clubId])
+}
+
+model ProjectTeam {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leaderId    String
+  leader      User     @relation("ProjectLeader", fields: [leaderId], references: [id])
+}
+
+model Business {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  industry     String?
+  logo         String?
+  contactEmail String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  type      PostType @default(ANNOUNCEMENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  authorId  String
+  author    User     @relation("PostAuthor", fields: [authorId], references: [id])
+
+  clubId    String?
+  club      Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  interactions Interaction[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  date        DateTime
+  location    String?
+  capacity    Int?
+  qrCode      String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizerId String
+  organizer   Club     @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  interactions Interaction[]
+}
+
+model Survey {
+  id        String   @id @default(cuid())
+  question  String
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  options      SurveyOption[]
+  interactions Interaction[]
+}
+
+model SurveyOption {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+
+  surveyId  String
+  survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  
+  interactions Interaction[]
+}
+
+model Interaction {
+  id        String          @id @default(cuid())
+  type      InteractionType
+  createdAt DateTime        @default(now())
+
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId    String?
+  post      Post?           @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  eventId   String?
+  event     Event?          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  surveyId  String?
+  survey    Survey?         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  optionId  String?
+  option    SurveyOption?   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  content   String?         @db.Text // For comments
+}
