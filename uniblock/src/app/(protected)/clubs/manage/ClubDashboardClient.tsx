@@ -9,7 +9,7 @@ import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Settings } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
-import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword } from "@/app/actions/club";
+import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword, handleJoinRequest } from "@/app/actions/club";
 import { toast } from "sonner";
 import { Trash2, Edit, PlusCircle, AlertCircle, ShieldAlert, ListFilter } from "lucide-react";
 import { resolveReport } from "@/app/actions/interaction";
@@ -20,6 +20,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create_post" | "edit_post" | "create_survey">("create_post");
   const [editingPost, setEditingPost] = useState<any>(null);
+  const [memberSubTab, setMemberSubTab] = useState<"list" | "requests">("list");
   const [isPending, setIsPending] = useState(false);
 
   async function handlePostSubmit(formData: FormData) {
@@ -116,6 +117,17 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     setIsPending(false);
   }
 
+  async function onHandleJoinRequest(memberId: string, action: "APPROVED" | "REJECTED") {
+    setIsPending(true);
+    const result = await handleJoinRequest(memberId, action);
+    if (result.success) {
+      toast.success(action === "APPROVED" ? "Üye kabul edildi!" : "İstek reddedildi.");
+    } else {
+      toast.error(result.error);
+    }
+    setIsPending(false);
+  }
+
 
 
   const openCreatePost = () => {
@@ -145,7 +157,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
-      <AdminNavbar />
+      <AdminNavbar user={club.leader} />
 
       <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-8">
         
@@ -199,21 +211,6 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               <p className="text-gray-500 font-medium text-sm mt-2">
                 Kulüp performansınızı ve içeriklerinizi buradan yönetin.
               </p>
-            </div>
-            <div className="flex gap-3">
-              <Button 
-                onClick={openCreateSurvey}
-                variant="outline"
-                className="rounded-none border-2 border-black font-bold uppercase tracking-widest text-[11px] h-12 px-6 flex gap-2 hover:bg-black hover:text-white transition-all"
-              >
-                Anket Yap
-              </Button>
-              <Button 
-                onClick={openCreatePost}
-                className="rounded-none bg-accent text-white border-2 border-accent hover:bg-black hover:border-black transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 font-bold uppercase tracking-widest text-[11px] h-12 px-8 flex gap-2"
-              >
-                <Plus className="w-4 h-4" /> Yeni Duyuru
-              </Button>
             </div>
           </div>
 
@@ -313,7 +310,39 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
           {/* Posts & Surveys Tab Content */}
           {activeTab === "posts" && (
-            <div className="animate-fade-in space-y-8">
+            <div className="animate-fade-in space-y-10">
+              
+              {/* Content Action Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button 
+                  onClick={openCreatePost}
+                  className="group bg-accent p-6 text-left border-2 border-accent shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+                >
+                  <div className="w-10 h-10 bg-white text-accent flex items-center justify-center mb-4">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-white font-heading text-lg font-black uppercase tracking-tighter mb-1">Yeni Duyuru</h3>
+                  <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    Kampüs haberlerini paylaşın.
+                  </p>
+                </button>
+
+                <button 
+                  onClick={openCreateSurvey}
+                  className="group bg-black p-6 text-left border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+                >
+                  <div className="w-10 h-10 bg-accent text-white flex items-center justify-center mb-4">
+                    <ListFilter className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-white font-heading text-lg font-black uppercase tracking-tighter mb-1">Yeni Anket</h3>
+                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                    Görüşleri toplayın.
+                  </p>
+                </button>
+              </div>
+
+              <div className="h-[2px] bg-gray-100 w-full"></div>
+
               <div className="flex border-2 border-black h-12 w-fit">
                 <button 
                   onClick={() => setContentSubTab("posts")}
@@ -399,62 +428,124 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
           {/* Members Tab Content */}
           {activeTab === "members" && (
-            <div className="space-y-12 animate-fade-in">
+            <div className="space-y-8 animate-fade-in">
+              <div className="flex border-2 border-black h-12 w-fit">
+                <button 
+                  onClick={() => setMemberSubTab("list")}
+                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all ${memberSubTab === "list" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
+                >
+                  Üye Listesi
+                </button>
+                <button 
+                  onClick={() => setMemberSubTab("requests")}
+                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all border-l-2 border-black ${memberSubTab === "requests" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
+                >
+                  Gelen İstekler ({club.members?.filter((m: any) => m.status === "PENDING").length || 0})
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {/* Member List */}
+                {/* Member List / Requests */}
                 <div className="lg:col-span-2 space-y-6">
-                  <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
-                    Aktif Üyeler <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest">{club.members?.length || 0}</span>
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    {club.members?.length > 0 ? (
-                      club.members.map((member: any) => (
-                        <div key={member.id} className="border-2 border-gray-100 p-4 flex items-center justify-between group/member">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-accent/10 text-accent flex items-center justify-center font-bold border-2 border-accent/20">
-                              {member.user.name?.[0] || "U"}
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm">{member.user.name}</p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{member.role}</p>
+                  {memberSubTab === "list" ? (
+                    <>
+                      <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
+                        Aktif Üyeler <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest">{club.members?.filter((m: any) => m.status === "APPROVED").length || 0}</span>
+                      </h3>
+                      <div className="flex flex-col gap-4">
+                        {club.members?.filter((m: any) => m.status === "APPROVED").length > 0 ? (
+                          club.members.filter((m: any) => m.status === "APPROVED").map((member: any) => (
+                            <div key={member.id} className="border-2 border-gray-100 p-4 flex items-center justify-between group/member">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-accent/10 text-accent flex items-center justify-center font-bold border-2 border-accent/20">
+                                  {member.user.name?.[0] || "U"}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-sm">{member.user.name}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{member.role}</p>
+                                    {member.userId !== club.leaderId && (
+                                      <button 
+                                        onClick={() => handleRoleChange(member.userId, member.role)}
+                                        className="text-[9px] text-accent font-black uppercase hover:underline"
+                                      >
+                                        [Değiştir]
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Katılım: {new Date(member.joinedAt).toLocaleDateString()}</span>
                                 {member.userId !== club.leaderId && (
-                                  <button 
-                                    onClick={() => handleRoleChange(member.userId, member.role)}
-                                    className="text-[9px] text-accent font-black uppercase hover:underline"
+                                  <Button 
+                                    variant="ghost" 
+                                    onClick={() => handleRemoveMember(member.userId)}
+                                    className="w-8 h-8 p-0 text-gray-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
                                   >
-                                    [Değiştir]
-                                  </button>
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
                                 )}
                               </div>
                             </div>
+                          ))
+                        ) : (
+                          <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-medium italic">
+                            Henüz kayıtlı üye bulunmamaktadır.
                           </div>
-                          <div className="flex items-center gap-4">
-                            <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Katılım: {new Date(member.joinedAt).toLocaleDateString()}</span>
-                            {member.userId !== club.leaderId && (
-                              <Button 
-                                variant="ghost" 
-                                onClick={() => handleRemoveMember(member.userId)}
-                                className="w-8 h-8 p-0 text-gray-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-medium italic">
-                        Henüz kayıtlı üye bulunmamaktadır.
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
+                        Bekleyen İstekler <span className="bg-accent text-white text-[10px] px-2 py-1 tracking-widest">{club.members?.filter((m: any) => m.status === "PENDING").length || 0}</span>
+                      </h3>
+                      <div className="flex flex-col gap-4">
+                        {club.members?.filter((m: any) => m.status === "PENDING").length > 0 ? (
+                          club.members.filter((m: any) => m.status === "PENDING").map((request: any) => (
+                            <div key={request.id} className="border-2 border-black p-6 flex items-center justify-between bg-gray-50">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold">
+                                  {request.user.name?.[0] || "U"}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-sm">{request.user.name}</p>
+                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{request.user.email}</p>
+                                  <p className="text-[9px] text-accent font-black uppercase mt-1">{request.user.faculty} / {request.user.department}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button 
+                                  onClick={() => onHandleJoinRequest(request.id, "REJECTED")}
+                                  variant="outline"
+                                  className="h-10 rounded-none border-2 border-black font-bold uppercase tracking-widest text-[9px] hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
+                                >
+                                  Reddet
+                                </Button>
+                                <Button 
+                                  onClick={() => onHandleJoinRequest(request.id, "APPROVED")}
+                                  className="h-10 rounded-none bg-black text-white border-2 border-black font-bold uppercase tracking-widest text-[9px] hover:bg-accent hover:border-accent transition-all shadow-[4px_4px_0px_0px_rgba(255,59,48,1)] hover:shadow-none"
+                                >
+                                  Onayla
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+                            Bekleyen katılım isteği bulunmuyor.
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Add Member Form */}
                 <div className="bg-gray-50 border-2 border-black p-8 h-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                   <h3 className="font-heading text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-2">
-                    <PlusCircle className="w-5 h-5 text-accent" /> Üye Ekle
+                    <PlusCircle className="w-5 h-5 text-accent" /> Manuel Ekle
                   </h3>
                   <form action={handleAddMember} className="space-y-4">
                     <div className="space-y-1">

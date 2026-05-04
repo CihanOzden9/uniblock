@@ -23,13 +23,13 @@ export async function getStatsData(clubId: string) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthLabel = months[d.getMonth()];
       const monthYear = d.getFullYear();
-      
-      const totalInMonth = allEvents.filter(e => 
+
+      const totalInMonth = allEvents.filter(e =>
         e.date.getMonth() === d.getMonth() && e.date.getFullYear() === d.getFullYear()
       ).length;
 
-      const clubInMonth = allEvents.filter(e => 
-        e.organizerId === clubId && 
+      const clubInMonth = allEvents.filter(e =>
+        e.organizerId === clubId &&
         e.date.getMonth() === d.getMonth() && e.date.getFullYear() === d.getFullYear()
       ).length;
 
@@ -51,7 +51,7 @@ export async function getStatsData(clubId: string) {
       where: { type: "RSVP" }
     });
     const clubRSVPs = await prisma.interaction.count({
-      where: { 
+      where: {
         type: "RSVP",
         event: { organizerId: clubId }
       }

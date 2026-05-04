@@ -42,6 +42,7 @@ model User {
   faculty       String?
   department    String?
   role          Role      @default(STUDENT)
+  interests     String[]  @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -75,15 +76,22 @@ model Club {
   members          ClubMember[]
 }
 
+enum MembershipStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model ClubMember {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
   clubId    String
-  role      String   @default("MEMBER") // e.g. MEMBER, BOARD_MEMBER
-  joinedAt  DateTime @default(now())
+  role      String           @default("MEMBER") // e.g. MEMBER, BOARD_MEMBER
+  status    MembershipStatus @default(APPROVED)
+  joinedAt  DateTime         @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club      Club             @relation(fields: [clubId], references: [id], onDelete: Cascade)
 
   @@unique([userId, clubId])
 }

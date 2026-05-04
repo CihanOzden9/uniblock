@@ -10,8 +10,9 @@ export async function getCurrentUser() {
   const token = cookieStore.get("auth_token")?.value;
 
   // In a real app, you would verify the JWT/Token here
-  // For now, we simulate the logged-in user
-  const email = token ? (token === "demo_admin" ? "mert@uniblock.com" : "ahmet@uniblock.com") : "mert@uniblock.com";
+  const email = token;
+
+  if (!email) return null;
 
   const user = await prisma.user.findUnique({
     where: { email },

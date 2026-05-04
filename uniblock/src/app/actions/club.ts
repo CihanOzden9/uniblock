@@ -1,9 +1,7 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
-const prisma = new PrismaClient();
 
 export async function addClubMember(formData: FormData) {
   try {
@@ -147,5 +145,57 @@ export async function updateClubPassword(formData: FormData) {
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || "Şifre güncellenemedi." };
+  }
+}
+
+export async function requestJoinClub(clubId: string, userId: string) {
+  try {
+    // Zaten bir kaydı var mı kontrol et
+    const existing = await prisma.clubMember.findUnique({
+      where: {
+        userId_clubId: { userId, clubId }
+      }
+    });
+
+    if (existing) {
+      if (existing.status === "PENDING") throw new Error("Zaten bir katılım isteğiniz bulunuyor.");
+      if (existing.status === "APPROVED") throw new Error("Zaten bu kulübün üyesisiniz.");
+      // Eğer reddedildiyse tekrar başvurabilsin diye siliyoruz
+      await prisma.clubMember.delete({ where: { id: existing.id } });
+    }
+
+    await prisma.clubMember.create({
+      data: {
+        userId,
+        clubId,
+        status: "PENDING",
+        role: "MEMBER"
+      }
+    });
+
+    revalidatePath("/clubs");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "İstek gönderilemedi." };
+  }
+}
+
+export async function handleJoinRequest(memberId: string, action: "APPROVED" | "REJECTED") {
+  try {
+    if (action === "APPROVED") {
+      await prisma.clubMember.update({
+        where: { id: memberId },
+        data: { status: "APPROVED", joinedAt: new Date() }
+      });
+    } else {
+      await prisma.clubMember.delete({
+        where: { id: memberId }
+      });
+    }
+
+    revalidatePath("/clubs/manage");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: "İşlem gerçekleştirilemedi." };
   }
 }

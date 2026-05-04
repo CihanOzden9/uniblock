@@ -127,7 +127,7 @@ export default function FeedClient({
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <Navbar />
+      <Navbar user={currentUser} />
 
       <main className="flex-1 pt-20">
         <section className="py-12 px-8 border-b-2 border-accent/10">

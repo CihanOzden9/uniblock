@@ -16,16 +16,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { register } from "@/app/actions/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
+    const formData = new FormData(event.currentTarget);
+    const result = await register(formData);
+
+    if (result.success) {
+      toast.success("Kayıt başarılı! Giriş yapabilirsiniz.");
+      router.push("/login");
+    } else {
+      toast.error(result.error);
       setIsLoading(false);
-    }, 3000);
+    }
   }
 
   return (
@@ -56,43 +68,56 @@ export default function RegisterPage() {
               </TabsList>
               <TabsContent value="student" className="space-y-6">
                 <form onSubmit={onSubmit} className="space-y-6">
+                  <input type="hidden" name="role" value="STUDENT" />
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="first-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Ad</Label>
-                      <Input id="first-name" placeholder="Adınız" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" />
+                      <Label htmlFor="firstName" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Ad</Label>
+                      <Input name="firstName" id="firstName" placeholder="Adınız" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="last-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Soyad</Label>
-                      <Input id="last-name" placeholder="Soyadınız" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" />
+                      <Label htmlFor="lastName" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Soyad</Label>
+                      <Input name="lastName" id="lastName" placeholder="Soyadınız" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Üniversite E-posta (.edu.tr)</Label>
                     <Input
+                      name="email"
                       id="email"
                       type="email"
                       placeholder="isim.soyisim@universite.edu.tr"
                       disabled={isLoading}
                       className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent"
+                      required
                     />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="faculty" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Fakülte</Label>
+                      <Input name="faculty" id="faculty" placeholder="Mühendislik" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="department" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Bölüm</Label>
+                      <Input name="department" id="department" placeholder="Bilgisayar Müh." disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Şifre</Label>
-                    <Input id="password" type="password" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" />
+                    <Input name="password" id="password" type="password" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
                   </div>
-                  <Button className="w-full rounded-none uppercase tracking-[0.15em] text-[12px] font-semibold py-[14px] h-auto transition-colors bg-accent text-white hover:bg-black border border-accent hover:border-black" disabled={isLoading}>
+                  <Button type="submit" className="w-full rounded-none uppercase tracking-[0.15em] text-[12px] font-semibold py-[14px] h-auto transition-colors bg-accent text-white hover:bg-black border border-accent hover:border-black" disabled={isLoading}>
                     {isLoading ? "İşleniyor..." : "Hesap Oluştur"}
                   </Button>
                 </form>
               </TabsContent>
-              <TabsContent value="club" className="space-y-4 pt-4">
-                <div className="text-sm text-accent text-center py-8">Kulüp kayıt formu buraya gelecek.</div>
+              <TabsContent value="club" className="space-y-4 pt-4 text-center">
+                 <p className="text-sm text-gray-500 py-8">Kulüp kayıtları şu an kapalıdır.</p>
               </TabsContent>
-              <TabsContent value="team" className="space-y-4 pt-4">
-                 <div className="text-sm text-accent text-center py-8">Proje takımı kayıt formu buraya gelecek.</div>
+              <TabsContent value="team" className="space-y-4 pt-4 text-center">
+                 <p className="text-sm text-gray-500 py-8">Takım kayıtları şu an kapalıdır.</p>
               </TabsContent>
-              <TabsContent value="business" className="space-y-4 pt-4">
-                 <div className="text-sm text-accent text-center py-8">İşletme kayıt formu buraya gelecek.</div>
+              <TabsContent value="business" className="space-y-4 pt-4 text-center">
+                 <p className="text-sm text-gray-500 py-8">İşletme kayıtları şu an kapalıdır.</p>
               </TabsContent>
             </Tabs>
           </CardContent>

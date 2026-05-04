@@ -16,24 +16,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { login } from "@/app/actions/auth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
+  const router = useRouter();
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
 
-    // Mock 2FA trigger
-    setTimeout(() => {
+    const formData = new FormData(event.currentTarget);
+    const result = await login(formData);
+
+    if (result.success) {
+      toast.success("Giriş başarılı!");
+      // window.location.href helps with middleware refresh better than router.push in some cases
+      window.location.href = result.role === "SUPER_ADMIN" || result.role === "CLUB_ADMIN" ? "/clubs/manage" : "/feed";
+    } else {
+      toast.error(result.error);
       setIsLoading(false);
-      if (!show2FA) {
-        setShow2FA(true);
-      } else {
-        // Mock successful login
-        window.location.href = "/feed";
-      }
-    }, 1500);
+    }
   }
 
   return (
@@ -59,6 +65,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">E-posta</Label>
                   <Input
+                    name="email"
                     id="email"
                     type="email"
                     placeholder="isim@ornek.com"
@@ -77,7 +84,7 @@ export default function LoginPage() {
                       Şifremi Unuttum
                     </Link>
                   </div>
-                  <Input id="password" type="password" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                  <Input name="password" id="password" type="password" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
                 </div>
                 <div className="flex items-center space-x-2 pt-2">
                   <Checkbox id="remember" disabled={isLoading} className="rounded-none border-black data-[state=checked]:bg-accent data-[state=checked]:border-accent" />
@@ -97,6 +104,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <Label htmlFor="otp" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Doğrulama Kodu (OTP)</Label>
                   <Input
+                    name="otp"
                     id="otp"
                     type="text"
                     placeholder="000000"

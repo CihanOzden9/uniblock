@@ -3,17 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
+import { logout } from "@/app/actions/auth";
 
-export default function AdminNavbar() {
+interface AdminNavbarProps {
+  user?: {
+    name: string;
+    role: string;
+  } | null;
+}
+
+export default function AdminNavbar({ user }: AdminNavbarProps) {
   const pathname = usePathname();
 
-  // Simulated Admin Data
-  const admin = {
-    name: "Mert Demir",
-    role: "Yazılım Kulübü Başkanı",
-    initials: "MD"
-  };
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "??";
 
   return (
     <header className="fixed top-0 w-full h-20 bg-black z-50 flex items-center justify-between px-8 border-b-2 border-accent transition-all duration-300">
@@ -29,14 +38,14 @@ export default function AdminNavbar() {
             <LayoutDashboard className="w-4 h-4" /> Panel
           </Link>
           <Link 
-            href="/admin/stats" 
-            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/admin/stats" ? "text-accent" : "text-gray-400 hover:text-white"}`}
+            href="/clubs/manage/stats" 
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/clubs/manage/stats" ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             İstatistikler
           </Link>
           <Link 
-            href="/admin/settings" 
-            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/admin/settings" ? "text-accent" : "text-gray-400 hover:text-white"}`}
+            href="/clubs/manage/settings" 
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/clubs/manage/settings" ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             Ayarlar
           </Link>
@@ -46,20 +55,22 @@ export default function AdminNavbar() {
       <div className="flex items-center gap-6">
         <div className="hidden sm:flex flex-col text-right">
           <span className="text-[11px] font-bold text-white uppercase tracking-wider leading-none">
-            {admin.name}
+            {user?.name || "Yönetici"}
           </span>
           <span className="text-[9px] text-accent font-black uppercase tracking-widest mt-1">
-            {admin.role}
+            {user?.role || "KULÜP BAŞKANI"}
           </span>
         </div>
 
         <div className="h-10 w-10 flex items-center justify-center font-bold bg-accent text-white border-2 border-accent">
-          {admin.initials}
+          {initials}
         </div>
 
-        <Button variant="ghost" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-none transition-colors">
-          <LogOut className="w-5 h-5" />
-        </Button>
+        <form action={logout}>
+          <Button type="submit" variant="ghost" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-none transition-colors">
+            <LogOut className="w-5 h-5" />
+          </Button>
+        </form>
       </div>
     </header>
   );

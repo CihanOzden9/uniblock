@@ -28,7 +28,7 @@ export default async function StatsPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
-      <AdminNavbar />
+      <AdminNavbar user={user} />
       <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full">
         <StatsClient 
           clubName={club.name} 
