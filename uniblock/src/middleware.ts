@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
   // If the user is not logged in and trying to access protected routes, redirect to login
   if (!token && !isPublicRoute && !pathname.startsWith("/api/auth")) {
     // Exception for root if it is meant to be a public landing page
-    if (pathname === "/" || pathname.startsWith("/profile") || pathname.startsWith("/feed") || pathname.startsWith("/events") || pathname.startsWith("/clubs") || pathname.startsWith("/news")) {
+    if (pathname === "/" || pathname.startsWith("/profile") || pathname.startsWith("/feed") || pathname.startsWith("/events") || pathname.startsWith("/clubs") || pathname.startsWith("/news") || pathname.startsWith("/admin")) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL("/login", request.url));
@@ -29,9 +29,11 @@ export function middleware(request: NextRequest) {
   // For a real application, you would decode the JWT to check the user's role
   const userRole = request.cookies.get("user_role")?.value;
 
+  /* Disabling for demo purposes
   if (pathname.startsWith("/admin") && userRole !== "admin") {
     return NextResponse.redirect(new URL("/feed", request.url));
   }
+  */
 
   return NextResponse.next();
 }

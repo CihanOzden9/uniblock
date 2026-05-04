@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import AdminNavbar from "@/components/layout/AdminNavbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +9,9 @@ import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Settings } from 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
-import { addClubMember, removeClubMember, updateClubMemberRole } from "@/app/actions/club";
+import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword } from "@/app/actions/club";
 import { toast } from "sonner";
-import { Trash2, Edit, PlusCircle, CheckCircle2, ListFilter, AlertCircle, ShieldAlert } from "lucide-react";
+import { Trash2, Edit, PlusCircle, AlertCircle, ShieldAlert, ListFilter } from "lucide-react";
 import { resolveReport } from "@/app/actions/interaction";
 
 export default function ClubDashboardClient({ club }: { club: any }) {
@@ -115,6 +116,8 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     setIsPending(false);
   }
 
+
+
   const openCreatePost = () => {
     setSheetMode("create_post");
     setEditingPost(null);
@@ -161,15 +164,20 @@ export default function ClubDashboardClient({ club }: { club: any }) {
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              
+              const className = `flex items-center gap-4 px-6 py-4 rounded-none transition-all font-bold uppercase tracking-widest text-[11px] border-2 ${
+                isActive 
+                  ? "bg-accent border-accent text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] translate-x-[-2px] translate-y-[-2px]" 
+                  : "bg-white border-transparent text-gray-500 hover:border-black hover:text-black"
+              }`;
+
+
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-4 px-6 py-4 rounded-none transition-all font-bold uppercase tracking-widest text-[11px] border-2 ${
-                    isActive 
-                      ? "bg-accent border-accent text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] translate-x-[-2px] translate-y-[-2px]" 
-                      : "bg-white border-transparent text-gray-500 hover:border-black hover:text-black"
-                  }`}
+                  className={className}
                 >
                   <Icon className="w-5 h-5" />
                   {tab.label}
@@ -177,12 +185,6 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               );
             })}
           </nav>
-
-          <div className="mt-auto pt-8">
-            <Button variant="outline" className="w-full rounded-none border-2 border-black text-black font-bold uppercase tracking-widest text-[10px] h-12 hover:bg-black hover:text-white transition-all flex gap-2">
-              <Settings className="w-4 h-4" /> Kulüp Ayarları
-            </Button>
-          </div>
         </aside>
 
         {/* Main Content Area */}
@@ -571,6 +573,8 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               </div>
             </div>
           )}
+
+
         </div>
       </div>
     </main>

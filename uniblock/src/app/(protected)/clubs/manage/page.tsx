@@ -1,35 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { getCurrentUser } from "@/lib/session";
 import ClubDashboardClient from "@/app/(protected)/clubs/manage/ClubDashboardClient";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export default async function ClubManagePage() {
-  // Demo amaçlı giriş yapmış kullanıcıyı simüle ediyoruz
-  const user = await prisma.user.findUnique({
-    where: { email: "mert@uniblock.com" },
-    include: {
-      ledClubs: {
-        include: {
-          members: {
-            include: {
-              user: true
-            }
-          },
-          posts: {
-            orderBy: { createdAt: 'desc' },
-            take: 10
-          },
-          events: true,
-          surveys: {
-            include: {
-              options: true
-            },
-            orderBy: { createdAt: 'desc' }
-          }
-        }
-      }
-    }
-  });
+  const user = await getCurrentUser();
 
   if (!user || user.ledClubs.length === 0) {
     return (
@@ -39,7 +13,32 @@ export default async function ClubManagePage() {
     );
   }
 
-  const club = user.ledClubs[0];
+  // Refetch with specific manage relations if needed, or use the one from session
+  const clubId = user.ledClubs[0].id;
+  const club = await prisma.club.findUnique({
+    where: { id: clubId },
+    include: {
+      members: {
+        include: {
+          user: true
+        }
+      },
+      posts: {
+        orderBy: { createdAt: 'desc' },
+        take: 10
+      },
+      events: true,
+      surveys: {
+        include: {
+          options: true
+        },
+        orderBy: { createdAt: 'desc' }
+      },
+      leader: true
+    }
+  });
+
+  if (!club) return <div>Kulüp bulunamadı.</div>;
 
   // Kulübün anket etkileşimlerini ayrıca çekiyoruz
   const surveyInteractions = await (prisma.interaction as any).findMany({

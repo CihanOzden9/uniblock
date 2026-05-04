@@ -29,14 +29,14 @@ export default function AdminNavbar() {
             <LayoutDashboard className="w-4 h-4" /> Panel
           </Link>
           <Link 
-            href="#" 
-            className="text-[12px] font-bold tracking-[0.1em] uppercase text-gray-400 hover:text-white transition-all"
+            href="/admin/stats" 
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/admin/stats" ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             İstatistikler
           </Link>
           <Link 
-            href="#" 
-            className="text-[12px] font-bold tracking-[0.1em] uppercase text-gray-400 hover:text-white transition-all"
+            href="/admin/settings" 
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/admin/settings" ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             Ayarlar
           </Link>

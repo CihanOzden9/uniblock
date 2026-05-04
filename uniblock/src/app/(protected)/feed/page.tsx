@@ -1,13 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { getCurrentUser } from "@/lib/session";
 import FeedClient from "./FeedClient";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // Veritabanından postları çeker ve FeedClient bileşenine aktarır
 export default async function FeedPage() {
-  const currentUser = await prisma.user.findUnique({
-    where: { email: "mert@uniblock.com" }
-  });
+  const currentUser = await getCurrentUser();
 
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
