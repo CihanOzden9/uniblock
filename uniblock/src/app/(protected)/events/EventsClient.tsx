@@ -5,8 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, ShieldCheck, Star, Calendar } from "lucide-react";
+import { Users, ShieldCheck, Star, Calendar, LogOut, Loader2 } from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
+import { leaveClub } from "@/app/actions/club";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface EventsClientProps {
   user: any;
@@ -15,6 +18,19 @@ interface EventsClientProps {
 }
 
 export default function EventsClient({ user, events, memberships }: EventsClientProps) {
+  const [leavingClub, setLeavingClub] = useState<string | null>(null);
+
+  const onLeaveClick = async (clubId: string) => {
+    if (!confirm("Bu kulüpten ayrılmak istediğinize emin misiniz?")) return;
+    setLeavingClub(clubId);
+    const result = await leaveClub(clubId, user.id);
+    if (result.success) {
+      toast.success("Kulüpten başarıyla ayrıldınız.");
+    } else {
+      toast.error(result.error);
+    }
+    setLeavingClub(null);
+  };
   return (
     <div className="min-h-screen bg-white">
       <Navbar user={user} />
@@ -126,8 +142,23 @@ export default function EventsClient({ user, events, memberships }: EventsClient
                           KATILIM: {new Date(membership.createdAt).toLocaleDateString("tr-TR").toUpperCase()}
                         </div>
                       </CardContent>
-                      <CardFooter className="pt-0 pb-6">
-                        <Button variant="link" className="p-0 h-auto text-accent text-[10px] font-bold uppercase tracking-widest hover:no-underline flex items-center gap-1 group/btn">
+                      <CardFooter className="pt-0 pb-6 flex flex-col gap-3">
+                        <Button 
+                          onClick={() => onLeaveClick(membership.club.id)}
+                          disabled={leavingClub === membership.club.id}
+                          variant="outline"
+                          className="w-full rounded-none uppercase tracking-widest text-[10px] font-bold h-10 border-2 border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all"
+                        >
+                          {leavingClub === membership.club.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <LogOut className="w-3 h-3 mr-2" />
+                              Kulüpten Ayrıl
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="link" className="p-0 h-auto text-accent text-[10px] font-bold uppercase tracking-widest hover:no-underline flex items-center gap-1 group/btn w-full justify-center">
                           KULÜP SAYFASI <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
                         </Button>
                       </CardFooter>

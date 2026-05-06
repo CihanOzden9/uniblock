@@ -17,8 +17,21 @@ export default async function ClubsPage() {
         select: { members: { where: { status: "APPROVED" } } }
       },
       members: {
-        where: { userId: user.id },
-        select: { status: true }
+        where: {
+          OR: [
+            { userId: user.id },
+            { role: { not: "MEMBER" }, status: "APPROVED" }
+          ]
+        },
+        select: { 
+          status: true, 
+          role: true, 
+          userId: true,
+          user: { select: { name: true, department: true } }
+        }
+      },
+      leader: {
+        select: { id: true, name: true, department: true }
       }
     }
   });

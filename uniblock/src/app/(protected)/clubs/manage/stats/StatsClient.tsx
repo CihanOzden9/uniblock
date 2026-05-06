@@ -27,6 +27,7 @@ interface StatsClientProps {
       participants: { club: number; others: number };
     };
     leaderboard: any[];
+    activeMemberCount: number;
   };
 }
 
@@ -236,7 +237,7 @@ export default function StatsClient({ clubName, data }: StatsClientProps) {
               <Users className="w-4 h-4" />
               <span className="text-[10px] font-black uppercase tracking-widest">Aktif Üyeler</span>
             </div>
-            <p className="text-3xl font-black">248</p>
+            <p className="text-3xl font-black">{data.activeMemberCount}</p>
             <div className="w-full bg-gray-100 h-1 mt-4 overflow-hidden">
               <div className="bg-accent h-full w-[65%]"></div>
             </div>

@@ -5,13 +5,13 @@ import Link from "next/link";
 import AdminNavbar from "@/components/layout/AdminNavbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Settings } from "lucide-react";
+import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Settings, Crown } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
-import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword, handleJoinRequest } from "@/app/actions/club";
+import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword, handleJoinRequest, checkUserExistence } from "@/app/actions/club";
 import { toast } from "sonner";
-import { Trash2, Edit, PlusCircle, AlertCircle, ShieldAlert, ListFilter } from "lucide-react";
+import { Trash2, Edit, PlusCircle, AlertCircle, ShieldAlert, ListFilter, Search } from "lucide-react";
 import { resolveReport } from "@/app/actions/interaction";
 
 export default function ClubDashboardClient({ club }: { club: any }) {
@@ -22,6 +22,14 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const [editingPost, setEditingPost] = useState<any>(null);
   const [memberSubTab, setMemberSubTab] = useState<"list" | "requests">("list");
   const [isPending, setIsPending] = useState(false);
+  const [memberSearchTerm, setMemberSearchTerm] = useState("");
+  const [boardRoleSelect, setBoardRoleSelect] = useState("BAŞKAN YARDIMCISI");
+  const [customRoleInput, setCustomRoleInput] = useState("");
+  const [boardMemberEmail, setBoardMemberEmail] = useState("");
+  const [selectedMemberForBoard, setSelectedMemberForBoard] = useState("");
+  const [boardAddMode, setBoardAddMode] = useState<"existing" | "email">("existing");
+  const [emailCheckResult, setEmailCheckResult] = useState<{ exists: boolean; user?: any; isMember?: boolean; memberRole?: string } | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   async function handlePostSubmit(formData: FormData) {
     setIsPending(true);
@@ -147,11 +155,101 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     setIsSheetOpen(true);
   };
 
+  const approvedMembers = club.members?.filter((m: any) => m.status === "APPROVED" && m.userId !== club.leaderId) || [];
+  const pendingMembersCount = club.members?.filter((m: any) => m.status === "PENDING").length || 0;
+  const boardMembers = approvedMembers.filter((m: any) => m.role !== "MEMBER");
+  const regularMembers = approvedMembers.filter((m: any) => m.role === "MEMBER");
+  
+  const filteredMembers = approvedMembers.filter((m: any) => 
+    m.user.name?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
+    m.user.email?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
+    (m.user.faculty && m.user.faculty.toLowerCase().includes(memberSearchTerm.toLowerCase())) ||
+    (m.user.department && m.user.department.toLowerCase().includes(memberSearchTerm.toLowerCase()))
+  );
+
+  const PREDEFINED_ROLES = [
+    "BAŞKAN YARDIMCISI",
+    "GENEL SEKRETER",
+    "SAYMAN",
+    "ETKİNLİK KOORDİNATÖRÜ",
+    "SOSYAL MEDYA SORUMLUSU",
+    "DIŞ İLİŞKİLER SORUMLUSU",
+    "TEKNİK SORUMLU",
+    "PROJE KOORDİNATÖRÜ"
+  ];
+  async function handleBoardAssignment() {
+    const role = boardRoleSelect === "DİĞER" ? customRoleInput.trim().toUpperCase() : boardRoleSelect;
+    if (!role) { toast.error("Lütfen bir rol belirleyin."); return; }
+
+    setIsPending(true);
+
+    if (boardAddMode === "existing" && selectedMemberForBoard) {
+      const result = await updateClubMemberRole(club.id, selectedMemberForBoard, role);
+      if (result.success) {
+        toast.success("Yönetim rolü atandı!");
+        setSelectedMemberForBoard("");
+      } else {
+        toast.error(result.error);
+      }
+    } else if (boardAddMode === "email" && boardMemberEmail) {
+      // Önce kullanıcıyı kontrol et
+      const check = await checkUserExistence(boardMemberEmail, club.id);
+      
+      if (!check.success) {
+        if (check.error === "USER_NOT_FOUND") {
+          toast.error("Bu e-posta adresine sahip bir kullanıcı bulunamadı. Lütfen kullanıcının sisteme kayıtlı olduğundan emin olun.");
+        } else {
+          toast.error("Kullanıcı kontrolü sırasında bir hata oluştu.");
+        }
+        setIsPending(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("email", boardMemberEmail);
+      formData.append("clubId", club.id);
+      formData.append("role", role);
+      const result = await addClubMember(formData);
+      if (result.success) {
+        toast.success("Yönetici eklendi!");
+        setBoardMemberEmail("");
+        setEmailCheckResult(null);
+      } else {
+        toast.error(result.error);
+      }
+    } else {
+      toast.error("Lütfen bir üye seçin veya e-posta girin.");
+    }
+    setIsPending(false);
+  }
+
+  const handleEmailBlur = async () => {
+    if (!boardMemberEmail || !boardMemberEmail.includes("@")) return;
+    
+    setIsCheckingEmail(true);
+    const result = await checkUserExistence(boardMemberEmail, club.id);
+    if (result.success) {
+      setEmailCheckResult({ exists: true, user: result.user, isMember: result.isMember, memberRole: result.memberRole });
+    } else if (result.error === "USER_NOT_FOUND") {
+      setEmailCheckResult({ exists: false });
+    }
+    setIsCheckingEmail(false);
+  };
+
+  async function handleRemoveFromBoard(userId: string) {
+    setIsPending(true);
+    const result = await updateClubMemberRole(club.id, userId, "MEMBER");
+    if (result.success) toast.success("Yönetim rolü kaldırıldı.");
+    else toast.error(result.error);
+    setIsPending(false);
+  }
+
   const TABS = [
     { id: "overview", label: "Genel Bakış", icon: Activity },
     { id: "posts", label: "İçerikler", icon: FileText },
     { id: "events", label: "Etkinlikler", icon: Calendar },
     { id: "members", label: "Üyeler", icon: Users },
+    { id: "management", label: "Kulüp Yönetimi", icon: Crown },
     { id: "reports", label: "Şikayetler", icon: ShieldAlert },
   ];
 
@@ -243,7 +341,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                       </div>
                     </div>
                     <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1">Toplam Üye</h3>
-                    <p className="font-heading text-4xl font-black tracking-tighter">{club.members?.length || 0}</p>
+                    <p className="font-heading text-4xl font-black tracking-tighter">{approvedMembers.length}</p>
                   </CardContent>
                 </Card>
 
@@ -440,7 +538,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                   onClick={() => setMemberSubTab("requests")}
                   className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all border-l-2 border-black ${memberSubTab === "requests" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
                 >
-                  Gelen İstekler ({club.members?.filter((m: any) => m.status === "PENDING").length || 0})
+                  Gelen İstekler ({pendingMembersCount})
                 </button>
               </div>
 
@@ -449,12 +547,26 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                 <div className="lg:col-span-2 space-y-6">
                   {memberSubTab === "list" ? (
                     <>
-                      <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
-                        Aktif Üyeler <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest">{club.members?.filter((m: any) => m.status === "APPROVED").length || 0}</span>
-                      </h3>
+                      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
+                        <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
+                          Aktif Üyeler <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest">{filteredMembers.length}</span>
+                        </h3>
+                        
+                        <div className="relative w-full md:w-64">
+                          <input 
+                            type="text"
+                            placeholder="Üye Ara (Ad, Bölüm...)"
+                            value={memberSearchTerm}
+                            onChange={(e) => setMemberSearchTerm(e.target.value)}
+                            className="w-full h-10 px-4 pr-10 rounded-none border-2 border-black text-[11px] font-bold uppercase tracking-widest outline-none focus:border-accent transition-colors"
+                          />
+                          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        </div>
+                      </div>
+
                       <div className="flex flex-col gap-4">
-                        {club.members?.filter((m: any) => m.status === "APPROVED").length > 0 ? (
-                          club.members.filter((m: any) => m.status === "APPROVED").map((member: any) => (
+                        {filteredMembers.length > 0 ? (
+                          filteredMembers.map((member: any) => (
                             <div key={member.id} className="border-2 border-gray-100 p-4 flex items-center justify-between group/member">
                               <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 bg-accent/10 text-accent flex items-center justify-center font-bold border-2 border-accent/20">
@@ -464,28 +576,24 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                                   <p className="font-bold text-sm">{member.user.name}</p>
                                   <div className="flex items-center gap-2">
                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{member.role}</p>
-                                    {member.userId !== club.leaderId && (
-                                      <button 
-                                        onClick={() => handleRoleChange(member.userId, member.role)}
-                                        className="text-[9px] text-accent font-black uppercase hover:underline"
-                                      >
-                                        [Değiştir]
-                                      </button>
-                                    )}
+                                    <button 
+                                      onClick={() => handleRoleChange(member.userId, member.role)}
+                                      className="text-[9px] text-accent font-black uppercase hover:underline"
+                                    >
+                                      [Değiştir]
+                                    </button>
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-4">
                                 <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Katılım: {new Date(member.joinedAt).toLocaleDateString()}</span>
-                                {member.userId !== club.leaderId && (
-                                  <Button 
-                                    variant="ghost" 
-                                    onClick={() => handleRemoveMember(member.userId)}
-                                    className="w-8 h-8 p-0 text-gray-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                )}
+                                <Button 
+                                  variant="ghost" 
+                                  onClick={() => handleRemoveMember(member.userId)}
+                                  className="w-8 h-8 p-0 text-gray-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </div>
                             </div>
                           ))
@@ -575,6 +683,197 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                       {isPending ? "Ekleniyor..." : "Kulübe Ekle"}
                     </Button>
                   </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Management Tab Content */}
+          {activeTab === "management" && (
+            <div className="space-y-10 animate-fade-in">
+              {/* Current Board */}
+              <div>
+                <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3 mb-6">
+                  <Crown className="w-5 h-5 text-accent" />
+                  Yönetim Kadrosu
+                  <span className="bg-accent text-white text-[10px] px-2 py-1 tracking-widest">{boardMembers.length + 1}</span>
+                </h3>
+
+                <div className="flex flex-col gap-4">
+                  {/* Leader - always shown */}
+                  <div className="border-2 border-accent p-5 flex items-center justify-between bg-accent/5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-accent text-white flex items-center justify-center font-bold text-lg">
+                        {club.leader.name?.[0] || "B"}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">{club.leader.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[9px] font-black text-accent uppercase tracking-widest bg-accent/10 border border-accent/20 px-2 py-0.5">
+                            BAŞKAN
+                          </span>
+                          {club.leader.department && (
+                            <span className="text-[9px] text-gray-400 font-bold">{club.leader.department}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Değiştirilemez</span>
+                  </div>
+
+                  {/* Board Members */}
+                  {boardMembers.map((member: any) => (
+                    <div key={member.id} className="border-2 border-gray-200 hover:border-black p-5 flex items-center justify-between group/board transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold text-lg">
+                          {member.user.name?.[0] || "Y"}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">{member.user.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-0.5">
+                              {member.role}
+                            </span>
+                            {member.user.department && (
+                              <span className="text-[9px] text-gray-400 font-bold">{member.user.department}</span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-gray-400 font-medium mt-1">{member.user.email}</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => handleRemoveFromBoard(member.userId)}
+                        className="h-8 rounded-none text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover/board:opacity-100 transition-all"
+                      >
+                        Görevden Al
+                      </Button>
+                    </div>
+                  ))}
+
+                  {boardMembers.length === 0 && (
+                    <div className="p-8 border-2 border-dashed border-gray-200 text-center text-gray-400 font-medium text-sm">
+                      Henüz yönetim kadrosuna atanmış üye bulunmuyor.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Add Board Member Form */}
+              <div className="bg-gray-50 border-2 border-black p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <h3 className="font-heading text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-2">
+                  <PlusCircle className="w-5 h-5 text-accent" /> Yönetici Ata
+                </h3>
+
+                <div className="space-y-6">
+                  {/* Mode Switch */}
+                  <div className="flex border-2 border-black h-10 w-fit">
+                    <button 
+                      onClick={() => setBoardAddMode("existing")}
+                      className={`px-6 font-bold uppercase tracking-widest text-[9px] transition-all ${boardAddMode === "existing" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
+                    >
+                      Mevcut Üyeden
+                    </button>
+                    <button 
+                      onClick={() => setBoardAddMode("email")}
+                      className={`px-6 font-bold uppercase tracking-widest text-[9px] transition-all border-l-2 border-black ${boardAddMode === "email" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
+                    >
+                      E-posta ile
+                    </button>
+                  </div>
+
+                  {/* Member Selection */}
+                  {boardAddMode === "existing" ? (
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Üye Seç</label>
+                      <select 
+                        value={selectedMemberForBoard}
+                        onChange={(e) => setSelectedMemberForBoard(e.target.value)}
+                        className="w-full h-10 px-4 rounded-none border-2 border-black bg-white focus:ring-accent outline-none text-sm font-semibold"
+                      >
+                        <option value="">-- Üye seçin --</option>
+                        {regularMembers.map((m: any) => (
+                          <option key={m.userId} value={m.userId}>{m.user.name} ({m.user.email})</option>
+                        ))}
+                      </select>
+                      {regularMembers.length === 0 && (
+                        <p className="text-[10px] text-gray-400 font-medium mt-1">Atanabilecek üye bulunmuyor. Önce kulübe üye ekleyin.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">E-posta Adresi</label>
+                      <input 
+                        type="email"
+                        value={boardMemberEmail}
+                        onChange={(e) => {
+                          setBoardMemberEmail(e.target.value);
+                          setEmailCheckResult(null);
+                        }}
+                        onBlur={handleEmailBlur}
+                        placeholder="yonetici@universite.edu.tr"
+                        className={`w-full h-10 px-4 rounded-none border-2 focus:ring-accent outline-none text-sm transition-colors ${
+                          emailCheckResult?.exists === false ? "border-red-500 bg-red-50" : 
+                          emailCheckResult?.exists === true ? "border-green-500 bg-green-50" : "border-black"
+                        }`}
+                      />
+                      {isCheckingEmail && <p className="text-[9px] font-bold text-gray-400 mt-1 animate-pulse">Kontrol ediliyor...</p>}
+                      {emailCheckResult?.exists === false && (
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-red-100 border border-red-200 text-red-600 rounded-none">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <p className="text-[10px] font-black uppercase leading-tight">
+                            Bu e-posta adresi UniBlock sisteminde kayıtlı değil!
+                          </p>
+                        </div>
+                      )}
+                      {emailCheckResult?.exists === true && (
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-green-100 border border-green-200 text-green-600 rounded-none">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <p className="text-[10px] font-black uppercase leading-tight">
+                            Kullanıcı Bulundu: <span className="text-black">{emailCheckResult.user.name}</span>
+                            {emailCheckResult.isMember && <span className="ml-2 text-gray-500">(Zaten Üye: {emailCheckResult.memberRole})</span>}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Role Selection */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Yönetim Rolü</label>
+                    <select 
+                      value={boardRoleSelect}
+                      onChange={(e) => setBoardRoleSelect(e.target.value)}
+                      className="w-full h-10 px-4 rounded-none border-2 border-black bg-white focus:ring-accent outline-none text-sm font-semibold"
+                    >
+                      {PREDEFINED_ROLES.map((role) => (
+                        <option key={role} value={role}>{role}</option>
+                      ))}
+                      <option value="DİĞER">DİĞER (Manuel Giriş)</option>
+                    </select>
+                  </div>
+
+                  {/* Custom Role Input */}
+                  {boardRoleSelect === "DİĞER" && (
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Manuel Rol Adı</label>
+                      <input 
+                        type="text"
+                        value={customRoleInput}
+                        onChange={(e) => setCustomRoleInput(e.target.value)}
+                        placeholder="Örn: Araştırma Koordinatörü"
+                        className="w-full h-10 px-4 rounded-none border-2 border-black focus:ring-accent outline-none text-sm"
+                      />
+                    </div>
+                  )}
+
+                  <Button 
+                    onClick={handleBoardAssignment}
+                    disabled={isPending}
+                    className="w-full mt-2 rounded-none bg-accent text-white hover:bg-black border-2 border-accent hover:border-black transition-all font-bold uppercase tracking-widest text-[10px] h-10"
+                  >
+                    {isPending ? "Atanıyor..." : "Yönetici Olarak Ata"}
+                  </Button>
                 </div>
               </div>
             </div>

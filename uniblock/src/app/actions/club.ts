@@ -54,6 +54,37 @@ export async function addClubMember(formData: FormData) {
   }
 }
 
+export async function checkUserExistence(email: string, clubId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, name: true, email: true }
+    });
+
+    if (!user) {
+      return { success: false, error: "USER_NOT_FOUND" };
+    }
+
+    const member = await prisma.clubMember.findUnique({
+      where: {
+        userId_clubId: {
+          userId: user.id,
+          clubId: clubId
+        }
+      }
+    });
+
+    return { 
+      success: true, 
+      user, 
+      isMember: !!member,
+      memberRole: member?.role 
+    };
+  } catch (error) {
+    return { success: false, error: "CHECK_FAILED" };
+  }
+}
+
 export async function removeClubMember(clubId: string, userId: string) {
   try {
     await prisma.clubMember.delete({
@@ -197,5 +228,29 @@ export async function handleJoinRequest(memberId: string, action: "APPROVED" | "
     return { success: true };
   } catch (error: any) {
     return { success: false, error: "İşlem gerçekleştirilemedi." };
+  }
+}
+
+export async function leaveClub(clubId: string, userId: string) {
+  try {
+    const club = await prisma.club.findUnique({
+      where: { id: clubId },
+      select: { leaderId: true }
+    });
+
+    if (club?.leaderId === userId) {
+      throw new Error("Kulüp başkanı kulüpten ayrılamaz.");
+    }
+
+    await prisma.clubMember.delete({
+      where: {
+        userId_clubId: { userId, clubId }
+      }
+    });
+
+    revalidatePath("/clubs");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Kulüpten ayrılırken bir hata oluştu." };
   }
 }

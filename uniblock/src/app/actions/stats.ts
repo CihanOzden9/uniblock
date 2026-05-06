@@ -65,7 +65,7 @@ export async function getStatsData(clubId: string) {
         _count: {
           select: {
             events: true,
-            members: true
+            members: { where: { status: "APPROVED" } }
           }
         }
       },
@@ -75,10 +75,14 @@ export async function getStatsData(clubId: string) {
       take: 5
     });
 
+    const currentClub = clubs.find(c => c.id === clubId);
+    const activeMemberCount = currentClub?._count.members || 0;
+
     return {
       success: true,
       data: {
         monthlyData,
+        activeMemberCount,
         shares: {
           events: {
             club: clubEventsCount,
