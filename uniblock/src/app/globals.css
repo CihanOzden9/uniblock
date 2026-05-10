@@ -68,6 +68,11 @@
   --radius: 0rem; /* Minimalist design, sharp edges */
 }
 
+@utility overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

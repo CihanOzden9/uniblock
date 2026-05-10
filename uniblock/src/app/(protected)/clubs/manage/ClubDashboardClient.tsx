@@ -23,6 +23,8 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const [memberSubTab, setMemberSubTab] = useState<"list" | "requests">("list");
   const [isPending, setIsPending] = useState(false);
   const [memberSearchTerm, setMemberSearchTerm] = useState("");
+  const [postContentLength, setPostContentLength] = useState(0);
+  const POST_CONTENT_MAX = 250;
   const [boardRoleSelect, setBoardRoleSelect] = useState("BAŞKAN YARDIMCISI");
   const [customRoleInput, setCustomRoleInput] = useState("");
   const [boardMemberEmail, setBoardMemberEmail] = useState("");
@@ -141,12 +143,14 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const openCreatePost = () => {
     setSheetMode("create_post");
     setEditingPost(null);
+    setPostContentLength(0);
     setIsSheetOpen(true);
   };
 
   const openEditPost = (post: any) => {
     setSheetMode("edit_post");
     setEditingPost(post);
+    setPostContentLength(post.content?.length || 0);
     setIsSheetOpen(true);
   };
 
@@ -1040,16 +1044,31 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="content" className="text-[10px] font-bold uppercase tracking-widest text-gray-500">İçerik Detayı</label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="content" className="text-[10px] font-bold uppercase tracking-widest text-gray-500">İçerik Detayı</label>
+                  <span className={`text-[11px] font-black tracking-tight transition-colors ${
+                    postContentLength > POST_CONTENT_MAX * 0.9 ? "text-red-500" : 
+                    postContentLength > POST_CONTENT_MAX * 0.7 ? "text-orange-500" : "text-gray-400"
+                  }`}>
+                    {postContentLength}/{POST_CONTENT_MAX}
+                  </span>
+                </div>
                 <textarea 
                   id="content" 
                   name="content" 
                   required 
                   rows={6}
+                  maxLength={POST_CONTENT_MAX}
                   defaultValue={editingPost?.content || ""}
+                  onChange={(e) => setPostContentLength(e.target.value.length)}
                   placeholder="Detaylı bilgiyi buraya girin..."
-                  className="w-full p-4 rounded-none border-2 border-black focus:ring-accent text-sm resize-none outline-none"
+                  className={`w-full p-4 rounded-none border-2 focus:ring-accent text-sm resize-none outline-none transition-colors ${
+                    postContentLength >= POST_CONTENT_MAX ? "border-red-500 bg-red-50/30" : "border-black"
+                  }`}
                 />
+                {postContentLength >= POST_CONTENT_MAX && (
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest animate-pulse">Karakter sınırına ulaştınız!</p>
+                )}
               </div>
 
               <div className="pt-6 border-t-2 border-gray-100 flex gap-4">
