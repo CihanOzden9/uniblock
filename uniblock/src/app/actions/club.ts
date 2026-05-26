@@ -131,6 +131,7 @@ export async function updateClubSettings(formData: FormData) {
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const contactEmail = formData.get("contactEmail") as string;
+    const presidentEmail = formData.get("presidentEmail") as string;
     const website = formData.get("website") as string;
     const logo = formData.get("logo") as string;
     const leaderName = formData.get("leaderName") as string;
@@ -141,6 +142,7 @@ export async function updateClubSettings(formData: FormData) {
         name,
         description,
         contactEmail,
+        presidentEmail: presidentEmail || null,
         website,
         logo: logo || null,
         leader: {

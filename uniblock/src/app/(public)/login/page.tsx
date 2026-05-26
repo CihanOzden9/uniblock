@@ -35,7 +35,7 @@ export default function LoginPage() {
     if (result.success) {
       toast.success("Giriş başarılı!");
       // window.location.href helps with middleware refresh better than router.push in some cases
-      if (result.role === "SUPER_ADMIN" || result.role === "PROJECT_ADMIN") {
+      if (result.role === "SUPER_ADMIN" || result.role === "PROJECT_ADMIN" || result.role === "ADMIN") {
         window.location.href = "/admin";
       } else if (result.role === "CLUB_ADMIN") {
         window.location.href = "/clubs/manage";

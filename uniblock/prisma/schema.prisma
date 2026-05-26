@@ -15,6 +15,7 @@ enum Role {
   CLUB_ADMIN
   PROJECT_ADMIN
   BUSINESS_ADMIN
+  ADMIN
   SUPER_ADMIN
 }
 
@@ -70,6 +71,7 @@ model Club {
   description      String?
   logo             String?
   contactEmail     String?
+  presidentEmail   String?
   website          String?
   status           AccountStatus @default(PENDING)
   performanceScore Int       @default(0)
@@ -162,6 +164,11 @@ model Event {
   organizer   Club     @relation(fields: [organizerId], references: [id], onDelete: Cascade)
 
   interactions Interaction[]
+}
+
+model SystemSettings {
+  id             String  @id @default("singleton")
+  adminsVisible  Boolean @default(false)
 }
 
 model Faculty {

@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Building2,
   UserCog,
+  ExternalLink,
 } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 
@@ -153,10 +154,17 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
           <div className="min-w-0">
             <p className="text-[12px] font-semibold text-white truncate">{user.name}</p>
             <p className="text-[10px] text-red-400/80 font-medium uppercase tracking-wider">
-              {user.role === "SUPER_ADMIN" ? "Süper Admin" : "Proje Admin"}
+              {user.role === "SUPER_ADMIN" ? "Süper Admin" : user.role === "PROJECT_ADMIN" ? "Proje Admin" : "Yönetici"}
             </p>
           </div>
         </div>
+        <Link
+          href="/feed"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 bg-white/[0.04] hover:bg-accent/10 border border-white/[0.06] hover:border-accent/30 text-white/50 hover:text-accent text-[11px] font-bold uppercase tracking-widest transition-all"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+          Platforma Git
+        </Link>
         <form action={logout}>
           <button
             type="submit"

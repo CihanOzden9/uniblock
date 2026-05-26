@@ -3,8 +3,6 @@ import type { NextRequest } from "next/server";
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
-  return NextResponse.next();
-  
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("auth_token");
 
@@ -30,7 +28,7 @@ export function middleware(request: NextRequest) {
   // For a real application, you would decode the JWT to check the user's role
   const userRole = request.cookies.get("user_role")?.value;
 
-  if (pathname.startsWith("/admin") && userRole !== "super_admin" && userRole !== "project_admin") {
+  if (pathname.startsWith("/admin") && userRole !== "super_admin" && userRole !== "admin" && userRole !== "project_admin") {
     return NextResponse.redirect(new URL("/feed", request.url));
   }
 

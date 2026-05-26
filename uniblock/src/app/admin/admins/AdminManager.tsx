@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { promoteUserToAdmin, removeAdminRole } from "@/app/actions/admin";
+import { promoteUserToAdmin, removeAdminRole, toggleAdminsVisibility } from "@/app/actions/admin";
 import { toast } from "sonner";
-import { UserPlus, Trash2 } from "lucide-react";
-
-interface Admin {
-  id: string;
-  name: string | null;
-  email: string;
-  createdAt: Date;
-}
+import { UserPlus, Trash2, Eye, EyeOff } from "lucide-react";
 
 export function AddAdminForm() {
   const [email, setEmail] = useState("");
@@ -73,6 +66,40 @@ export function RemoveAdminButton({ userId, name }: { userId: string; name: stri
       className="p-1.5 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
     >
       <Trash2 className="w-4 h-4" />
+    </button>
+  );
+}
+
+export function VisibilityToggle({ adminsVisible }: { adminsVisible: boolean }) {
+  const [visible, setVisible] = useState(adminsVisible);
+  const [loading, setLoading] = useState(false);
+
+  async function onClick() {
+    setLoading(true);
+    const next = !visible;
+    const res = await toggleAdminsVisibility(next);
+    if (res.success) {
+      setVisible(next);
+      toast.success(next ? "Yöneticiler diğer adminlere görünür yapıldı." : "Yöneticiler gizlendi.");
+    } else {
+      toast.error(res.error);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      title={visible ? "Yöneticileri gizle" : "Yöneticileri göster"}
+      className={`flex items-center gap-2 px-4 py-2 text-[12px] font-bold uppercase tracking-wider border transition-colors disabled:opacity-50 ${
+        visible
+          ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
+          : "border-white/[0.08] text-white/30 hover:bg-white/[0.04]"
+      }`}
+    >
+      {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+      {visible ? "Diğerleri Görüyor" : "Diğerleri Görmüyor"}
     </button>
   );
 }

@@ -22,10 +22,23 @@ export async function handleUserStatus(userId: string, status: "ACTIVE" | "REJEC
 
 export async function handleClubStatus(clubId: string, status: "ACTIVE" | "REJECTED" | "BANNED") {
   try {
-    await prisma.club.update({
+    const club = await prisma.club.update({
       where: { id: clubId },
-      data: { status }
+      data: { status },
+      include: { leader: true }
     });
+
+    if (status === "ACTIVE") {
+      await prisma.post.create({
+        data: {
+          title: `${club.name} Topluluğa Katıldı!`,
+          content: `${club.name} kulübü sistemimize onaylanarak katıldı. Etkinlikleri ve duyuruları takip etmeyi unutmayın!`,
+          type: "ANNOUNCEMENT",
+          authorId: club.leaderId,
+          clubId: club.id,
+        }
+      });
+    }
 
     revalidatePath("/admin");
     revalidatePath("/admin/clubs");
@@ -76,11 +89,12 @@ export async function promoteUserToAdmin(email: string) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) return { success: false, error: "Bu e-posta ile kayıtlı kullanıcı bulunamadı." };
-    if (user.role === "SUPER_ADMIN") return { success: false, error: "Bu kullanıcı zaten yönetici." };
+    if (user.role === "SUPER_ADMIN") return { success: false, error: "Süperadmin yetkisi değiştirilemez." };
+    if (user.role === "ADMIN") return { success: false, error: "Bu kullanıcı zaten yönetici." };
 
     await prisma.user.update({
       where: { email },
-      data: { role: "SUPER_ADMIN", status: "ACTIVE" }
+      data: { role: "ADMIN", status: "ACTIVE" }
     });
 
     revalidatePath("/admin/admins");
@@ -93,6 +107,9 @@ export async function promoteUserToAdmin(email: string) {
 
 export async function removeAdminRole(userId: string) {
   try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user?.role === "SUPER_ADMIN") return { success: false, error: "Süperadmin yetkisi kaldırılamaz." };
+
     await prisma.user.update({
       where: { id: userId },
       data: { role: "STUDENT" }
@@ -102,6 +119,21 @@ export async function removeAdminRole(userId: string) {
     return { success: true };
   } catch (error: any) {
     console.error("Remove admin role error:", error);
+    return { success: false, error: "İşlem gerçekleştirilemedi." };
+  }
+}
+
+export async function toggleAdminsVisibility(visible: boolean) {
+  try {
+    await prisma.systemSettings.upsert({
+      where: { id: "singleton" },
+      update: { adminsVisible: visible },
+      create: { id: "singleton", adminsVisible: visible },
+    });
+    revalidatePath("/admin/admins");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Toggle visibility error:", error);
     return { success: false, error: "İşlem gerçekleştirilemedi." };
   }
 }

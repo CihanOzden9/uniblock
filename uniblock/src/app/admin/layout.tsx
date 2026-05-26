@@ -9,11 +9,10 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
-  const safeUser = user || {
-    name: "Demo Admin",
-    role: "SUPER_ADMIN",
-    image: null,
-  };
+
+  if (!user || (user.role !== "SUPER_ADMIN" && user.role !== "PROJECT_ADMIN" && user.role !== "ADMIN")) {
+    redirect("/feed");
+  }
 
   const [pendingUsers, pendingClubs, pendingComplaints] = await Promise.all([
     prisma.user.count({ where: { role: { in: ["STUDENT", "CLUB_ADMIN"] }, status: "PENDING" } }),
@@ -24,7 +23,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen flex bg-[#0f1117]">
       <AdminSidebar 
-        user={{ name: safeUser.name || "Admin", role: safeUser.role, image: safeUser.image }} 
+        user={{ name: user.name || "Admin", role: user.role, image: user.image }} 
         pendingCounts={{
           users: pendingUsers,
           clubs: pendingClubs,

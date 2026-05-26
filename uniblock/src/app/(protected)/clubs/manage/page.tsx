@@ -1,8 +1,9 @@
 import { getCurrentUser } from "@/lib/session";
 import ClubDashboardClient from "@/app/(protected)/clubs/manage/ClubDashboardClient";
 import { prisma } from "@/lib/prisma";
-import { Clock, X } from "lucide-react";
+import { Clock, X, AlertTriangle } from "lucide-react";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function ClubManagePage() {
   const user = await getCurrentUser();
@@ -116,5 +117,25 @@ export default async function ClubManagePage() {
     reports: reports
   };
 
-  return <ClubDashboardClient club={enhancedClub} />;
+  const missingPresidentEmail = !club.presidentEmail;
+
+  return (
+    <>
+      {missingPresidentEmail && (
+        <div className="bg-orange-500 text-white px-6 py-3 flex items-center gap-3">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span className="text-sm font-semibold flex-1">
+            Başkan kişisel e-posta adresi eksik — kulüp yönetimi için zorunludur.
+          </span>
+          <Link
+            href="/clubs/manage/settings"
+            className="text-sm font-black uppercase tracking-wider underline underline-offset-2 hover:text-orange-100 transition-colors shrink-0"
+          >
+            Ayarlara Git →
+          </Link>
+        </div>
+      )}
+      <ClubDashboardClient club={enhancedClub} />
+    </>
+  );
 }

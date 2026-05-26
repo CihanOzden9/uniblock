@@ -175,8 +175,11 @@ export default function RegisterForm({ faculties }: { faculties: Faculty[] }) {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Kulüp / Başkan E-posta</Label>
+                    <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">
+                      Kulüp Resmi E-posta Adresi
+                    </Label>
                     <Input name="email" id="email" type="email" placeholder="kulup@universite.edu.tr" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    <p className="text-[10px] text-[#888] mt-1">Başkanın kişisel e-postası onay sonrası ayarlardan eklenebilir.</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Şifre</Label>

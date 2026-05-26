@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UniBlock
 
-## Getting Started
+Üniversite kulüpleri, etkinlikler ve öğrenci topluluğu için geliştirilmiş platform.
 
-First, run the development server:
+## Gereksinimler
+
+- **Node.js** v20+
+- **npm** v10+
+- **PostgreSQL** v14+
+
+## Kurulum
 
 ```bash
+# Bağımlılıkları yükle
+npm install
+
+# Ortam değişkenlerini ayarla
+cp .env.example .env.local
+# .env.local dosyasını düzenle: DATABASE_URL, vb.
+
+# Veritabanı şemasını uygula
+npx prisma db push
+
+# Prisma istemcisini oluştur
+npx prisma generate
+
+# Geliştirme sunucusunu başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Uygulama [http://localhost:3000](http://localhost:3000) adresinde çalışır.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ortam Değişkenleri
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` dosyasında aşağıdaki değişkenler tanımlanmalıdır:
 
-## Learn More
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/uniblock"
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Teknoloji Yığını
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Katman | Teknoloji |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Dil | TypeScript |
+| ORM | Prisma 6 |
+| Veritabanı | PostgreSQL |
+| UI | Tailwind CSS + shadcn/ui |
+| Bildirimler | Sonner |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Roller
 
-## Deploy on Vercel
+| Rol | Açıklama |
+|---|---|
+| `STUDENT` | Standart öğrenci |
+| `CLUB_ADMIN` | Kulüp yöneticisi |
+| `ADMIN` | Sistem yöneticisi |
+| `PROJECT_ADMIN` | Proje ekibi yöneticisi |
+| `SUPER_ADMIN` | Tam yetkili süper admin |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Geliştirme Komutları
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev        # Geliştirme sunucusu
+npm run build      # Prodüksiyon build
+npm run lint       # ESLint kontrolü
+npx prisma studio  # Veritabanı arayüzü
+npx prisma db push # Şema değişikliklerini uygula
+```

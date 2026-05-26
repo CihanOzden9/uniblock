@@ -90,15 +90,37 @@ export default function SettingsClient({ club }: SettingsClientProps) {
 
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                <Mail className="w-3 h-3" /> İletişim E-posta
+                <Mail className="w-3 h-3" /> Kulüp Resmi E-postası
               </label>
-              <input 
+              <input
                 name="contactEmail"
                 type="email"
                 defaultValue={club.contactEmail || ""}
-                placeholder="iletisim@kulup.com"
+                placeholder="kulup@universite.edu.tr"
                 className="w-full h-12 px-4 rounded-none border-2 border-black focus:ring-accent outline-none font-bold text-sm"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2">
+                <Mail className="w-3 h-3" /> Başkan Kişisel E-postası
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="presidentEmail"
+                type="email"
+                defaultValue={club.presidentEmail || ""}
+                placeholder="baskan@universite.edu.tr"
+                required
+                className={`w-full h-12 px-4 rounded-none border-2 focus:ring-accent outline-none font-bold text-sm ${
+                  !club.presidentEmail ? "border-orange-400 bg-orange-50" : "border-black"
+                }`}
+              />
+              {!club.presidentEmail && (
+                <p className="text-[10px] text-orange-600 font-bold uppercase tracking-wider">
+                  Zorunlu — Başkan kişisel e-postası henüz eklenmemiş.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

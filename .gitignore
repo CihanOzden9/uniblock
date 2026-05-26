@@ -65,8 +65,10 @@ desktop.ini
 **/coverage/
 **/.nyc_output
 
-# Temporary Files
+# Temporary & Planning Files
 *~
 **/~*
 **/*.drawio~
 **/*.tmp
+future/
+gelistirme_plani.md

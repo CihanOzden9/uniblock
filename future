@@ -1,10 +1,10 @@
 # UniBlock — Gelecek Özellikler ve Geliştirme Eksikleri Yol Haritası
 
 ## 🔴 1. Yönetici Paneli Kalan Eksikler (Öncelikli)
-- [ ] **Şikâyet Yönetimi:** Şikâyet edilen içerikleri (yorum, duyuru) kaldırabilme veya şikâyeti reddedebilme butonlarının ve backend aksiyonlarının (/admin/complaints) tamamlanması.
-- [ ] **İkinci Admin Davet Sistemi:** Mevcut yöneticilerin sisteme yeni admin atayabilmesi (/admin/admins) ve rol yönetimi.
-- [ ] **Etkinlik İptal & Oluşturma:** Adminin etkinlik iptal edebilmesi, iptal sebebini kulübe otomatik bildirimle iletebilmesi ve kulüpler adına etkinlik oluşturabilmesi.
-- [ ] **Fakülte & Bölüm Yönetimi:** Kayıt ekranlarında dinamik olarak kullanılan fakülte/bölüm listesinin CRUD (Ekle/Düzenle/Sil) yönetimi (/admin/departments).
+- [x] **Şikâyet Yönetimi:** Şikâyet edilen içerikleri (yorum, duyuru) kaldırabilme veya şikâyeti reddedebilme butonlarının ve backend aksiyonlarının (/admin/complaints) tamamlanması.
+- [x] **İkinci Admin Davet Sistemi:** Mevcut yöneticilerin sisteme yeni admin atayabilmesi (/admin/admins) ve rol yönetimi.
+- [x] **Etkinlik İptal & Oluşturma:** Adminin etkinlik iptal edebilmesi, iptal sebebini kulübe otomatik bildirimle iletebilmesi ve kulüpler adına etkinlik oluşturabilmesi.
+- [x] **Fakülte & Bölüm Yönetimi:** Kayıt ekranlarında dinamik olarak kullanılan fakülte/bölüm listesinin CRUD (Ekle/Düzenle/Sil) yönetimi (/admin/departments).
 
 ## 🟡 2. Gelişmiş Etkinlik & Gamification Modülleri (Faz 2 & 3)
 - [ ] **QR Katılım Doğrulama:** Etkinlik giriş ve çıkışlarında mobil uyumlu QR kod okutarak katılım doğrulama ve katılım sürelerinin loglanması.
