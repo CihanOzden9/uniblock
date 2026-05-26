@@ -28,11 +28,11 @@ export default async function StatsPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
-      <AdminNavbar user={user} />
+      <AdminNavbar user={{ name: user.name || "Yönetici", role: user.role }} />
       <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full">
         <StatsClient 
           clubName={club.name} 
-          data={statsResult.data} 
+          data={statsResult.data!} 
         />
       </main>
     </div>

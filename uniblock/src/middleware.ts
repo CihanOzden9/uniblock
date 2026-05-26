@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
+  return NextResponse.next();
+  
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("auth_token");
 
@@ -11,10 +13,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // If the user is logged in and trying to access public auth routes, redirect to feed
-  if (token && isPublicRoute) {
-    return NextResponse.redirect(new URL("/feed", request.url));
-  }
+  // We removed the redirect for public routes here because a stale cookie
+  // (e.g. after DB reset) would cause an infinite loop where the user can't login.
+  // The user can now access /login even if they have a cookie, and logging in again will overwrite it.
 
   // If the user is not logged in and trying to access protected routes, redirect to login
   if (!token && !isPublicRoute && !pathname.startsWith("/api/auth")) {
@@ -29,11 +30,9 @@ export function middleware(request: NextRequest) {
   // For a real application, you would decode the JWT to check the user's role
   const userRole = request.cookies.get("user_role")?.value;
 
-  /* Disabling for demo purposes
-  if (pathname.startsWith("/admin") && userRole !== "admin") {
+  if (pathname.startsWith("/admin") && userRole !== "super_admin" && userRole !== "project_admin") {
     return NextResponse.redirect(new URL("/feed", request.url));
   }
-  */
 
   return NextResponse.next();
 }

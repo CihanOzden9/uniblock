@@ -1,14 +1,52 @@
 import { getCurrentUser } from "@/lib/session";
 import ClubDashboardClient from "@/app/(protected)/clubs/manage/ClubDashboardClient";
 import { prisma } from "@/lib/prisma";
+import { Clock, X } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function ClubManagePage() {
   const user = await getCurrentUser();
 
-  if (!user || user.ledClubs.length === 0) {
+  if (!user) {
+    redirect("/login");
+  }
+
+  const userClub = user.ledClubs[0];
+
+  if (!userClub) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white font-heading font-bold text-xl uppercase tracking-widest text-red-500">
         Yetkiniz yok veya yönettiğiniz bir kulüp bulunamadı.
+      </div>
+    );
+  }
+
+  // @ts-ignore - status field exists in DB but might not be in generated types yet
+  if (userClub.status === "PENDING") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-8 text-center">
+        <div className="w-16 h-16 bg-orange-500/10 flex items-center justify-center mb-6">
+          <Clock className="w-8 h-8 text-orange-500" />
+        </div>
+        <h1 className="text-2xl font-heading font-extrabold text-black uppercase tracking-tight mb-2">Kulüp Başvurusu İnceleniyor</h1>
+        <p className="text-gray-500 max-w-md mx-auto">
+          "{userClub.name}" kulübü için yaptığınız başvuru yönetici onayında bekliyor. Onaylandığında buradan kulübünüzü yönetmeye başlayabilirsiniz.
+        </p>
+      </div>
+    );
+  }
+
+  // @ts-ignore
+  if (userClub.status === "REJECTED") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-8 text-center">
+        <div className="w-16 h-16 bg-red-500/10 flex items-center justify-center mb-6">
+          <X className="w-8 h-8 text-red-500" />
+        </div>
+        <h1 className="text-2xl font-heading font-extrabold text-black uppercase tracking-tight mb-2">Başvuru Reddedildi</h1>
+        <p className="text-gray-500 max-w-md mx-auto">
+          Kulüp başvurunuz maalesef reddedildi. Daha fazla bilgi için sistem yöneticisiyle iletişime geçebilirsiniz.
+        </p>
       </div>
     );
   }

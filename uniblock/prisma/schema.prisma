@@ -18,6 +18,13 @@ enum Role {
   SUPER_ADMIN
 }
 
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  BANNED
+}
+
 enum PostType {
   NEWS
   ANNOUNCEMENT
@@ -42,6 +49,7 @@ model User {
   faculty       String?
   department    String?
   role          Role      @default(STUDENT)
+  status        AccountStatus @default(PENDING)
   interests     String[]  @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -63,6 +71,7 @@ model Club {
   logo             String?
   contactEmail     String?
   website          String?
+  status           AccountStatus @default(PENDING)
   performanceScore Int       @default(0)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -137,20 +146,41 @@ model Post {
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  title       String
-  description String   @db.Text
-  date        DateTime
-  location    String?
-  capacity    Int?
-  qrCode      String?  @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  title        String
+  description  String   @db.Text
+  date         DateTime
+  location     String?
+  capacity     Int?
+  qrCode       String?  @unique
+  cancelled    Boolean  @default(false)
+  cancelReason String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   organizerId String
   organizer   Club     @relation(fields: [organizerId], references: [id], onDelete: Cascade)
 
   interactions Interaction[]
+}
+
+model Faculty {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+
+  departments Department[]
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  facultyId String
+  faculty   Faculty  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@unique([facultyId, name])
 }
 
 model Survey {

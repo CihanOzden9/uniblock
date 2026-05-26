@@ -1,0 +1,21 @@
+# UniBlock — Gelecek Özellikler ve Geliştirme Eksikleri Yol Haritası
+
+## 🔴 1. Yönetici Paneli Kalan Eksikler (Öncelikli)
+- [ ] **Şikâyet Yönetimi:** Şikâyet edilen içerikleri (yorum, duyuru) kaldırabilme veya şikâyeti reddedebilme butonlarının ve backend aksiyonlarının (/admin/complaints) tamamlanması.
+- [ ] **İkinci Admin Davet Sistemi:** Mevcut yöneticilerin sisteme yeni admin atayabilmesi (/admin/admins) ve rol yönetimi.
+- [ ] **Etkinlik İptal & Oluşturma:** Adminin etkinlik iptal edebilmesi, iptal sebebini kulübe otomatik bildirimle iletebilmesi ve kulüpler adına etkinlik oluşturabilmesi.
+- [ ] **Fakülte & Bölüm Yönetimi:** Kayıt ekranlarında dinamik olarak kullanılan fakülte/bölüm listesinin CRUD (Ekle/Düzenle/Sil) yönetimi (/admin/departments).
+
+## 🟡 2. Gelişmiş Etkinlik & Gamification Modülleri (Faz 2 & 3)
+- [ ] **QR Katılım Doğrulama:** Etkinlik giriş ve çıkışlarında mobil uyumlu QR kod okutarak katılım doğrulama ve katılım sürelerinin loglanması.
+- [ ] **Memnuniyet Anketleri:** Etkinlik sonrasında katılımcılara memnuniyet anketi sunulması, puanlama ve raporlama modeli.
+- [ ] **Gamification (Öğrenci Puanları):** Anketlere katılan veya etkinliklerde check-in yapan öğrencilerin puan kazanma ve profilinde listeleme altyapısı.
+- [ ] **Performans Endeksi:** Kulüplerin performansının `(Katılım * 0.4) + (Memnuniyet * 0.3) + (Etkileşim * 0.2) + (Süreklilik * 0.1)` formülüyle hesaplanıp aylık olarak sıralanması.
+
+## 🟢 3. Akıllı Sponsorluk & Sosyal Akış Modülleri (Faz 4 & 5)
+- [ ] **Sponsorluk Eşleştirme Motoru:** İşletmeler ile kulüpler arasında kitle uyumu, lokasyon ve etkileşim oranlarına göre otomatik sponsorluk eşleşme skoru hesaplanması.
+- [ ] **Sponsorluk İş Akışı Pipeline'ı:** Sponsorluk teklifi oluşturma, değerlendirme, onaylama ve sponsorlu etkinliklerin performans raporlaması.
+- [ ] **Kişiselleştirilmiş Akış Algoritması:** Öğrencinin ilgi alanı etiketleri, bölümü ve geçmiş davranış sinyallerine göre akışta (feed) ve haberlerde özelleştirilmiş sıralama.
+- [ ] **Haber Tercih Yönetimi:** Kullanıcıların görmek istemediği haber kategorilerini kapatabilmesi ve başlık yoğunluğu modunu seçebilmesi için ayar ekranı.
+- [ ] **Sohbet & İletişim Altyapısı:** Kulüpler, takımlar ve öğrenciler arasında 1-1 ve grup mesajlaşma odaları, rol bazlı mesajlaşma kısıtları.
+- [ ] **Çoklu Kampüs Desteği:** Sistem altyapısının farklı üniversiteler ve kampüslere göre ölçeklenebilmesi (multi-tenant yapısı).

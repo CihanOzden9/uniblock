@@ -259,7 +259,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
-      <AdminNavbar user={club.leader} />
+      <AdminNavbar user={{ name: club.leader.name || "Yönetici", role: club.leader.role }} />
 
       <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-8">
         

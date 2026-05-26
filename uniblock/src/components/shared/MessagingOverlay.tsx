@@ -53,7 +53,7 @@ export default function MessagingOverlay() {
             {isNewMessageOpen ? (
               <div className="p-6 flex flex-col h-full bg-white">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Alıcı Seçin</p>
-                <Select onValueChange={setSelectedRecipient}>
+                <Select onValueChange={(val: any) => setSelectedRecipient(val || "")}>
                   <SelectTrigger className="rounded-none border-2 border-black h-12 focus:ring-accent">
                     <SelectValue placeholder="Kulüp veya Takım Seçin" />
                   </SelectTrigger>

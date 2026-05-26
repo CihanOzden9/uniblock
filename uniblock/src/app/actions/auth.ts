@@ -12,6 +12,7 @@ export async function register(formData: FormData) {
   const faculty = formData.get("faculty") as string;
   const department = formData.get("department") as string;
   const role = (formData.get("role") as string) || "STUDENT";
+  const clubName = formData.get("clubName") as string;
 
   if (!email || !password || !firstName || !lastName) {
     return { success: false, error: "Lütfen tüm zorunlu alanları doldurun." };
@@ -26,17 +27,41 @@ export async function register(formData: FormData) {
       return { success: false, error: "Bu e-posta adresi zaten kullanımda." };
     }
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         name: `${firstName} ${lastName}`,
         email,
         password, // Not: Gerçek uygulamada şifre hash'lenmelidir!
         role: role as any,
+        status: "PENDING",
         faculty,
         department,
         image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}`,
       },
     });
+
+    if (role === "CLUB_ADMIN" && clubName) {
+      const slug = clubName.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
+      const club = await prisma.club.create({
+        data: {
+          name: clubName,
+          slug: `${slug}-${Math.floor(Math.random() * 1000)}`,
+          leaderId: newUser.id,
+          status: "PENDING",
+          contactEmail: email,
+        },
+      });
+
+      // Lideri aynı zamanda kulüp üyesi (BOARD_MEMBER) olarak ekle
+      await prisma.clubMember.create({
+        data: {
+          userId: newUser.id,
+          clubId: club.id,
+          role: "BOARD_MEMBER",
+          status: "APPROVED"
+        }
+      });
+    }
 
     return { success: true };
   } catch (error) {
@@ -61,6 +86,20 @@ export async function login(formData: FormData) {
     if (!user || user.password !== password) {
       return { success: false, error: "Hatalı e-posta veya şifre." };
     }
+
+    /*
+    if (user.status === "PENDING") {
+      return { success: false, error: "Hesabınız henüz onaylanmamış. Lütfen yöneticinin onayını bekleyin." };
+    }
+
+    if (user.status === "REJECTED") {
+      return { success: false, error: "Hesap başvurunuz reddedildi." };
+    }
+
+    if (user.status === "BANNED") {
+      return { success: false, error: "Hesabınız askıya alındı." };
+    }
+    */
 
     const cookieStore = await cookies();
     

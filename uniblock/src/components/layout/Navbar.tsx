@@ -17,6 +17,7 @@ interface NavbarProps {
     email: string;
     department?: string;
     image?: string;
+    role?: string;
   } | null;
 }
 
@@ -64,6 +65,14 @@ export default function Navbar({ user }: NavbarProps) {
             >
               Kulüpler
             </Link>
+            {(user?.role === "SUPER_ADMIN" || user?.role === "PROJECT_ADMIN") && (
+              <Link 
+                href="/admin" 
+                className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 text-red-500 border-transparent hover:border-red-500`}
+              >
+                Admin Paneli
+              </Link>
+            )}
           </nav>
         )}
       </div>
