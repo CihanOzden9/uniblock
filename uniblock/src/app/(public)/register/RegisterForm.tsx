@@ -47,8 +47,12 @@ export default function RegisterForm({ faculties }: { faculties: Faculty[] }) {
     const result = await register(formData);
 
     if (result.success) {
-      toast.success("Başvurunuz alındı! Yönetici onayından sonra giriş yapabileceksiniz.");
-      router.push("/login");
+      toast.success("Kayıt başarılı! Giriş yapıldı.");
+      if (result.role === "CLUB_ADMIN") {
+        window.location.href = "/clubs/manage";
+      } else {
+        window.location.href = "/feed";
+      }
     } else {
       toast.error(result.error);
       setIsLoading(false);

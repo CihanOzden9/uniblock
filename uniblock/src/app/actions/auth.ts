@@ -33,7 +33,7 @@ export async function register(formData: FormData) {
         email,
         password, // Not: Gerçek uygulamada şifre hash'lenmelidir!
         role: role as any,
-        status: "PENDING",
+        status: "ACTIVE",
         faculty,
         department,
         image: `https://api.dicebear.com/7.x/avataaars/svg?seed=${firstName}`,
@@ -47,7 +47,7 @@ export async function register(formData: FormData) {
           name: clubName,
           slug: `${slug}-${Math.floor(Math.random() * 1000)}`,
           leaderId: newUser.id,
-          status: "PENDING",
+          status: "ACTIVE",
           contactEmail: email,
         },
       });
@@ -63,7 +63,25 @@ export async function register(formData: FormData) {
       });
     }
 
-    return { success: true };
+    const cookieStore = await cookies();
+    
+    // Auth token simülasyonu
+    cookieStore.set("auth_token", newUser.email, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 60 * 60 * 24 * 7, // 1 hafta
+      path: "/",
+    });
+
+    // Rol bilgisini de saklayalım (middleware için)
+    cookieStore.set("user_role", newUser.role.toLowerCase(), {
+      httpOnly: true,
+      secure: false,
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+
+    return { success: true, role: newUser.role };
   } catch (error) {
     console.error("Register Error:", error);
     return { success: false, error: "Kayıt sırasında bir hata oluştu." };
@@ -106,7 +124,7 @@ export async function login(formData: FormData) {
     // Auth token simülasyonu
     cookieStore.set("auth_token", user.email, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       maxAge: 60 * 60 * 24 * 7, // 1 hafta
       path: "/",
     });
@@ -114,7 +132,7 @@ export async function login(formData: FormData) {
     // Rol bilgisini de saklayalım (middleware için)
     cookieStore.set("user_role", user.role.toLowerCase(), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
