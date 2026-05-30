@@ -17,6 +17,7 @@ export default async function NewsPage() {
     },
     include: {
       club: true,
+      team: true,
       interactions: true
     },
     orderBy: {

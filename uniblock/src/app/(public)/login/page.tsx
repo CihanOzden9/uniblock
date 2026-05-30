@@ -39,6 +39,8 @@ export default function LoginPage() {
         window.location.href = "/admin";
       } else if (result.role === "CLUB_ADMIN") {
         window.location.href = "/clubs/manage";
+      } else if (result.role === "TEAM_ADMIN") {
+        window.location.href = "/teams/manage";
       } else {
         window.location.href = "/feed";
       }

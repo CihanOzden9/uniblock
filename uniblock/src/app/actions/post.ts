@@ -11,9 +11,10 @@ export async function createPost(formData: FormData) {
     const content = formData.get("content") as string;
     const type = formData.get("type") as "NEWS" | "ANNOUNCEMENT";
     const clubId = formData.get("clubId") as string;
+    const teamId = formData.get("teamId") as string;
     const authorId = formData.get("authorId") as string;
 
-    if (!title || !content || !type || !clubId || !authorId) {
+    if (!title || !content || !type || !authorId || (!clubId && !teamId)) {
       throw new Error("Tüm alanlar zorunludur.");
     }
 
@@ -22,13 +23,15 @@ export async function createPost(formData: FormData) {
         title,
         content,
         type,
-        clubId,
+        clubId: clubId || null,
+        teamId: teamId || null,
         authorId,
       },
     });
 
-    // Ana akışı ve kulüp yönetim sayfasını yenile
+    // Ana akışı ve kulüp/takım yönetim sayfasını yenile
     revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
     revalidatePath("/feed");
     
     return { success: true, post };
@@ -59,8 +62,9 @@ export async function updatePost(formData: FormData) {
     });
 
     revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
     revalidatePath("/feed");
-    
+
     return { success: true, post };
   } catch (error: any) {
     console.error("Post update error:", error);
@@ -75,8 +79,9 @@ export async function deletePost(id: string) {
     });
 
     revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
     revalidatePath("/feed");
-    
+
     return { success: true };
   } catch (error: any) {
     console.error("Post delete error:", error);

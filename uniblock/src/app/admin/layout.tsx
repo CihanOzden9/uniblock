@@ -14,9 +14,10 @@ export default async function AdminLayout({
     redirect("/feed");
   }
 
-  const [pendingUsers, pendingClubs, pendingComplaints] = await Promise.all([
+  const [pendingUsers, pendingClubs, pendingTeams, pendingComplaints] = await Promise.all([
     prisma.user.count({ where: { role: { in: ["STUDENT", "CLUB_ADMIN"] }, status: "PENDING" } }),
     prisma.club.count({ where: { status: "PENDING" } }),
+    prisma.team.count({ where: { status: "PENDING" } }),
     prisma.report.count({ where: { status: "PENDING" } }),
   ]);
 
@@ -27,6 +28,7 @@ export default async function AdminLayout({
         pendingCounts={{
           users: pendingUsers,
           clubs: pendingClubs,
+          teams: pendingTeams,
           complaints: pendingComplaints
         }}
       />

@@ -50,6 +50,36 @@ export async function handleClubStatus(clubId: string, status: "ACTIVE" | "REJEC
   }
 }
 
+export async function handleTeamStatus(teamId: string, status: "ACTIVE" | "REJECTED" | "BANNED") {
+  try {
+    const team = await prisma.team.update({
+      where: { id: teamId },
+      data: { status },
+      include: { leader: true }
+    });
+
+    if (status === "ACTIVE") {
+      await prisma.post.create({
+        data: {
+          title: `${team.name} Topluluğa Katıldı!`,
+          content: `${team.name} takımı sistemimize onaylanarak katıldı. Etkinlikleri ve duyuruları takip etmeyi unutmayın!`,
+          type: "ANNOUNCEMENT",
+          authorId: team.leaderId,
+          teamId: team.id,
+        }
+      });
+    }
+
+    revalidatePath("/admin");
+    revalidatePath("/admin/teams");
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Handle team status error:", error);
+    return { success: false, error: "İşlem gerçekleştirilemedi." };
+  }
+}
+
 export async function handleReport(reportId: string, action: "RESOLVED" | "DISMISSED") {
   try {
     await prisma.report.update({
@@ -152,20 +182,22 @@ export async function cancelEvent(eventId: string, reason: string) {
       data: { cancelled: true, cancelReason: reason }
     });
 
-    const clubLeader = await prisma.user.findFirst({
-      where: { ledClubs: { some: { id: event.organizerId } } }
-    });
-
-    if (clubLeader) {
-      await prisma.post.create({
-        data: {
-          title: `Etkinlik İptal Edildi: ${event.title}`,
-          content: `"${event.title}" etkinliği admin tarafından iptal edilmiştir.\n\nSebep: ${reason}`,
-          type: "ANNOUNCEMENT",
-          authorId: clubLeader.id,
-          clubId: event.organizerId
-        }
+    if (event.organizerId) {
+      const clubLeader = await prisma.user.findFirst({
+        where: { ledClubs: { some: { id: event.organizerId } } }
       });
+
+      if (clubLeader) {
+        await prisma.post.create({
+          data: {
+            title: `Etkinlik İptal Edildi: ${event.title}`,
+            content: `"${event.title}" etkinliği admin tarafından iptal edilmiştir.\n\nSebep: ${reason}`,
+            type: "ANNOUNCEMENT",
+            authorId: clubLeader.id,
+            clubId: event.organizerId
+          }
+        });
+      }
     }
 
     revalidatePath("/admin/events");

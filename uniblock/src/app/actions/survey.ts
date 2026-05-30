@@ -9,9 +9,10 @@ export async function createSurvey(formData: FormData) {
   try {
     const question = formData.get("question") as string;
     const clubId = formData.get("clubId") as string;
+    const teamId = formData.get("teamId") as string;
     const optionsRaw = formData.get("options") as string; // Will be comma separated
-    
-    if (!question || !clubId || !optionsRaw) {
+
+    if (!question || (!clubId && !teamId) || !optionsRaw) {
       throw new Error("Tüm alanlar zorunludur.");
     }
 
@@ -24,7 +25,8 @@ export async function createSurvey(formData: FormData) {
     const survey = await prisma.survey.create({
       data: {
         question,
-        clubId,
+        clubId: clubId || null,
+        teamId: teamId || null,
         options: {
           create: options.map(text => ({ text }))
         }
@@ -32,6 +34,7 @@ export async function createSurvey(formData: FormData) {
     });
 
     revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
     revalidatePath("/feed");
     
     return { success: true, survey };
@@ -47,6 +50,7 @@ export async function deleteSurvey(id: string) {
       where: { id }
     });
     revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
     revalidatePath("/feed");
     return { success: true };
   } catch (error: any) {

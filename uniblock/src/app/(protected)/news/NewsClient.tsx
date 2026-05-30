@@ -151,7 +151,7 @@ export default function NewsClient({ user, posts }: NewsClientProps) {
                   {selectedNews.title}
                 </SheetTitle>
                 <SheetDescription className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] pt-4">
-                  Yayınlayan: {selectedNews.source || selectedNews.club?.name}
+                  Yayınlayan: {selectedNews.source || selectedNews.club?.name || selectedNews.team?.name}
                 </SheetDescription>
               </SheetHeader>
 

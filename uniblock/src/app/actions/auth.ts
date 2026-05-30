@@ -13,6 +13,7 @@ export async function register(formData: FormData) {
   const department = formData.get("department") as string;
   const role = (formData.get("role") as string) || "STUDENT";
   const clubName = formData.get("clubName") as string;
+  const teamName = formData.get("teamName") as string;
 
   if (!email || !password || !firstName || !lastName) {
     return { success: false, error: "Lütfen tüm zorunlu alanları doldurun." };
@@ -57,6 +58,29 @@ export async function register(formData: FormData) {
         data: {
           userId: newUser.id,
           clubId: club.id,
+          role: "BOARD_MEMBER",
+          status: "APPROVED"
+        }
+      });
+    }
+
+    if (role === "TEAM_ADMIN" && teamName) {
+      const slug = teamName.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
+      const team = await prisma.team.create({
+        data: {
+          name: teamName,
+          slug: `${slug}-${Math.floor(Math.random() * 1000)}`,
+          leaderId: newUser.id,
+          status: "ACTIVE",
+          contactEmail: email,
+        },
+      });
+
+      // Kaptanı aynı zamanda takım üyesi (BOARD_MEMBER) olarak ekle
+      await prisma.teamMember.create({
+        data: {
+          userId: newUser.id,
+          teamId: team.id,
           role: "BOARD_MEMBER",
           status: "APPROVED"
         }

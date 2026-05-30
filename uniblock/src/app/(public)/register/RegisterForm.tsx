@@ -50,6 +50,8 @@ export default function RegisterForm({ faculties }: { faculties: Faculty[] }) {
       toast.success("Kayıt başarılı! Giriş yapıldı.");
       if (result.role === "CLUB_ADMIN") {
         window.location.href = "/clubs/manage";
+      } else if (result.role === "TEAM_ADMIN") {
+        window.location.href = "/teams/manage";
       } else {
         window.location.href = "/feed";
       }
@@ -195,8 +197,38 @@ export default function RegisterForm({ faculties }: { faculties: Faculty[] }) {
                 </form>
               </TabsContent>
 
-              <TabsContent value="team" className="space-y-4 pt-4 text-center">
-                <p className="text-sm text-gray-500 py-8">Takım kayıtları şu an kapalıdır.</p>
+              <TabsContent value="team" className="space-y-6">
+                <form onSubmit={onSubmit} className="space-y-6">
+                  <input type="hidden" name="role" value="TEAM_ADMIN" />
+                  <div className="space-y-2">
+                    <Label htmlFor="teamName" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Takım Adı</Label>
+                    <Input name="teamName" id="teamName" placeholder="Örn: Robotik Yarışma Takımı" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Kaptan Ad</Label>
+                      <Input name="firstName" id="firstName" placeholder="Ad" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Kaptan Soyad</Label>
+                      <Input name="lastName" id="lastName" placeholder="Soyad" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">
+                      Takım Resmi E-posta Adresi
+                    </Label>
+                    <Input name="email" id="email" type="email" placeholder="takim@universite.edu.tr" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                    <p className="text-[10px] text-[#888] mt-1">Kaptanın kişisel e-postası onay sonrası ayarlardan eklenebilir.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#525252]">Şifre</Label>
+                    <Input name="password" id="password" type="password" disabled={isLoading} className="rounded-none border-black focus-visible:ring-accent focus-visible:border-accent" required />
+                  </div>
+                  <Button type="submit" className="w-full rounded-none uppercase tracking-[0.15em] text-[12px] font-semibold py-[14px] h-auto transition-colors bg-accent text-white hover:bg-black border border-accent hover:border-black" disabled={isLoading}>
+                    {isLoading ? "Başvuru Gönderiliyor..." : "Takım Başvurusu Yap"}
+                  </Button>
+                </form>
               </TabsContent>
               <TabsContent value="business" className="space-y-4 pt-4 text-center">
                 <p className="text-sm text-gray-500 py-8">İşletme kayıtları şu an kapalıdır.</p>

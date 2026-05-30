@@ -59,11 +59,17 @@ export default function Navbar({ user }: NavbarProps) {
             >
               Etkinliklerim
             </Link>
-            <Link 
-              href="/clubs" 
+            <Link
+              href="/clubs"
               className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/clubs" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
             >
               Kulüpler
+            </Link>
+            <Link
+              href="/teams"
+              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/teams" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
+            >
+              Takımlar
             </Link>
             {(user?.role === "SUPER_ADMIN" || user?.role === "PROJECT_ADMIN" || user?.role === "ADMIN") && (
               <Link

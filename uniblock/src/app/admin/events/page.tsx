@@ -27,6 +27,7 @@ export default async function AdminEventsPage() {
   const avgAttendance = past.length > 0 ? Math.round(totalAttendance / past.length) : 0;
 
   const clubStats = events.reduce((acc: Record<string, { name: string; count: number; past: number }>, e) => {
+    if (!e.organizer) return acc;
     const id = e.organizer.id;
     if (!acc[id]) acc[id] = { name: e.organizer.name, count: 0, past: 0 };
     acc[id].count++;
@@ -125,7 +126,7 @@ export default async function AdminEventsPage() {
                 </div>
                 <div className="flex items-center gap-2 min-w-0">
                   <Shield className="w-3 h-3 text-emerald-400/50 shrink-0" />
-                  <span className="text-[11px] text-white/50 truncate">{event.organizer.name}</span>
+                  <span className="text-[11px] text-white/50 truncate">{event.organizer?.name ?? "—"}</span>
                 </div>
                 <div className="flex items-center gap-1 min-w-0">
                   <MapPin className="w-3 h-3 text-white/20 shrink-0" />

@@ -1,6 +1,6 @@
 # 🎓 UniBlock — Üniversite Kulüp, Etkinlik ve Topluluk Yönetim Platformu
 
-UniBlock, üniversite kulüpleri, öğrenci toplulukları, etkinlikler, anketler ve öğrenci etkileşimlerini tek bir çatı altında toplayan modern, esnek ve yüksek performanslı bir kampüs sosyal ağ platformudur.
+UniBlock, üniversite kulüpleri, yarışma/proje **takımları**, öğrenci toplulukları, etkinlikler, anketler ve öğrenci etkileşimlerini tek bir çatı altında toplayan modern, esnek ve yüksek performanslı bir kampüs sosyal ağ platformudur.
 
 ---
 
@@ -8,6 +8,7 @@ UniBlock, üniversite kulüpleri, öğrenci toplulukları, etkinlikler, anketler
 
 * **Hızlı Kayıt ve Otomatik Giriş (Instant Activation & Auto-Login):** Kayıt olan tüm öğrenci ve kulüpler doğrudan `ACTIVE` durumuna alınır. Yönetici onay kuyruğunda bekleme zorunluluğu yoktur; kayıt işlemi tamamlandığı an çerezler yazılarak otomatik olarak sisteme giriş yapılır ve kullanıcı kendi rolünün paneline yönlendirilir.
 * **Etkinlik ve Duyuru Yönetimi:** Kulüp yöneticileri duyuru (gönderi) yayınlayabilir, etkinlikler oluşturabilir ve etkinlikler iptal edildiğinde kulüp üyelerine otomatik bildirim yollayabilir.
+* **Takım Yönetimi (Teams):** Kulüplere paralel, tam özellikli takım yapısı. Takımların kendi üyelikleri (katılım/onay akışıyla), gönderileri, etkinlikleri, anketleri, yönetim kadrosu, ayarları ve şikâyet moderasyonu bulunur. Kayıt formundaki **Takım** sekmesinden `TEAM_ADMIN` (kaptan) olarak kayıt olunur. _Not: Takımlar performans skoru/liderlik tablosuna dâhil değildir._
 * **İnteraktif Anketler (Surveys):** Kulüpler anket oluşturabilir, öğrenciler oylamaya katılarak anket sonuçlarını anlık yüzdelerle görebilirler.
 * **Gelişmiş Yönetici Paneli (Admin Dashboard):**
   * **Kullanıcı Yönetimi:** Kayıtlı öğrencilerin ve kulüp başkanlarının listelenmesi, rollerinin güncellenmesi veya engellenmesi.
@@ -77,6 +78,7 @@ Uygulama varsayılan olarak **[http://localhost:3000](http://localhost:3000)** a
 | `SUPER_ADMIN` | En Üst Yetki | Sistemdeki tüm şikayetleri, kullanıcıları, kulüpleri ve ayarları yönetebilir. |
 | `ADMIN` | Orta Yetki | Kullanıcı, şikayet ve içerik moderasyonu yapabilir. |
 | `CLUB_ADMIN` | Kulüp Yetkisi | Yönettiği kulüp adına gönderi, anket, etkinlik oluşturabilir ve kulüp ayarlarını düzenleyebilir. |
+| `TEAM_ADMIN` | Takım Yetkisi | Yönettiği takım (kaptan) adına gönderi, anket, etkinlik oluşturabilir, üye ve yönetim kadrosunu yönetebilir, takım ayarlarını düzenleyebilir. |
 | `STUDENT` | Öğrenci Yetkisi | Topluluk akışını takip edebilir, gönderileri beğenebilir, yorum yapabilir ve anketlerde oy kullanabilir. |
 
 ### Varsayılan Admin Hesapları (Giriş Bilgileri):
@@ -94,9 +96,9 @@ uniblock/
 ├── public/                  # Statik dosyalar ve görseller
 ├── src/
 │   ├── app/                 # Next.js App Router sayfaları
-│   │   ├── (protected)/     # Giriş yapmış kullanıcıların eriştiği rotalar (feed, profile, clubs/manage)
+│   │   ├── (protected)/     # Giriş yapmış kullanıcıların eriştiği rotalar (feed, profile, clubs/manage, teams/manage)
 │   │   ├── (public)/        # Genel erişime açık sayfalar (login, register)
-│   │   ├── actions/         # Server Actions (Sunucu eylemleri: auth, admin, club, vb.)
+│   │   ├── actions/         # Server Actions (Sunucu eylemleri: auth, admin, club, team, vb.)
 │   │   ├── admin/           # Yönetici paneli alt sayfaları
 │   │   └── page.tsx         # Giriş yönlendirmeleri yapan ana sayfa
 │   ├── components/          # Ortak ve yeniden kullanılabilir arayüz bileşenleri (Navbar, Sidebar, ui/)

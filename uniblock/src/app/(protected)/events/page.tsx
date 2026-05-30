@@ -19,7 +19,8 @@ export default async function EventsPage() {
     include: {
       event: {
         include: {
-          organizer: true
+          organizer: true,
+          team: true
         }
       }
     }
@@ -30,7 +31,7 @@ export default async function EventsPage() {
     id: i.event?.id,
     title: i.event?.title,
     date: i.event?.date,
-    club: i.event?.organizer,
+    club: i.event?.organizer || i.event?.team,
     points: 100 // Default points for participation
   }));
 

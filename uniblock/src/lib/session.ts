@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 const INCLUDE = {
   ledClubs: true,
   clubMemberships: { include: { club: true } },
+  ledTeams: true,
+  teamMemberships: { include: { team: true } },
 } as const;
 
 export async function getCurrentUser() {

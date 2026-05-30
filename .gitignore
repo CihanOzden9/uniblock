@@ -72,3 +72,6 @@ desktop.ini
 **/*.tmp
 future/
 gelistirme_plani.md
+
+# Claude Code — makineye özel yerel ayarlar
+.claude/settings.local.json

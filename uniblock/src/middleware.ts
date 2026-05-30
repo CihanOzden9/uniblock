@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   // If the user is not logged in and trying to access protected routes, redirect to login
   if (!token && !isPublicRoute && !pathname.startsWith("/api/auth")) {
     // Exception for root if it is meant to be a public landing page
-    if (pathname === "/" || pathname.startsWith("/profile") || pathname.startsWith("/feed") || pathname.startsWith("/events") || pathname.startsWith("/clubs") || pathname.startsWith("/news") || pathname.startsWith("/admin")) {
+    if (pathname === "/" || pathname.startsWith("/profile") || pathname.startsWith("/feed") || pathname.startsWith("/events") || pathname.startsWith("/clubs") || pathname.startsWith("/teams") || pathname.startsWith("/news") || pathname.startsWith("/admin")) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL("/login", request.url));

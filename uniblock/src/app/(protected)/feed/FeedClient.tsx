@@ -39,7 +39,7 @@ export default function FeedClient({
   const feedPosts = useMemo(() => initialPosts.map(post => ({
     ...post,
     date: new Date(post.createdAt).toLocaleDateString("tr-TR"),
-    source: post.club?.name || post.author?.name || "Bilinmeyen Kaynak",
+    source: post.club?.name || post.team?.name || post.author?.name || "Bilinmeyen Kaynak",
     category: post.type === "NEWS" ? "Haber" : "Duyuru",
     excerpt: post.content.substring(0, 150) + "..."
   })), [initialPosts]);
@@ -290,7 +290,7 @@ export default function FeedClient({
                       <div className="w-2 h-2 bg-accent"></div>
                       <span className="text-[10px] font-semibold tracking-[0.15em] text-gray-400 uppercase">Anket</span>
                     </div>
-                    <span className="text-[10px] font-black tracking-[0.1em] text-accent uppercase">{survey.club?.name}</span>
+                    <span className="text-[10px] font-black tracking-[0.1em] text-accent uppercase">{survey.club?.name || survey.team?.name}</span>
                     <span className="text-[10px] font-medium tracking-[0.1em] text-gray-400 uppercase">{new Date(survey.createdAt).toLocaleDateString("tr-TR")}</span>
                   </div>
                   <div className="h-[1px] w-full bg-gray-100 mb-5"></div>
@@ -340,7 +340,7 @@ export default function FeedClient({
                       <User className="w-3.5 h-3.5 text-gray-400" />
                       <span className="text-[11px] font-bold text-gray-400">{survey.interactions?.length || 0} Katılımcı</span>
                     </div>
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{survey.club?.name}</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{survey.club?.name || survey.team?.name}</span>
                   </div>
                 </div>
               )) : (

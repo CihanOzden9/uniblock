@@ -11,9 +11,11 @@ interface AdminNavbarProps {
     name: string;
     role: string;
   } | null;
+  // Yönetim panelinin kök yolu — kulüp için "/clubs/manage", takım için "/teams/manage"
+  basePath?: string;
 }
 
-export default function AdminNavbar({ user }: AdminNavbarProps) {
+export default function AdminNavbar({ user, basePath = "/clubs/manage" }: AdminNavbarProps) {
   const pathname = usePathname();
 
   const initials = user?.name
@@ -27,25 +29,25 @@ export default function AdminNavbar({ user }: AdminNavbarProps) {
   return (
     <header className="fixed top-0 w-full h-20 bg-black z-50 flex items-center justify-between px-8 border-b-2 border-accent transition-all duration-300">
       <div className="flex items-center gap-12">
-        <Link href="/clubs/manage" className="font-heading font-extrabold text-[18px] tracking-tight text-white hover:text-accent transition-colors">
+        <Link href={basePath} className="font-heading font-extrabold text-[18px] tracking-tight text-white hover:text-accent transition-colors">
           Uni<span className="text-accent">.</span>Block <span className="ml-2 text-[10px] bg-accent text-white px-2 py-0.5 tracking-[0.2em] uppercase">Admin</span>
         </Link>
         <nav className="hidden md:flex items-center gap-8">
-          <Link 
-            href="/clubs/manage" 
-            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${pathname === "/clubs/manage" ? "text-accent" : "text-gray-400 hover:text-white"}`}
+          <Link
+            href={basePath}
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${pathname === basePath ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             <LayoutDashboard className="w-4 h-4" /> Panel
           </Link>
-          <Link 
-            href="/clubs/manage/stats" 
-            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/clubs/manage/stats" ? "text-accent" : "text-gray-400 hover:text-white"}`}
+          <Link
+            href={`${basePath}/stats`}
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === `${basePath}/stats` ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             İstatistikler
           </Link>
-          <Link 
-            href="/clubs/manage/settings" 
-            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === "/clubs/manage/settings" ? "text-accent" : "text-gray-400 hover:text-white"}`}
+          <Link
+            href={`${basePath}/settings`}
+            className={`text-[12px] font-bold tracking-[0.1em] uppercase transition-all ${pathname === `${basePath}/settings` ? "text-accent" : "text-gray-400 hover:text-white"}`}
           >
             Ayarlar
           </Link>

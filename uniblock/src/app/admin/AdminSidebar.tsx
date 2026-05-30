@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Building2,
   UserCog,
+  Users2,
   ExternalLink,
 } from "lucide-react";
 import { logout } from "@/app/actions/auth";
@@ -26,6 +27,7 @@ interface AdminSidebarProps {
   pendingCounts?: {
     users: number;
     clubs: number;
+    teams: number;
     complaints: number;
   };
 }
@@ -49,11 +51,17 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
           icon: GraduationCap,
           count: pendingCounts?.users 
         },
-        { 
-          href: "/admin/clubs", 
-          label: "Kulüpler", 
+        {
+          href: "/admin/clubs",
+          label: "Kulüpler",
           icon: Shield,
           count: pendingCounts?.clubs
+        },
+        {
+          href: "/admin/teams",
+          label: "Takımlar",
+          icon: Users2,
+          count: pendingCounts?.teams
         },
         { href: "/admin/events", label: "Etkinlikler", icon: Calendar },
         { 

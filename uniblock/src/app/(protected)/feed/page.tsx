@@ -10,6 +10,7 @@ export default async function FeedPage() {
     orderBy: { createdAt: "desc" },
     include: {
       club: true,
+      team: true,
       author: true
     }
   });
@@ -44,6 +45,7 @@ export default async function FeedPage() {
     take: 5,
     include: {
       club: true,
+      team: true,
       options: true
     }
   });

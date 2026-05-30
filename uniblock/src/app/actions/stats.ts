@@ -106,3 +106,88 @@ export async function getStatsData(clubId: string) {
     return { success: false, error: "İstatistikler yüklenirken bir hata oluştu." };
   }
 }
+
+// Takım istatistikleri — kulüp ile aynı yapıda, ANCAK sıralama/liderlik tablosu YOKTUR.
+export async function getTeamStatsData(teamId: string) {
+  try {
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+    // 1. Aylık etkinlikler (Toplam vs Takım)
+    const allEvents = await prisma.event.findMany({
+      where: {
+        date: { gte: sixMonthsAgo }
+      },
+      select: {
+        date: true,
+        teamId: true
+      }
+    });
+
+    const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+    const monthlyData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = months[d.getMonth()];
+
+      const totalInMonth = allEvents.filter(e =>
+        e.date.getMonth() === d.getMonth() && e.date.getFullYear() === d.getFullYear()
+      ).length;
+
+      const teamInMonth = allEvents.filter(e =>
+        e.teamId === teamId &&
+        e.date.getMonth() === d.getMonth() && e.date.getFullYear() === d.getFullYear()
+      ).length;
+
+      monthlyData.push({
+        name: monthLabel,
+        total: totalInMonth,
+        team: teamInMonth
+      });
+    }
+
+    // 2. Etkinlik payı
+    const totalEventsCount = await prisma.event.count();
+    const teamEventsCount = await prisma.event.count({
+      where: { teamId: teamId }
+    });
+
+    // 3. Katılımcı payı (RSVP)
+    const totalRSVPs = await prisma.interaction.count({
+      where: { type: "RSVP" }
+    });
+    const teamRSVPs = await prisma.interaction.count({
+      where: {
+        type: "RSVP",
+        event: { teamId: teamId }
+      }
+    });
+
+    // 4. Aktif üye sayısı
+    const activeMemberCount = await prisma.teamMember.count({
+      where: { teamId: teamId, status: "APPROVED" }
+    });
+
+    return {
+      success: true,
+      data: {
+        monthlyData,
+        activeMemberCount,
+        shares: {
+          events: {
+            team: teamEventsCount,
+            others: Math.max(0, totalEventsCount - teamEventsCount)
+          },
+          participants: {
+            team: teamRSVPs,
+            others: Math.max(0, totalRSVPs - teamRSVPs)
+          }
+        }
+      }
+    };
+  } catch (error) {
+    console.error("Team Stats Error:", error);
+    return { success: false, error: "İstatistikler yüklenirken bir hata oluştu." };
+  }
+}

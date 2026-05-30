@@ -13,7 +13,7 @@ export default async function AdminDashboardPage() {
   const [
     activeStudents, activeClubs, totalEvents, pendingComplaints,
     totalPosts, totalInteractions, recentUsers, recentClubs, recentReports,
-    pendingStudents, pendingClubs
+    pendingStudents, pendingClubs, activeTeams, pendingTeams
   ] = await Promise.all([
     prisma.user.count({ where: { role: "STUDENT", status: "ACTIVE" } }),
     prisma.club.count({ where: { status: "ACTIVE" } }),
@@ -38,15 +38,19 @@ export default async function AdminDashboardPage() {
     }),
     prisma.user.count({ where: { role: "STUDENT", status: "PENDING" } }),
     prisma.club.count({ where: { status: "PENDING" } }),
+    prisma.team.count({ where: { status: "ACTIVE" } }),
+    prisma.team.count({ where: { status: "PENDING" } }),
   ]);
 
   const stats = [
     { label: "Aktif Öğrenci", value: activeStudents, icon: Users, color: "from-blue-500/20 to-blue-600/20", iconColor: "text-blue-400", borderColor: "border-blue-500/20", href: "/admin/students" },
     { label: "Aktif Kulüp", value: activeClubs, icon: Shield, color: "from-emerald-500/20 to-emerald-600/20", iconColor: "text-emerald-400", borderColor: "border-emerald-500/20", href: "/admin/clubs" },
+    { label: "Aktif Takım", value: activeTeams, icon: Users, color: "from-teal-500/20 to-teal-600/20", iconColor: "text-teal-400", borderColor: "border-teal-500/20", href: "/admin/teams" },
     { label: "Etkinlik", value: totalEvents, icon: Calendar, color: "from-amber-500/20 to-amber-600/20", iconColor: "text-amber-400", borderColor: "border-amber-500/20", href: "/admin/events" },
     { label: "Bekleyen Şikâyet", value: pendingComplaints, icon: AlertTriangle, color: "from-red-500/20 to-red-600/20", iconColor: "text-red-400", borderColor: "border-red-500/20", href: "/admin/complaints" },
     { label: "Bekleyen Öğrenci", value: pendingStudents, icon: Clock, color: "from-orange-500/20 to-orange-600/20", iconColor: "text-orange-400", borderColor: "border-orange-500/20", href: "/admin/students?tab=pending" },
     { label: "Bekleyen Kulüp", value: pendingClubs, icon: Clock, color: "from-pink-500/20 to-pink-600/20", iconColor: "text-pink-400", borderColor: "border-pink-500/20", href: "/admin/clubs?tab=pending" },
+    { label: "Bekleyen Takım", value: pendingTeams, icon: Clock, color: "from-teal-500/20 to-teal-600/20", iconColor: "text-teal-400", borderColor: "border-teal-500/20", href: "/admin/teams" },
   ];
 
   function timeAgo(date: Date) {
