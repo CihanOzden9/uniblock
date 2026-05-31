@@ -22,55 +22,102 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+
+  /* Academic Pulse — birincil/vurgu yardımcı tonları */
+  --color-primary-container: var(--primary-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-accent-container: var(--accent-container);
+
+  /* Academic Pulse — tonal yüzey katmanları */
+  --color-surface: var(--surface);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.67);
   --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
+
+  /* Academic Pulse — aralık token'ları (8px baz grid) */
+  --spacing-base: 8px;
+  --spacing-stack-sm: 8px;
+  --spacing-stack-md: 16px;
+  --spacing-stack-lg: 32px;
+  --spacing-gutter: 24px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 32px;
 }
 
 :root {
-  /* Core Colors */
-  --black: #000000;
+  /* Academic Pulse — Core palette */
   --white: #ffffff;
-  --gray-100: #f5f5f5;
-  --gray-200: #e5e5e5;
-  --gray-400: #a3a3a3;
-  --gray-600: #525252;
-  --accent-green: #059669;
+  --edu-blue: #005bbf; /* primary */
+  --edu-blue-bright: #1a73e8; /* primary-container / hover */
+  --community-orange: #fd6c00; /* accent (sınırlı kullanım) */
+  --community-orange-deep: #9f4200; /* on/secondary text */
+
+  /* Tonal surfaces (mavi-soğuk) */
+  --surface: #f8f9ff;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e5eeff;
+  --surface-container-high: #dce9ff;
+  --surface-container-highest: #d3e4fe;
+  --on-surface: #0b1c30;
+  --on-surface-variant: #414754;
+  --outline: #727785;
+  --outline-variant: #c1c6d6;
+  --primary-container: var(--edu-blue-bright);
+  --primary-fixed: #d8e2ff;
+  --accent-container: #ffdbcb;
 
   /* Shadcn UI Mapping */
-  --background: var(--white);
-  --foreground: var(--black);
-  
+  --background: var(--surface);
+  --foreground: var(--on-surface);
+
   --card: var(--white);
-  --card-foreground: var(--black);
-  
+  --card-foreground: var(--on-surface);
+
   --popover: var(--white);
-  --popover-foreground: var(--black);
-  
-  /* Primary buttons use black */
-  --primary: var(--black);
+  --popover-foreground: var(--on-surface);
+
+  /* Birincil aksiyonlar: Eğitim Mavisi */
+  --primary: var(--edu-blue);
   --primary-foreground: var(--white);
-  
-  --secondary: var(--gray-100);
-  --secondary-foreground: var(--black);
-  
-  --muted: var(--gray-100);
-  --muted-foreground: var(--gray-600);
-  
-  /* Accent is green */
-  --accent: var(--accent-green);
+
+  --secondary: var(--surface-container-low);
+  --secondary-foreground: var(--on-surface);
+
+  --muted: var(--surface-container-low);
+  --muted-foreground: var(--on-surface-variant);
+
+  /* Vurgu: Topluluk Turuncusu */
+  --accent: var(--community-orange);
   --accent-foreground: var(--white);
-  
-  --border: var(--gray-200);
-  --input: var(--gray-200);
-  --ring: var(--accent-green);
-  
-  --radius: 0rem; /* Minimalist design, sharp edges */
+
+  --border: var(--outline-variant);
+  --input: var(--outline-variant);
+  --ring: var(--edu-blue);
+
+  --radius: 0.75rem; /* 12px — kart/konteyner yarıçapı */
 }
 
 @utility overflow-wrap-anywhere {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* Ambient gölge (Academic Pulse — Seviye 1/2) */
+@utility shadow-ambient {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.02), 0 2px 4px -1px rgb(0 0 0 / 0.02);
+}
+@utility shadow-ambient-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -2px rgb(0 0 0 / 0.06);
 }
 
 @keyframes ticker {
@@ -97,26 +144,27 @@
 
   /* Scrollbar */
   ::-webkit-scrollbar {
-    width: 3px;
+    width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #f5f5f5;
+    background: var(--surface-container-low);
   }
   ::-webkit-scrollbar-thumb {
-    background: #000000;
+    background: var(--outline-variant);
+    border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #059669;
+    background: var(--outline);
   }
 
   ::selection {
-    background-color: #059669;
+    background-color: var(--edu-blue);
     color: #ffffff;
   }
 
   /* Focus ring consistent */
   :focus-visible {
-    outline: 2px solid #059669;
+    outline: 2px solid var(--edu-blue);
     outline-offset: 2px;
   }
 }

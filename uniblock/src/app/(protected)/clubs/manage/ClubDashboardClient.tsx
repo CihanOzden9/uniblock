@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import AdminNavbar from "@/components/layout/AdminNavbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Settings, Crown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Crown } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
-import { addClubMember, removeClubMember, updateClubMemberRole, updateClubSettings, updateClubPassword, handleJoinRequest, checkUserExistence } from "@/app/actions/club";
+import { addClubMember, removeClubMember, updateClubMemberRole, handleJoinRequest, checkUserExistence } from "@/app/actions/club";
 import { toast } from "sonner";
 import { Trash2, Edit, PlusCircle, AlertCircle, ShieldAlert, ListFilter, Search } from "lucide-react";
 import { resolveReport } from "@/app/actions/interaction";
@@ -138,8 +137,6 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     setIsPending(false);
   }
 
-
-
   const openCreatePost = () => {
     setSheetMode("create_post");
     setEditingPost(null);
@@ -163,8 +160,8 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const pendingMembersCount = club.members?.filter((m: any) => m.status === "PENDING").length || 0;
   const boardMembers = approvedMembers.filter((m: any) => m.role !== "MEMBER");
   const regularMembers = approvedMembers.filter((m: any) => m.role === "MEMBER");
-  
-  const filteredMembers = approvedMembers.filter((m: any) => 
+
+  const filteredMembers = approvedMembers.filter((m: any) =>
     m.user.name?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
     m.user.email?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
     (m.user.faculty && m.user.faculty.toLowerCase().includes(memberSearchTerm.toLowerCase())) ||
@@ -196,9 +193,8 @@ export default function ClubDashboardClient({ club }: { club: any }) {
         toast.error(result.error);
       }
     } else if (boardAddMode === "email" && boardMemberEmail) {
-      // Önce kullanıcıyı kontrol et
       const check = await checkUserExistence(boardMemberEmail, club.id);
-      
+
       if (!check.success) {
         if (check.error === "USER_NOT_FOUND") {
           toast.error("Bu e-posta adresine sahip bir kullanıcı bulunamadı. Lütfen kullanıcının sisteme kayıtlı olduğundan emin olun.");
@@ -229,7 +225,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
   const handleEmailBlur = async () => {
     if (!boardMemberEmail || !boardMemberEmail.includes("@")) return;
-    
+
     setIsCheckingEmail(true);
     const result = await checkUserExistence(boardMemberEmail, club.id);
     if (result.success) {
@@ -257,43 +253,43 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     { id: "reports", label: "Şikayetler", icon: ShieldAlert },
   ];
 
+  const inputClass = "w-full h-11 px-4 rounded-lg border border-input bg-card text-[14px] text-on-surface outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors";
+  const labelClass = "text-[13px] font-medium text-on-surface";
+  const subTabBtn = (active: boolean) =>
+    `px-6 h-10 rounded-full text-[13px] font-medium transition-colors ${active ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"}`;
+
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <AdminNavbar user={{ name: club.leader.name || "Yönetici", role: club.leader.role }} />
 
-      <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-8">
-        
+      <main className="flex-1 pt-24 pb-12 px-4 md:px-8 max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-gutter">
+
         {/* Sidebar Nav */}
-        <aside className="w-full lg:w-[280px] shrink-0 flex flex-col gap-6">
-          <div className="bg-black text-white p-8 rounded-none border-b-8 border-accent">
-            <span className="text-[10px] font-black tracking-[0.2em] uppercase text-accent mb-2 block">
+        <aside className="w-full lg:w-[280px] shrink-0 flex flex-col gap-5">
+          <div className="bg-primary text-white p-6 rounded-xl shadow-ambient">
+            <span className="text-[11px] font-semibold tracking-wide uppercase text-white/70 mb-1.5 block">
               Yönetim Paneli
             </span>
-            <h1 className="font-heading text-2xl font-extrabold tracking-tight leading-tight uppercase">
+            <h1 className="font-heading text-xl font-bold tracking-tight leading-tight">
               {club.name}
             </h1>
           </div>
 
-          <nav className="flex flex-col gap-2">
+          <nav className="flex flex-col gap-1 bg-card rounded-xl border border-outline-variant shadow-ambient p-2">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              
-              const className = `flex items-center gap-4 px-6 py-4 rounded-none transition-all font-bold uppercase tracking-widest text-[11px] border-2 ${
-                isActive 
-                  ? "bg-accent border-accent text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] translate-x-[-2px] translate-y-[-2px]" 
-                  : "bg-white border-transparent text-gray-500 hover:border-black hover:text-black"
-              }`;
-
-
-
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={className}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium text-[14px] ${
+                    isActive
+                      ? "bg-primary-fixed text-primary"
+                      : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
+                  }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-[18px] h-[18px]" />
                   {tab.label}
                 </button>
               );
@@ -302,791 +298,542 @@ export default function ClubDashboardClient({ club }: { club: any }) {
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 bg-white border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-8 md:p-12 min-h-[600px]">
-          
-          {/* Header Action */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6 border-b-2 border-gray-100 pb-8">
+        <div className="flex-1 bg-card rounded-xl border border-outline-variant shadow-ambient p-6 md:p-10 min-h-[600px]">
+
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4 border-b border-outline-variant pb-6">
             <div>
-              <h2 className="font-heading text-3xl font-black uppercase tracking-tighter text-black">
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-on-surface">
                 {TABS.find(t => t.id === activeTab)?.label}
               </h2>
-              <p className="text-gray-500 font-medium text-sm mt-2">
+              <p className="text-on-surface-variant text-[14px] mt-1.5">
                 Kulüp performansınızı ve içeriklerinizi buradan yönetin.
               </p>
             </div>
           </div>
 
-          {/* Tab Contents Container */}
-          <div className="mt-8">
+          <div className="mt-6">
 
-          {/* Overview Tab Content */}
-          {activeTab === "overview" && (
-            <div className="space-y-12 animate-fade-in">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-[#f4f4f5]">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
-                        <TrendingUp className="w-5 h-5" />
+            {/* Overview */}
+            {activeTab === "overview" && (
+              <div className="space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                  <Card className="shadow-ambient">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="w-10 h-10 bg-primary-fixed text-primary flex items-center justify-center rounded-lg">
+                          <TrendingUp className="w-5 h-5" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-[color:var(--community-orange-deep)] bg-accent/15 px-2.5 py-1 rounded-full">Liderlik: #3</span>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-accent bg-accent/10 px-2 py-1">Liderlik: #3</span>
-                    </div>
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1">Performans Puanı</h3>
-                    <p className="font-heading text-4xl font-black tracking-tighter">{club.performanceScore}</p>
-                  </CardContent>
-                </Card>
+                      <h3 className="text-[13px] font-medium text-on-surface-variant mb-1">Performans Puanı</h3>
+                      <p className="font-heading text-4xl font-bold tracking-tight text-on-surface">{club.performanceScore}</p>
+                    </CardContent>
+                  </Card>
 
-                <Card className="rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-10 h-10 bg-accent text-white flex items-center justify-center rounded-none">
-                        <Users className="w-5 h-5" />
+                  <Card className="shadow-ambient">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="w-10 h-10 bg-accent/15 text-[color:var(--community-orange-deep)] flex items-center justify-center rounded-lg">
+                          <Users className="w-5 h-5" />
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1">Toplam Üye</h3>
-                    <p className="font-heading text-4xl font-black tracking-tighter">{approvedMembers.length}</p>
-                  </CardContent>
-                </Card>
+                      <h3 className="text-[13px] font-medium text-on-surface-variant mb-1">Toplam Üye</h3>
+                      <p className="font-heading text-4xl font-bold tracking-tight text-on-surface">{approvedMembers.length}</p>
+                    </CardContent>
+                  </Card>
 
-                <Card className="rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="w-10 h-10 bg-black text-white flex items-center justify-center rounded-none">
-                        <ListFilter className="w-5 h-5" />
+                  <Card className="shadow-ambient">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="w-10 h-10 bg-primary-fixed text-primary flex items-center justify-center rounded-lg">
+                          <ListFilter className="w-5 h-5" />
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-1">Aktif Anket</h3>
-                    <p className="font-heading text-4xl font-black tracking-tighter">{club.surveys?.length || 0}</p>
-                  </CardContent>
-                </Card>
-              </div>
+                      <h3 className="text-[13px] font-medium text-on-surface-variant mb-1">Aktif Anket</h3>
+                      <p className="font-heading text-4xl font-bold tracking-tight text-on-surface">{club.surveys?.length || 0}</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-              {/* Recent Activity List */}
-              <div>
-                <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight mb-6 flex items-center gap-3">
-                  Son İçerikler <span className="bg-accent text-white text-[10px] px-2 py-1 tracking-widest">YENİ</span>
-                </h3>
-                <div className="flex flex-col gap-4">
-                  {club.posts?.length > 0 ? (
-                    club.posts.map((post: any) => (
-                      <div key={post.id} className="group border-2 border-gray-100 hover:border-black p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[9px] font-black text-accent uppercase tracking-widest border border-accent/20 bg-accent/5 px-2 py-0.5">
-                              {post.type}
-                            </span>
-                            <span className="text-[10px] text-gray-400 font-bold tracking-widest">
-                              {new Date(post.createdAt).toLocaleDateString("tr-TR")}
-                            </span>
+                <div>
+                  <h3 className="font-heading text-xl font-bold tracking-tight mb-5 flex items-center gap-3">
+                    Son İçerikler <span className="bg-accent text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">YENİ</span>
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {club.posts?.length > 0 ? (
+                      club.posts.map((post: any) => (
+                        <div key={post.id} className="group border border-outline-variant hover:border-primary/40 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-ambient">
+                          <div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-[11px] font-semibold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full">{post.type}</span>
+                              <span className="text-[12px] text-on-surface-variant">{new Date(post.createdAt).toLocaleDateString("tr-TR")}</span>
+                            </div>
+                            <h4 className="font-semibold text-[16px] text-on-surface group-hover:text-primary transition-colors">{post.title}</h4>
                           </div>
-                          <h4 className="font-bold text-lg group-hover:text-accent transition-colors">{post.title}</h4>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => openEditPost(post)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-primary hover:text-primary"><Edit className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => handleDeletePost(post.id)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            onClick={() => openEditPost(post)}
-                            className="w-10 h-10 p-0 rounded-none border-2 border-gray-200 hover:border-black transition-all"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            onClick={() => handleDeletePost(post.id)}
-                            className="w-10 h-10 p-0 rounded-none border-2 border-gray-200 hover:border-red-500 hover:text-red-500 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                      ))
+                    ) : (
+                      <div className="p-8 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">
+                        Henüz içerik oluşturulmamış.
                       </div>
-                    ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Posts & Surveys */}
+            {activeTab === "posts" && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                  <button onClick={openCreatePost} className="group bg-primary p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
+                    <div className="w-10 h-10 bg-white/20 text-white flex items-center justify-center rounded-lg mb-4"><Plus className="w-5 h-5" /></div>
+                    <h3 className="text-white font-heading text-lg font-bold tracking-tight mb-1">Yeni Duyuru</h3>
+                    <p className="text-white/80 text-[13px]">Kampüs haberlerini paylaşın.</p>
+                  </button>
+
+                  <button onClick={openCreateSurvey} className="group bg-accent p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
+                    <div className="w-10 h-10 bg-white/20 text-white flex items-center justify-center rounded-lg mb-4"><ListFilter className="w-5 h-5" /></div>
+                    <h3 className="text-white font-heading text-lg font-bold tracking-tight mb-1">Yeni Anket</h3>
+                    <p className="text-white/80 text-[13px]">Görüşleri toplayın.</p>
+                  </button>
+                </div>
+
+                <div className="flex gap-1 bg-surface-container-low rounded-full p-1 w-fit">
+                  <button onClick={() => setContentSubTab("posts")} className={subTabBtn(contentSubTab === "posts")}>Duyurular</button>
+                  <button onClick={() => setContentSubTab("surveys")} className={subTabBtn(contentSubTab === "surveys")}>Anketler</button>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {contentSubTab === "posts" ? (
+                    club.posts?.length > 0 ? (
+                      club.posts.map((post: any) => (
+                        <div key={post.id} className="group border border-outline-variant hover:border-primary/40 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-ambient">
+                          <div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-[11px] font-semibold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full">{post.type}</span>
+                              <span className="text-[12px] text-on-surface-variant">{new Date(post.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <h4 className="font-semibold text-[16px] text-on-surface">{post.title}</h4>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => openEditPost(post)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-primary hover:text-primary"><Edit className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => handleDeletePost(post.id)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">Yayınlanmış duyuru bulunmuyor.</div>
+                    )
                   ) : (
-                    <div className="p-8 border-2 border-dashed border-gray-200 text-center text-gray-500 font-medium">
-                      Henüz içerik oluşturulmamış.
-                    </div>
+                    club.surveys?.length > 0 ? (
+                      club.surveys.map((survey: any) => (
+                        <div key={survey.id} className="group border border-outline-variant hover:border-primary/40 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-ambient">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-[11px] font-semibold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full">ANKET</span>
+                              <span className="text-[12px] text-on-surface-variant">{new Date(survey.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <h4 className="font-semibold text-[16px] text-on-surface">{survey.question}</h4>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {survey.options?.map((opt: any) => {
+                                const count = survey.interactions?.filter((i: any) => i.optionId === opt.id).length || 0;
+                                return (
+                                  <span key={opt.id} className="text-[11px] font-medium bg-surface-container-low border border-outline-variant px-2.5 py-1 rounded-full text-on-surface">
+                                    {opt.text}: <span className="text-accent font-semibold">{count}</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                            <p className="text-[12px] text-on-surface-variant mt-2">Toplam: {survey.interactions?.length || 0} Katılımcı</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" onClick={() => handleDeleteSurvey(survey.id)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">Henüz anket oluşturulmamış.</div>
+                    )
                   )}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Posts & Surveys Tab Content */}
-          {activeTab === "posts" && (
-            <div className="animate-fade-in space-y-10">
-              
-              {/* Content Action Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button 
-                  onClick={openCreatePost}
-                  className="group bg-accent p-6 text-left border-2 border-accent shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
-                >
-                  <div className="w-10 h-10 bg-white text-accent flex items-center justify-center mb-4">
-                    <Plus className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-white font-heading text-lg font-black uppercase tracking-tighter mb-1">Yeni Duyuru</h3>
-                  <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    Kampüs haberlerini paylaşın.
-                  </p>
-                </button>
+            {/* Members */}
+            {activeTab === "members" && (
+              <div className="space-y-8">
+                <div className="flex gap-1 bg-surface-container-low rounded-full p-1 w-fit">
+                  <button onClick={() => setMemberSubTab("list")} className={subTabBtn(memberSubTab === "list")}>Üye Listesi</button>
+                  <button onClick={() => setMemberSubTab("requests")} className={subTabBtn(memberSubTab === "requests")}>Gelen İstekler ({pendingMembersCount})</button>
+                </div>
 
-                <button 
-                  onClick={openCreateSurvey}
-                  className="group bg-black p-6 text-left border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
-                >
-                  <div className="w-10 h-10 bg-accent text-white flex items-center justify-center mb-4">
-                    <ListFilter className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-white font-heading text-lg font-black uppercase tracking-tighter mb-1">Yeni Anket</h3>
-                  <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    Görüşleri toplayın.
-                  </p>
-                </button>
-              </div>
-
-              <div className="h-[2px] bg-gray-100 w-full"></div>
-
-              <div className="flex border-2 border-black h-12 w-fit">
-                <button 
-                  onClick={() => setContentSubTab("posts")}
-                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all ${contentSubTab === "posts" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                >
-                  Duyurular
-                </button>
-                <button 
-                  onClick={() => setContentSubTab("surveys")}
-                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all border-l-2 border-black ${contentSubTab === "surveys" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                >
-                  Anketler
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                {contentSubTab === "posts" ? (
-                  club.posts?.length > 0 ? (
-                    club.posts.map((post: any) => (
-                      <div key={post.id} className="group border-2 border-gray-100 hover:border-black p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[9px] font-black text-accent uppercase tracking-widest border border-accent/20 bg-accent/5 px-2 py-0.5">{post.type}</span>
-                            <span className="text-[10px] text-gray-400 font-bold tracking-widest">{new Date(post.createdAt).toLocaleDateString()}</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+                  <div className="lg:col-span-2 space-y-5">
+                    {memberSubTab === "list" ? (
+                      <>
+                        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                          <h3 className="font-heading text-lg font-bold tracking-tight flex items-center gap-3">
+                            Aktif Üyeler <span className="bg-primary-fixed text-primary text-[11px] px-2.5 py-0.5 rounded-full font-semibold">{filteredMembers.length}</span>
+                          </h3>
+                          <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                            <input
+                              type="text"
+                              placeholder="Üye ara (ad, bölüm...)"
+                              value={memberSearchTerm}
+                              onChange={(e) => setMemberSearchTerm(e.target.value)}
+                              className="w-full h-10 pl-10 pr-4 rounded-full border border-input bg-card text-[13px] text-on-surface outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors"
+                            />
                           </div>
-                          <h4 className="font-bold text-lg">{post.title}</h4>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" onClick={() => openEditPost(post)} className="w-10 h-10 p-0 rounded-none border-2 border-gray-200 hover:border-black">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="outline" onClick={() => handleDeletePost(post.id)} className="w-10 h-10 p-0 rounded-none border-2 border-gray-200 hover:border-red-500 hover:text-red-500">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold italic uppercase tracking-widest text-xs">
-                      Yayınlanmış duyuru bulunmuyor.
-                    </div>
-                  )
-                ) : (
-                  club.surveys?.length > 0 ? (
-                    club.surveys.map((survey: any) => (
-                      <div key={survey.id} className="group border-2 border-gray-100 hover:border-black p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest border border-blue-500/20 bg-blue-500/5 px-2 py-0.5">ANKET</span>
-                            <span className="text-[10px] text-gray-400 font-bold tracking-widest">{new Date(survey.createdAt).toLocaleDateString()}</span>
-                          </div>
-                          <h4 className="font-bold text-lg">{survey.question}</h4>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {survey.options?.map((opt: any) => {
-                              const count = survey.interactions?.filter((i: any) => i.optionId === opt.id).length || 0;
-                              return (
-                                <span key={opt.id} className="text-[10px] font-bold bg-gray-50 border border-gray-200 px-2 py-1 uppercase">
-                                  {opt.text}: <span className="text-accent">{count}</span>
-                                </span>
-                              );
-                            })}
-                          </div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase mt-2">
-                            Toplam: {survey.interactions?.length || 0} Katılımcı
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" onClick={() => handleDeleteSurvey(survey.id)} className="w-10 h-10 p-0 rounded-none border-2 border-gray-200 hover:border-red-500 hover:text-red-500">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold italic uppercase tracking-widest text-xs">
-                      Henüz anket oluşturulmamış.
-                    </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
 
-          {/* Members Tab Content */}
-          {activeTab === "members" && (
-            <div className="space-y-8 animate-fade-in">
-              <div className="flex border-2 border-black h-12 w-fit">
-                <button 
-                  onClick={() => setMemberSubTab("list")}
-                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all ${memberSubTab === "list" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                >
-                  Üye Listesi
-                </button>
-                <button 
-                  onClick={() => setMemberSubTab("requests")}
-                  className={`px-8 font-bold uppercase tracking-widest text-[10px] transition-all border-l-2 border-black ${memberSubTab === "requests" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                >
-                  Gelen İstekler ({pendingMembersCount})
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {/* Member List / Requests */}
-                <div className="lg:col-span-2 space-y-6">
-                  {memberSubTab === "list" ? (
-                    <>
-                      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-8">
-                        <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
-                          Aktif Üyeler <span className="bg-black text-white text-[10px] px-2 py-1 tracking-widest">{filteredMembers.length}</span>
-                        </h3>
-                        
-                        <div className="relative w-full md:w-64">
-                          <input 
-                            type="text"
-                            placeholder="Üye Ara (Ad, Bölüm...)"
-                            value={memberSearchTerm}
-                            onChange={(e) => setMemberSearchTerm(e.target.value)}
-                            className="w-full h-10 px-4 pr-10 rounded-none border-2 border-black text-[11px] font-bold uppercase tracking-widest outline-none focus:border-accent transition-colors"
-                          />
-                          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-4">
-                        {filteredMembers.length > 0 ? (
-                          filteredMembers.map((member: any) => (
-                            <div key={member.id} className="border-2 border-gray-100 p-4 flex items-center justify-between group/member">
-                              <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 bg-accent/10 text-accent flex items-center justify-center font-bold border-2 border-accent/20">
-                                  {member.user.name?.[0] || "U"}
-                                </div>
-                                <div>
-                                  <p className="font-bold text-sm">{member.user.name}</p>
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{member.role}</p>
-                                    <button 
-                                      onClick={() => handleRoleChange(member.userId, member.role)}
-                                      className="text-[9px] text-accent font-black uppercase hover:underline"
-                                    >
-                                      [Değiştir]
-                                    </button>
+                        <div className="flex flex-col gap-3">
+                          {filteredMembers.length > 0 ? (
+                            filteredMembers.map((member: any) => (
+                              <div key={member.id} className="border border-outline-variant rounded-xl p-4 flex items-center justify-between group/member hover:shadow-ambient transition-all">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold">{member.user.name?.[0] || "U"}</div>
+                                  <div>
+                                    <p className="font-semibold text-[14px] text-on-surface">{member.user.name}</p>
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-[12px] text-on-surface-variant">{member.role}</p>
+                                      <button onClick={() => handleRoleChange(member.userId, member.role)} className="text-[11px] text-primary font-semibold hover:underline">[Değiştir]</button>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <span className="text-[10px] text-gray-400 font-medium hidden sm:block">Katılım: {new Date(member.joinedAt).toLocaleDateString()}</span>
-                                <Button 
-                                  variant="ghost" 
-                                  onClick={() => handleRemoveMember(member.userId)}
-                                  className="w-8 h-8 p-0 text-gray-300 hover:text-red-500 opacity-0 group-hover/member:opacity-100 transition-all"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-medium italic">
-                            Henüz kayıtlı üye bulunmamaktadır.
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
-                        Bekleyen İstekler <span className="bg-accent text-white text-[10px] px-2 py-1 tracking-widest">{club.members?.filter((m: any) => m.status === "PENDING").length || 0}</span>
-                      </h3>
-                      <div className="flex flex-col gap-4">
-                        {club.members?.filter((m: any) => m.status === "PENDING").length > 0 ? (
-                          club.members.filter((m: any) => m.status === "PENDING").map((request: any) => (
-                            <div key={request.id} className="border-2 border-black p-6 flex items-center justify-between bg-gray-50">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold">
-                                  {request.user.name?.[0] || "U"}
-                                </div>
-                                <div>
-                                  <p className="font-bold text-sm">{request.user.name}</p>
-                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{request.user.email}</p>
-                                  <p className="text-[9px] text-accent font-black uppercase mt-1">{request.user.faculty} / {request.user.department}</p>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-[12px] text-on-surface-variant hidden sm:block">Katılım: {new Date(member.joinedAt).toLocaleDateString()}</span>
+                                  <Button variant="ghost" onClick={() => handleRemoveMember(member.userId)} className="w-9 h-9 p-0 rounded-full text-on-surface-variant hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover/member:opacity-100 transition-all"><Trash2 className="w-4 h-4" /></Button>
                                 </div>
                               </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  onClick={() => onHandleJoinRequest(request.id, "REJECTED")}
-                                  variant="outline"
-                                  className="h-10 rounded-none border-2 border-black font-bold uppercase tracking-widest text-[9px] hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
-                                >
-                                  Reddet
-                                </Button>
-                                <Button 
-                                  onClick={() => onHandleJoinRequest(request.id, "APPROVED")}
-                                  className="h-10 rounded-none bg-black text-white border-2 border-black font-bold uppercase tracking-widest text-[9px] hover:bg-accent hover:border-accent transition-all shadow-[4px_4px_0px_0px_rgba(255,59,48,1)] hover:shadow-none"
-                                >
-                                  Onayla
-                                </Button>
+                            ))
+                          ) : (
+                            <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">Henüz kayıtlı üye bulunmamaktadır.</div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="font-heading text-lg font-bold tracking-tight flex items-center gap-3">
+                          Bekleyen İstekler <span className="bg-accent/15 text-[color:var(--community-orange-deep)] text-[11px] px-2.5 py-0.5 rounded-full font-semibold">{pendingMembersCount}</span>
+                        </h3>
+                        <div className="flex flex-col gap-3">
+                          {club.members?.filter((m: any) => m.status === "PENDING").length > 0 ? (
+                            club.members.filter((m: any) => m.status === "PENDING").map((request: any) => (
+                              <div key={request.id} className="border border-outline-variant rounded-xl p-5 flex items-center justify-between bg-surface-container-low">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold">{request.user.name?.[0] || "U"}</div>
+                                  <div>
+                                    <p className="font-semibold text-[14px] text-on-surface">{request.user.name}</p>
+                                    <p className="text-[12px] text-on-surface-variant">{request.user.email}</p>
+                                    <p className="text-[11px] text-primary font-medium mt-0.5">{request.user.faculty} / {request.user.department}</p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button onClick={() => onHandleJoinRequest(request.id, "REJECTED")} variant="outline" className="h-10 rounded-full border-outline-variant text-[13px] font-semibold hover:border-destructive hover:text-destructive transition-all">Reddet</Button>
+                                  <Button onClick={() => onHandleJoinRequest(request.id, "APPROVED")} className="h-10 rounded-full text-[13px] font-semibold">Onayla</Button>
+                                </div>
                               </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">
-                            Bekleyen katılım isteği bulunmuyor.
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
+                            ))
+                          ) : (
+                            <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">Bekleyen katılım isteği bulunmuyor.</div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
 
-                {/* Add Member Form */}
-                <div className="bg-gray-50 border-2 border-black p-8 h-fit shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  <h3 className="font-heading text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-2">
-                    <PlusCircle className="w-5 h-5 text-accent" /> Manuel Ekle
-                  </h3>
-                  <form action={handleAddMember} className="space-y-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Öğrenci E-posta</label>
-                      <input 
-                        name="email"
-                        required
-                        placeholder="ogrenci@universite.edu.tr"
-                        className="w-full h-10 px-4 rounded-none border-2 border-black focus:ring-accent outline-none text-sm"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Rol</label>
-                      <select 
-                        name="role"
-                        className="w-full h-10 px-4 rounded-none border-2 border-black bg-white focus:ring-accent outline-none text-sm font-semibold"
-                      >
-                        <option value="MEMBER">Üye</option>
-                        <option value="BOARD_MEMBER">Yönetim Kurulu</option>
-                      </select>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      disabled={isPending}
-                      className="w-full mt-4 rounded-none bg-black text-white hover:bg-accent border-2 border-black hover:border-accent transition-all font-bold uppercase tracking-widest text-[10px] h-10"
-                    >
-                      {isPending ? "Ekleniyor..." : "Kulübe Ekle"}
-                    </Button>
-                  </form>
+                  {/* Add Member Form */}
+                  <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6 h-fit">
+                    <h3 className="font-heading text-lg font-bold tracking-tight mb-5 flex items-center gap-2"><PlusCircle className="w-5 h-5 text-accent" /> Manuel Ekle</h3>
+                    <form action={handleAddMember} className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>Öğrenci E-posta</label>
+                        <input name="email" required placeholder="ogrenci@universite.edu.tr" className={inputClass} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>Rol</label>
+                        <select name="role" className={inputClass + " font-medium"}>
+                          <option value="MEMBER">Üye</option>
+                          <option value="BOARD_MEMBER">Yönetim Kurulu</option>
+                        </select>
+                      </div>
+                      <Button type="submit" disabled={isPending} className="w-full mt-2 rounded-full text-[13px] font-semibold h-10">{isPending ? "Ekleniyor..." : "Kulübe Ekle"}</Button>
+                    </form>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Management Tab Content */}
-          {activeTab === "management" && (
-            <div className="space-y-10 animate-fade-in">
-              {/* Current Board */}
-              <div>
-                <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3 mb-6">
-                  <Crown className="w-5 h-5 text-accent" />
-                  Yönetim Kadrosu
-                  <span className="bg-accent text-white text-[10px] px-2 py-1 tracking-widest">{boardMembers.length + 1}</span>
+            {/* Management */}
+            {activeTab === "management" && (
+              <div className="space-y-8">
+                <div>
+                  <h3 className="font-heading text-lg font-bold tracking-tight flex items-center gap-3 mb-5">
+                    <Crown className="w-5 h-5 text-accent" /> Yönetim Kadrosu
+                    <span className="bg-accent/15 text-[color:var(--community-orange-deep)] text-[11px] px-2.5 py-0.5 rounded-full font-semibold">{boardMembers.length + 1}</span>
+                  </h3>
+
+                  <div className="flex flex-col gap-3">
+                    <div className="border border-accent/40 rounded-xl p-5 flex items-center justify-between bg-accent/5">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg">{club.leader.name?.[0] || "B"}</div>
+                        <div>
+                          <p className="font-semibold text-[14px] text-on-surface">{club.leader.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[11px] font-semibold text-[color:var(--community-orange-deep)] bg-accent/15 px-2.5 py-0.5 rounded-full">BAŞKAN</span>
+                            {club.leader.department && <span className="text-[12px] text-on-surface-variant">{club.leader.department}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[12px] text-on-surface-variant">Değiştirilemez</span>
+                    </div>
+
+                    {boardMembers.map((member: any) => (
+                      <div key={member.id} className="border border-outline-variant hover:border-primary/40 rounded-xl p-5 flex items-center justify-between group/board transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">{member.user.name?.[0] || "Y"}</div>
+                          <div>
+                            <p className="font-semibold text-[14px] text-on-surface">{member.user.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[11px] font-semibold text-primary bg-primary-fixed px-2.5 py-0.5 rounded-full">{member.role}</span>
+                              {member.user.department && <span className="text-[12px] text-on-surface-variant">{member.user.department}</span>}
+                            </div>
+                            <p className="text-[12px] text-on-surface-variant mt-1">{member.user.email}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" onClick={() => handleRemoveFromBoard(member.userId)} className="h-9 rounded-full text-[12px] font-semibold text-on-surface-variant hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover/board:opacity-100 transition-all">Görevden Al</Button>
+                      </div>
+                    ))}
+
+                    {boardMembers.length === 0 && (
+                      <div className="p-8 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium text-[14px]">Henüz yönetim kadrosuna atanmış üye bulunmuyor.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Add Board Member */}
+                <div className="bg-surface-container-low border border-outline-variant rounded-xl p-6">
+                  <h3 className="font-heading text-lg font-bold tracking-tight mb-5 flex items-center gap-2"><PlusCircle className="w-5 h-5 text-accent" /> Yönetici Ata</h3>
+
+                  <div className="space-y-5">
+                    <div className="flex gap-1 bg-card rounded-full p-1 w-fit border border-outline-variant">
+                      <button onClick={() => setBoardAddMode("existing")} className={subTabBtn(boardAddMode === "existing")}>Mevcut Üyeden</button>
+                      <button onClick={() => setBoardAddMode("email")} className={subTabBtn(boardAddMode === "email")}>E-posta ile</button>
+                    </div>
+
+                    {boardAddMode === "existing" ? (
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>Üye Seç</label>
+                        <select value={selectedMemberForBoard} onChange={(e) => setSelectedMemberForBoard(e.target.value)} className={inputClass + " font-medium"}>
+                          <option value="">-- Üye seçin --</option>
+                          {regularMembers.map((m: any) => (
+                            <option key={m.userId} value={m.userId}>{m.user.name} ({m.user.email})</option>
+                          ))}
+                        </select>
+                        {regularMembers.length === 0 && <p className="text-[12px] text-on-surface-variant mt-1">Atanabilecek üye bulunmuyor. Önce kulübe üye ekleyin.</p>}
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>E-posta Adresi</label>
+                        <input
+                          type="email"
+                          value={boardMemberEmail}
+                          onChange={(e) => { setBoardMemberEmail(e.target.value); setEmailCheckResult(null); }}
+                          onBlur={handleEmailBlur}
+                          placeholder="yonetici@universite.edu.tr"
+                          className={`w-full h-11 px-4 rounded-lg border bg-card text-[14px] outline-none focus:ring-2 focus:ring-ring/50 transition-colors ${
+                            emailCheckResult?.exists === false ? "border-destructive bg-destructive/5" :
+                            emailCheckResult?.exists === true ? "border-emerald-500 bg-emerald-50" : "border-input focus:border-ring"
+                          }`}
+                        />
+                        {isCheckingEmail && <p className="text-[12px] font-medium text-on-surface-variant mt-1 animate-pulse">Kontrol ediliyor...</p>}
+                        {emailCheckResult?.exists === false && (
+                          <div className="flex items-center gap-2 mt-2 p-2.5 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            <p className="text-[12px] font-semibold leading-tight">Bu e-posta adresi UniBlock sisteminde kayıtlı değil!</p>
+                          </div>
+                        )}
+                        {emailCheckResult?.exists === true && (
+                          <div className="flex items-center gap-2 mt-2 p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <p className="text-[12px] font-semibold leading-tight">
+                              Kullanıcı Bulundu: <span className="text-on-surface">{emailCheckResult.user.name}</span>
+                              {emailCheckResult.isMember && <span className="ml-2 text-on-surface-variant">(Zaten Üye: {emailCheckResult.memberRole})</span>}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Yönetim Rolü</label>
+                      <select value={boardRoleSelect} onChange={(e) => setBoardRoleSelect(e.target.value)} className={inputClass + " font-medium"}>
+                        {PREDEFINED_ROLES.map((role) => (<option key={role} value={role}>{role}</option>))}
+                        <option value="DİĞER">DİĞER (Manuel Giriş)</option>
+                      </select>
+                    </div>
+
+                    {boardRoleSelect === "DİĞER" && (
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>Manuel Rol Adı</label>
+                        <input type="text" value={customRoleInput} onChange={(e) => setCustomRoleInput(e.target.value)} placeholder="Örn: Araştırma Koordinatörü" className={inputClass} />
+                      </div>
+                    )}
+
+                    <Button onClick={handleBoardAssignment} disabled={isPending} className="w-full rounded-full text-[13px] font-semibold h-10 bg-accent text-white hover:bg-accent/90">{isPending ? "Atanıyor..." : "Yönetici Olarak Ata"}</Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Events */}
+            {activeTab === "events" && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-6"><Calendar className="w-8 h-8 text-primary" /></div>
+                <h3 className="font-heading text-2xl font-bold tracking-tight mb-2">Etkinlik Yönetimi</h3>
+                <p className="text-on-surface-variant max-w-md text-[14px]">Etkinlik takvimi ve QR kodlu katılım sistemi yakında eklenecek.</p>
+              </div>
+            )}
+
+            {/* Reports */}
+            {activeTab === "reports" && (
+              <div className="space-y-6">
+                <h3 className="font-heading text-lg font-bold tracking-tight flex items-center gap-3">
+                  Gelen Şikayetler <span className="bg-destructive/10 text-destructive text-[11px] px-2.5 py-0.5 rounded-full font-semibold">{club.reports?.filter((r: any) => r.status === "PENDING").length || 0} BEKLEYEN</span>
                 </h3>
 
                 <div className="flex flex-col gap-4">
-                  {/* Leader - always shown */}
-                  <div className="border-2 border-accent p-5 flex items-center justify-between bg-accent/5">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-accent text-white flex items-center justify-center font-bold text-lg">
-                        {club.leader.name?.[0] || "B"}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">{club.leader.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] font-black text-accent uppercase tracking-widest bg-accent/10 border border-accent/20 px-2 py-0.5">
-                            BAŞKAN
-                          </span>
-                          {club.leader.department && (
-                            <span className="text-[9px] text-gray-400 font-bold">{club.leader.department}</span>
+                  {club.reports?.length > 0 ? (
+                    club.reports.map((report: any) => (
+                      <div key={report.id} className={`border rounded-xl p-6 flex flex-col gap-4 transition-all ${report.status === "PENDING" ? "border-destructive/20 bg-destructive/5" : "border-outline-variant bg-card opacity-70"}`}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                            <AlertCircle className={`w-5 h-5 ${report.status === "PENDING" ? "text-destructive" : "text-on-surface-variant"}`} />
+                            <div>
+                              <span className="text-[11px] font-medium text-on-surface-variant">Şikayet Nedeni</span>
+                              <p className="font-semibold text-[14px] text-on-surface">{report.reason || "Belirtilmemiş"}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[11px] text-on-surface-variant block">Tarih</span>
+                            <span className="text-[12px] font-semibold text-on-surface">{new Date(report.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-card border border-outline-variant p-4 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-semibold bg-primary text-white px-2 py-0.5 rounded-full">Şikayet Edilen Yorum</span>
+                            <span className="text-[11px] text-on-surface-variant italic">"{report.interaction.post.title}" duyurusunda</span>
+                          </div>
+                          <p className="text-[14px] text-on-surface mb-2">"{report.interaction.content}"</p>
+                          <p className="text-[12px] text-on-surface-variant">Yorum Sahibi: {report.interaction.user.name}</p>
+                        </div>
+
+                        <div className="flex justify-between items-center pt-3 border-t border-outline-variant">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[12px] text-on-surface-variant">Bildiren:</span>
+                            <span className="text-[12px] font-semibold text-on-surface">{report.reporter.name}</span>
+                          </div>
+
+                          {report.status === "PENDING" ? (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleResolveReport(report.id, "DISMISSED")} className="px-4 py-2 text-[12px] font-semibold rounded-full border border-outline-variant hover:border-on-surface transition-all">Reddet</button>
+                              <button onClick={() => handleResolveReport(report.id, "RESOLVED")} className="px-4 py-2 text-[12px] font-semibold rounded-full bg-primary text-white hover:bg-primary-container transition-all">Çözüldü Olarak İşaretle</button>
+                            </div>
+                          ) : (
+                            <span className={`text-[11px] font-semibold rounded-full px-2.5 py-1 ${report.status === "RESOLVED" ? "bg-emerald-100 text-emerald-700" : "bg-surface-container-high text-on-surface-variant"}`}>
+                              {report.status === "RESOLVED" ? "ÇÖZÜLDÜ" : "REDDEDİLDİ"}
+                            </span>
                           )}
                         </div>
                       </div>
-                    </div>
-                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Değiştirilemez</span>
-                  </div>
-
-                  {/* Board Members */}
-                  {boardMembers.map((member: any) => (
-                    <div key={member.id} className="border-2 border-gray-200 hover:border-black p-5 flex items-center justify-between group/board transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold text-lg">
-                          {member.user.name?.[0] || "Y"}
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm">{member.user.name}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-2 py-0.5">
-                              {member.role}
-                            </span>
-                            {member.user.department && (
-                              <span className="text-[9px] text-gray-400 font-bold">{member.user.department}</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-gray-400 font-medium mt-1">{member.user.email}</p>
-                        </div>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => handleRemoveFromBoard(member.userId)}
-                        className="h-8 rounded-none text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover/board:opacity-100 transition-all"
-                      >
-                        Görevden Al
-                      </Button>
-                    </div>
-                  ))}
-
-                  {boardMembers.length === 0 && (
-                    <div className="p-8 border-2 border-dashed border-gray-200 text-center text-gray-400 font-medium text-sm">
-                      Henüz yönetim kadrosuna atanmış üye bulunmuyor.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Add Board Member Form */}
-              <div className="bg-gray-50 border-2 border-black p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                <h3 className="font-heading text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-2">
-                  <PlusCircle className="w-5 h-5 text-accent" /> Yönetici Ata
-                </h3>
-
-                <div className="space-y-6">
-                  {/* Mode Switch */}
-                  <div className="flex border-2 border-black h-10 w-fit">
-                    <button 
-                      onClick={() => setBoardAddMode("existing")}
-                      className={`px-6 font-bold uppercase tracking-widest text-[9px] transition-all ${boardAddMode === "existing" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                    >
-                      Mevcut Üyeden
-                    </button>
-                    <button 
-                      onClick={() => setBoardAddMode("email")}
-                      className={`px-6 font-bold uppercase tracking-widest text-[9px] transition-all border-l-2 border-black ${boardAddMode === "email" ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"}`}
-                    >
-                      E-posta ile
-                    </button>
-                  </div>
-
-                  {/* Member Selection */}
-                  {boardAddMode === "existing" ? (
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Üye Seç</label>
-                      <select 
-                        value={selectedMemberForBoard}
-                        onChange={(e) => setSelectedMemberForBoard(e.target.value)}
-                        className="w-full h-10 px-4 rounded-none border-2 border-black bg-white focus:ring-accent outline-none text-sm font-semibold"
-                      >
-                        <option value="">-- Üye seçin --</option>
-                        {regularMembers.map((m: any) => (
-                          <option key={m.userId} value={m.userId}>{m.user.name} ({m.user.email})</option>
-                        ))}
-                      </select>
-                      {regularMembers.length === 0 && (
-                        <p className="text-[10px] text-gray-400 font-medium mt-1">Atanabilecek üye bulunmuyor. Önce kulübe üye ekleyin.</p>
-                      )}
-                    </div>
+                    ))
                   ) : (
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">E-posta Adresi</label>
-                      <input 
-                        type="email"
-                        value={boardMemberEmail}
-                        onChange={(e) => {
-                          setBoardMemberEmail(e.target.value);
-                          setEmailCheckResult(null);
-                        }}
-                        onBlur={handleEmailBlur}
-                        placeholder="yonetici@universite.edu.tr"
-                        className={`w-full h-10 px-4 rounded-none border-2 focus:ring-accent outline-none text-sm transition-colors ${
-                          emailCheckResult?.exists === false ? "border-red-500 bg-red-50" : 
-                          emailCheckResult?.exists === true ? "border-green-500 bg-green-50" : "border-black"
-                        }`}
-                      />
-                      {isCheckingEmail && <p className="text-[9px] font-bold text-gray-400 mt-1 animate-pulse">Kontrol ediliyor...</p>}
-                      {emailCheckResult?.exists === false && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-red-100 border border-red-200 text-red-600 rounded-none">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <p className="text-[10px] font-black uppercase leading-tight">
-                            Bu e-posta adresi UniBlock sisteminde kayıtlı değil!
-                          </p>
-                        </div>
-                      )}
-                      {emailCheckResult?.exists === true && (
-                        <div className="flex items-center gap-2 mt-2 p-2 bg-green-100 border border-green-200 text-green-600 rounded-none">
-                          <div className="w-2 h-2 rounded-full bg-green-500" />
-                          <p className="text-[10px] font-black uppercase leading-tight">
-                            Kullanıcı Bulundu: <span className="text-black">{emailCheckResult.user.name}</span>
-                            {emailCheckResult.isMember && <span className="ml-2 text-gray-500">(Zaten Üye: {emailCheckResult.memberRole})</span>}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center text-on-surface-variant font-medium">Henüz şikayet bulunmuyor.</div>
                   )}
-
-                  {/* Role Selection */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Yönetim Rolü</label>
-                    <select 
-                      value={boardRoleSelect}
-                      onChange={(e) => setBoardRoleSelect(e.target.value)}
-                      className="w-full h-10 px-4 rounded-none border-2 border-black bg-white focus:ring-accent outline-none text-sm font-semibold"
-                    >
-                      {PREDEFINED_ROLES.map((role) => (
-                        <option key={role} value={role}>{role}</option>
-                      ))}
-                      <option value="DİĞER">DİĞER (Manuel Giriş)</option>
-                    </select>
-                  </div>
-
-                  {/* Custom Role Input */}
-                  {boardRoleSelect === "DİĞER" && (
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Manuel Rol Adı</label>
-                      <input 
-                        type="text"
-                        value={customRoleInput}
-                        onChange={(e) => setCustomRoleInput(e.target.value)}
-                        placeholder="Örn: Araştırma Koordinatörü"
-                        className="w-full h-10 px-4 rounded-none border-2 border-black focus:ring-accent outline-none text-sm"
-                      />
-                    </div>
-                  )}
-
-                  <Button 
-                    onClick={handleBoardAssignment}
-                    disabled={isPending}
-                    className="w-full mt-2 rounded-none bg-accent text-white hover:bg-black border-2 border-accent hover:border-black transition-all font-bold uppercase tracking-widest text-[10px] h-10"
-                  >
-                    {isPending ? "Atanıyor..." : "Yönetici Olarak Ata"}
-                  </Button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Events Tab Placeholder */}
-          {activeTab === "events" && (
-            <div className="animate-fade-in flex flex-col items-center justify-center py-20 text-center">
-              <Calendar className="w-16 h-16 text-gray-200 mb-6" />
-              <h3 className="font-heading text-2xl font-extrabold uppercase tracking-tight mb-2">Etkinlik Yönetimi</h3>
-              <p className="text-gray-500 mb-8 max-w-md">Etkinlik takvimi ve QR kodlu katılım sistemi yakında eklenecek.</p>
-            </div>
-          )}
-
-          {/* Reports Tab Content */}
-          {activeTab === "reports" && (
-            <div className="animate-fade-in space-y-8">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="font-heading text-xl font-extrabold uppercase tracking-tight flex items-center gap-3">
-                  Gelen Şikayetler <span className="bg-red-500 text-white text-[10px] px-2 py-1 tracking-widest">{club.reports?.filter((r: any) => r.status === "PENDING").length || 0} BEKLEYEN</span>
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-6">
-                {club.reports?.length > 0 ? (
-                  club.reports.map((report: any) => (
-                    <div key={report.id} className={`border-2 p-6 flex flex-col gap-4 transition-all ${report.status === "PENDING" ? "border-red-100 bg-red-50/30" : "border-gray-100 bg-white opacity-60"}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <AlertCircle className={`w-5 h-5 ${report.status === "PENDING" ? "text-red-500" : "text-gray-400"}`} />
-                          <div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Şikayet Nedeni</span>
-                            <p className="font-bold text-sm text-gray-800">{report.reason || "Belirtilmemiş"}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[9px] font-bold text-gray-400 block uppercase">Tarih</span>
-                          <span className="text-[10px] font-black">{new Date(report.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-white border border-gray-200 p-4 rounded-none">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[9px] font-black bg-black text-white px-2 py-0.5 uppercase tracking-tighter">Şikayet Edilen Yorum</span>
-                          <span className="text-[9px] font-bold text-gray-400 italic">"{report.interaction.post.title}" duyurusunda</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">"{report.interaction.content}"</p>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">Yorum Sahibi: {report.interaction.user.name}</p>
-                      </div>
-
-                      <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Bildiren:</span>
-                          <span className="text-[10px] font-black text-black">{report.reporter.name}</span>
-                        </div>
-                        
-                        {report.status === "PENDING" && (
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleResolveReport(report.id, "DISMISSED")}
-                              className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest border border-gray-200 hover:border-black transition-all"
-                            >
-                              Reddet
-                            </button>
-                            <button 
-                              onClick={() => handleResolveReport(report.id, "RESOLVED")}
-                              className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest bg-black text-white hover:bg-accent transition-all"
-                            >
-                              Çözüldü Olarak İşaretle
-                            </button>
-                          </div>
-                        )}
-
-                        {report.status !== "PENDING" && (
-                          <span className={`text-[10px] font-black uppercase px-2 py-1 ${report.status === "RESOLVED" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                            {report.status === "RESOLVED" ? "ÇÖZÜLDÜ" : "REDDEDİLDİ"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-12 border-2 border-dashed border-gray-100 text-center text-gray-400 font-bold italic uppercase tracking-widest text-xs">
-                    Henüz şikayet bulunmuyor.
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[500px] p-0 rounded-none border-l-2 border-black overflow-y-auto">
-          <SheetHeader className="p-8 border-b-2 border-gray-100 bg-gray-50 text-left">
+        <SheetContent side="right" className="w-full sm:max-w-[500px] p-0 border-l border-outline-variant overflow-y-auto">
+          <SheetHeader className="p-8 border-b border-outline-variant bg-surface-container-low text-left">
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-accent text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-widest">
+              <span className="bg-primary-fixed text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full">
                 {sheetMode === "create_survey" ? "ANKET MERKEZİ" : "İÇERİK STÜDYOSU"}
               </span>
             </div>
-            <SheetTitle className="font-heading text-2xl font-extrabold tracking-tight">
-              {sheetMode === "create_post" ? "Yeni Duyuru Yayınla" : 
-               sheetMode === "edit_post" ? "Duyuruyu Düzenle" : 
-               "Yeni Anket Oluştur"}
+            <SheetTitle className="font-heading text-2xl font-bold tracking-tight">
+              {sheetMode === "create_post" ? "Yeni Duyuru Yayınla" :
+                sheetMode === "edit_post" ? "Duyuruyu Düzenle" :
+                  "Yeni Anket Oluştur"}
             </SheetTitle>
-            <SheetDescription className="text-gray-500 font-medium text-xs">
+            <SheetDescription className="text-on-surface-variant text-[13px]">
               Bu işlem veritabanına kaydedilecek ve anında yayına alınacaktır.
             </SheetDescription>
           </SheetHeader>
 
           {sheetMode === "create_survey" ? (
             <form action={handleSurveySubmit} className="p-8 space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Soru</label>
-                <input 
-                  name="question" 
-                  required 
-                  placeholder="Örn: Gelecek zirve nerede olsun?"
-                  className="w-full h-12 px-4 rounded-none border-2 border-black focus:ring-accent text-sm font-bold outline-none"
-                />
+              <div className="space-y-1.5">
+                <label className={labelClass}>Soru</label>
+                <input name="question" required placeholder="Örn: Gelecek zirve nerede olsun?" className={inputClass + " h-12 font-medium"} />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Seçenekler (Virgülle ayırın)</label>
-                <textarea 
-                  name="options" 
-                  required 
-                  rows={4}
-                  placeholder="Kampüs A, Kampüs B, Online"
-                  className="w-full p-4 rounded-none border-2 border-black focus:ring-accent text-sm outline-none resize-none"
-                />
+              <div className="space-y-1.5">
+                <label className={labelClass}>Seçenekler (Virgülle ayırın)</label>
+                <textarea name="options" required rows={4} placeholder="Kampüs A, Kampüs B, Online" className="w-full p-4 rounded-lg border border-input bg-card text-[14px] outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring resize-none" />
               </div>
-              <Button type="submit" disabled={isPending} className="w-full rounded-none bg-black text-white font-bold uppercase tracking-widest text-[11px] h-12">
-                {isPending ? "Oluşturuluyor..." : "Anketi Başlat"}
-              </Button>
+              <Button type="submit" disabled={isPending} className="w-full rounded-full text-[14px] font-semibold h-12">{isPending ? "Oluşturuluyor..." : "Anketi Başlat"}</Button>
             </form>
           ) : (
             <form action={handlePostSubmit} className="p-8 space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="type" className="text-[10px] font-bold uppercase tracking-widest text-gray-500">İçerik Tipi</label>
-                <select 
-                  id="type" 
-                  name="type" 
-                  defaultValue={editingPost?.type || "ANNOUNCEMENT"}
-                  className="w-full h-12 px-4 rounded-none border-2 border-black bg-white focus:ring-accent text-sm font-semibold outline-none"
-                >
+              <div className="space-y-1.5">
+                <label htmlFor="type" className={labelClass}>İçerik Tipi</label>
+                <select id="type" name="type" defaultValue={editingPost?.type || "ANNOUNCEMENT"} className={inputClass + " h-12 font-medium"}>
                   <option value="ANNOUNCEMENT">Duyuru</option>
                   <option value="NEWS">Haber</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="title" className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Başlık</label>
-                <input 
-                  id="title" 
-                  name="title" 
-                  required 
-                  defaultValue={editingPost?.title || ""}
-                  placeholder="Başlık yazın..."
-                  className="w-full h-12 px-4 rounded-none border-2 border-black focus:ring-accent text-sm font-bold outline-none"
-                />
+              <div className="space-y-1.5">
+                <label htmlFor="title" className={labelClass}>Başlık</label>
+                <input id="title" name="title" required defaultValue={editingPost?.title || ""} placeholder="Başlık yazın..." className={inputClass + " h-12 font-medium"} />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="content" className="text-[10px] font-bold uppercase tracking-widest text-gray-500">İçerik Detayı</label>
-                  <span className={`text-[11px] font-black tracking-tight transition-colors ${
-                    postContentLength > POST_CONTENT_MAX * 0.9 ? "text-red-500" : 
-                    postContentLength > POST_CONTENT_MAX * 0.7 ? "text-orange-500" : "text-gray-400"
-                  }`}>
-                    {postContentLength}/{POST_CONTENT_MAX}
-                  </span>
+                  <label htmlFor="content" className={labelClass}>İçerik Detayı</label>
+                  <span className={`text-[12px] font-semibold transition-colors ${
+                    postContentLength > POST_CONTENT_MAX * 0.9 ? "text-destructive" :
+                    postContentLength > POST_CONTENT_MAX * 0.7 ? "text-accent" : "text-on-surface-variant"
+                  }`}>{postContentLength}/{POST_CONTENT_MAX}</span>
                 </div>
-                <textarea 
-                  id="content" 
-                  name="content" 
-                  required 
-                  rows={6}
-                  maxLength={POST_CONTENT_MAX}
+                <textarea
+                  id="content" name="content" required rows={6} maxLength={POST_CONTENT_MAX}
                   defaultValue={editingPost?.content || ""}
                   onChange={(e) => setPostContentLength(e.target.value.length)}
                   placeholder="Detaylı bilgiyi buraya girin..."
-                  className={`w-full p-4 rounded-none border-2 focus:ring-accent text-sm resize-none outline-none transition-colors ${
-                    postContentLength >= POST_CONTENT_MAX ? "border-red-500 bg-red-50/30" : "border-black"
+                  className={`w-full p-4 rounded-lg border bg-card text-[14px] resize-none outline-none focus:ring-2 focus:ring-ring/50 transition-colors ${
+                    postContentLength >= POST_CONTENT_MAX ? "border-destructive bg-destructive/5" : "border-input focus:border-ring"
                   }`}
                 />
-                {postContentLength >= POST_CONTENT_MAX && (
-                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest animate-pulse">Karakter sınırına ulaştınız!</p>
-                )}
+                {postContentLength >= POST_CONTENT_MAX && <p className="text-[12px] font-semibold text-destructive">Karakter sınırına ulaştınız!</p>}
               </div>
 
-              <div className="pt-6 border-t-2 border-gray-100 flex gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsSheetOpen(false)}
-                  className="flex-1 rounded-none border-2 border-black font-bold uppercase tracking-widest text-[11px] h-12"
-                >
-                  İptal
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={isPending}
-                  className="flex-1 rounded-none bg-accent text-white border-2 border-accent hover:bg-black hover:border-black transition-all font-bold uppercase tracking-widest text-[11px] h-12"
-                >
-                  {isPending ? "İşleniyor..." : (sheetMode === "edit_post" ? "Güncelle" : "Yayınla")}
-                </Button>
+              <div className="pt-5 border-t border-outline-variant flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="flex-1 rounded-full border-outline-variant text-[14px] font-semibold h-12">İptal</Button>
+                <Button type="submit" disabled={isPending} className="flex-1 rounded-full text-[14px] font-semibold h-12 bg-accent text-white hover:bg-accent/90">{isPending ? "İşleniyor..." : (sheetMode === "edit_post" ? "Güncelle" : "Yayınla")}</Button>
               </div>
             </form>
           )}

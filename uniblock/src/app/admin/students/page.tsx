@@ -19,54 +19,54 @@ export default async function AdminStudentsPage() {
     <div className="p-8">
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <GraduationCap className="w-5 h-5 text-blue-400" />
-          <span className="text-[11px] font-semibold text-white/40 uppercase tracking-[0.2em]">Yönetim / Kullanıcılar</span>
+          <GraduationCap className="w-5 h-5 text-primary" />
+          <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.2em]">Yönetim / Kullanıcılar</span>
         </div>
-        <h1 className="text-3xl font-heading font-extrabold text-white tracking-tight">Kullanıcı Yönetimi</h1>
-        <p className="text-sm text-white/40 mt-1">Sistemde {users.length} kayıtlı öğrenci ve başkan bulunuyor.</p>
+        <h1 className="text-3xl font-heading font-bold text-on-surface tracking-tight">Kullanıcı Yönetimi</h1>
+        <p className="text-sm text-on-surface-variant mt-1">Sistemde {users.length} kayıtlı öğrenci ve başkan bulunuyor.</p>
       </div>
 
-      <div className="bg-[#181a24] border border-white/[0.06] overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Tüm Kullanıcılar</h2>
-          <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{users.length} Kayıt</span>
+      <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
+        <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
+          <h2 className="text-[14px] font-bold text-on-surface tracking-tight">Tüm Kullanıcılar</h2>
+          <span className="text-[11px] font-semibold text-on-surface-variant">{users.length} Kayıt</span>
         </div>
-        <div className="grid grid-cols-[1.2fr_1fr_1fr_80px_100px_80px_100px] px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Ad Soyad</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">E-posta</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">Rol</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Fakülte</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Tarih</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">Durum</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">İşlem</span>
+        <div className="grid grid-cols-[1.2fr_1fr_1fr_80px_100px_80px_100px] px-5 py-3 border-b border-outline-variant bg-surface-container-low">
+          <span className="text-[11px] font-semibold text-on-surface-variant">Ad Soyad</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">E-posta</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant text-center">Rol</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">Fakülte</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">Tarih</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant text-center">Durum</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant text-center">İşlem</span>
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-outline-variant">
           {users.length > 0 ? users.map((user) => (
-            <div key={user.id} className="grid grid-cols-[1.2fr_1fr_1fr_80px_100px_80px_100px] px-5 py-3 hover:bg-white/[0.02] transition-colors items-center">
+            <div key={user.id} className="grid grid-cols-[1.2fr_1fr_1fr_80px_100px_80px_100px] px-5 py-3 hover:bg-surface-container-low transition-colors items-center">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-7 h-7 bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                  <span className="text-[9px] font-bold text-blue-400">{user.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "??"}</span>
+                <div className="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
+                  <span className="text-[9px] font-bold text-primary">{user.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "??"}</span>
                 </div>
-                <span className="text-[12px] font-semibold text-white truncate">{user.name}</span>
+                <span className="text-[13px] font-semibold text-on-surface truncate">{user.name}</span>
               </div>
-              <span className="text-[11px] text-white/40 truncate">{user.email}</span>
+              <span className="text-[12px] text-on-surface-variant truncate">{user.email}</span>
               <div className="flex justify-center">
-                <span className={`text-[9px] font-black px-2 py-0.5 uppercase tracking-widest ${
-                  user.role === "CLUB_ADMIN" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
+                  user.role === "CLUB_ADMIN" ? "bg-amber-100 text-amber-700" : "bg-primary-fixed text-primary"
                 }`}>
                   {user.role === "CLUB_ADMIN" ? "Kulüp Başk." : "Öğrenci"}
                 </span>
               </div>
-              <span className="text-[11px] text-white/50 truncate">{user.faculty || "—"}</span>
-              <div className="flex items-center gap-1 text-white/30">
+              <span className="text-[12px] text-on-surface-variant truncate">{user.faculty || "—"}</span>
+              <div className="flex items-center gap-1 text-on-surface-variant">
                 <Clock className="w-3 h-3" />
-                <span className="text-[10px] font-medium">{new Date(user.createdAt).toLocaleDateString("tr-TR")}</span>
+                <span className="text-[11px] font-medium">{new Date(user.createdAt).toLocaleDateString("tr-TR")}</span>
               </div>
               <div className="flex justify-center">
-                <span className={`text-[9px] font-black px-2 py-0.5 uppercase tracking-widest ${
-                  user.status === "PENDING" ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" :
-                  user.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                  "bg-red-500/10 text-red-400 border border-red-500/20"
+                <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
+                  user.status === "PENDING" ? "bg-accent/15 text-[color:var(--community-orange-deep)]" :
+                  user.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" :
+                  "bg-red-100 text-red-700"
                 }`}>
                   {user.status === "PENDING" ? "Bekliyor" : user.status === "ACTIVE" ? "Aktif" : "Red/Engel"}
                 </span>
@@ -74,7 +74,7 @@ export default async function AdminStudentsPage() {
               <StudentStatusActions userId={user.id} status={user.status} />
             </div>
           )) : (
-            <div className="px-5 py-12 text-center text-[12px] text-white/20 font-medium">Henüz kayıtlı kullanıcı bulunmuyor.</div>
+            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">Henüz kayıtlı kullanıcı bulunmuyor.</div>
           )}
         </div>
       </div>

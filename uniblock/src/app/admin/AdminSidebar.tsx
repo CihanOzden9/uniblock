@@ -89,18 +89,18 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
     .slice(0, 2);
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-[#13151d] border-r border-white/[0.06] flex flex-col z-50">
+    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-card border-r border-outline-variant flex flex-col z-50">
       {/* Brand */}
-      <div className="h-[72px] flex items-center px-6 border-b border-white/[0.06]">
+      <div className="h-[72px] flex items-center px-6 border-b border-outline-variant">
         <Link href="/admin" className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-white font-extrabold text-[13px] tracking-tight">UB</span>
           </div>
           <div>
-            <span className="font-heading font-extrabold text-[15px] text-white tracking-tight">
+            <span className="font-heading font-extrabold text-[15px] text-on-surface tracking-tight">
               UniBlock
             </span>
-            <span className="block text-[9px] font-bold text-red-400 uppercase tracking-[0.2em] -mt-0.5">
+            <span className="block text-[9px] font-bold text-primary uppercase tracking-[0.2em] -mt-0.5">
               Admin Panel
             </span>
           </div>
@@ -112,7 +112,7 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
         {navItems.map((section) => (
           <div key={section.section} className="mb-6">
             <div className="px-3 mb-2">
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">
+              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">
                 {section.section}
               </span>
             </div>
@@ -126,24 +126,24 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium transition-all duration-200 group relative ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
                       isActive
-                        ? "bg-white/[0.08] text-white"
-                        : "text-white/50 hover:text-white/80 hover:bg-white/[0.04]"
+                        ? "bg-primary-fixed text-primary"
+                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low"
                     }`}
                   >
                     {isActive && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-red-500 rounded-r-full" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-primary rounded-r-full" />
                     )}
-                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? "text-red-400" : "text-white/30 group-hover:text-white/60"}`} />
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? "text-primary" : "text-outline group-hover:text-on-surface"}`} />
                     <span className="flex-1">{item.label}</span>
                     {item.count > 0 && (
-                      <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-black border border-red-500/30 min-w-[18px] text-center">
+                      <span className="px-1.5 py-0.5 rounded-full bg-accent/15 text-[color:var(--community-orange-deep)] text-[10px] font-bold min-w-[18px] text-center">
                         {item.count}
                       </span>
                     )}
                     {isActive && (
-                      <ChevronRight className="w-3.5 h-3.5 text-white/30 ml-1" />
+                      <ChevronRight className="w-3.5 h-3.5 text-primary/50 ml-1" />
                     )}
                   </Link>
                 );
@@ -154,21 +154,21 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
       </nav>
 
       {/* User Info */}
-      <div className="border-t border-white/[0.06] p-4">
+      <div className="border-t border-outline-variant p-4">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-red-500/20 to-red-700/20 border border-red-500/30 flex items-center justify-center shrink-0">
-            <span className="text-red-400 font-bold text-[11px]">{initials}</span>
+          <div className="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center shrink-0">
+            <span className="text-primary font-bold text-[11px]">{initials}</span>
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] font-semibold text-white truncate">{user.name}</p>
-            <p className="text-[10px] text-red-400/80 font-medium uppercase tracking-wider">
+            <p className="text-[12px] font-semibold text-on-surface truncate">{user.name}</p>
+            <p className="text-[10px] text-primary font-medium uppercase tracking-wider">
               {user.role === "SUPER_ADMIN" ? "Süper Admin" : user.role === "PROJECT_ADMIN" ? "Proje Admin" : "Yönetici"}
             </p>
           </div>
         </div>
         <Link
           href="/feed"
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 bg-white/[0.04] hover:bg-accent/10 border border-white/[0.06] hover:border-accent/30 text-white/50 hover:text-accent text-[11px] font-bold uppercase tracking-widest transition-all"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 mb-2 rounded-lg bg-surface-container-low hover:bg-primary-fixed border border-outline-variant hover:border-primary/30 text-on-surface-variant hover:text-primary text-[11px] font-semibold transition-all"
         >
           <ExternalLink className="w-3.5 h-3.5" />
           Platforma Git
@@ -176,7 +176,7 @@ export default function AdminSidebar({ user, pendingCounts }: AdminSidebarProps)
         <form action={logout}>
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white/[0.04] hover:bg-red-500/10 border border-white/[0.06] hover:border-red-500/20 text-white/50 hover:text-red-400 text-[11px] font-bold uppercase tracking-widest transition-all"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-destructive/10 border border-outline-variant hover:border-destructive/30 text-on-surface-variant hover:text-destructive text-[11px] font-semibold transition-all"
           >
             <LogOut className="w-3.5 h-3.5" />
             Çıkış Yap

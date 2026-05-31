@@ -46,7 +46,7 @@ export default function ReportActions({ reportId, status }: ReportActionsProps) 
         onClick={resolve}
         disabled={loading}
         title="Çözümlendi olarak işaretle"
-        className="p-1.5 text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-40"
+        className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-40"
       >
         <CheckCircle className="w-4 h-4" />
       </button>
@@ -54,7 +54,7 @@ export default function ReportActions({ reportId, status }: ReportActionsProps) 
         onClick={removeContent}
         disabled={loading}
         title="İçeriği kaldır"
-        className="p-1.5 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+        className="p-1.5 rounded-lg text-red-700 hover:bg-red-100 transition-colors disabled:opacity-40"
       >
         <Trash2 className="w-4 h-4" />
       </button>
@@ -62,7 +62,7 @@ export default function ReportActions({ reportId, status }: ReportActionsProps) 
         onClick={dismiss}
         disabled={loading}
         title="Reddet"
-        className="p-1.5 text-white/30 hover:bg-white/[0.05] transition-colors disabled:opacity-40"
+        className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors disabled:opacity-40"
       >
         <XCircle className="w-4 h-4" />
       </button>

@@ -41,53 +41,53 @@ export default async function AdminEventsPage() {
       <div className="mb-8 flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Calendar className="w-5 h-5 text-amber-400" />
-            <span className="text-[11px] font-semibold text-white/40 uppercase tracking-[0.2em]">Yönetim / Etkinlikler</span>
+            <Calendar className="w-5 h-5 text-primary" />
+            <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.2em]">Yönetim / Etkinlikler</span>
           </div>
-          <h1 className="text-3xl font-heading font-extrabold text-white tracking-tight">Etkinlik Yönetimi</h1>
-          <p className="text-sm text-white/40 mt-1">Tüm kulüplerin etkinliklerini görüntüle, yönet ve oluştur.</p>
+          <h1 className="text-3xl font-heading font-bold text-on-surface tracking-tight">Etkinlik Yönetimi</h1>
+          <p className="text-sm text-on-surface-variant mt-1">Tüm kulüplerin etkinliklerini görüntüle, yönet ve oluştur.</p>
         </div>
         <CreateEventButton clubs={clubs} />
       </div>
 
       {/* İstatistikler */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#181a24] border border-emerald-500/20 p-5">
-          <div className="text-2xl font-heading font-black text-emerald-400">{upcoming.length}</div>
-          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Yaklaşan</div>
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5">
+          <div className="text-2xl font-heading font-bold text-emerald-600">{upcoming.length}</div>
+          <div className="text-[12px] font-medium text-on-surface-variant mt-1">Yaklaşan</div>
         </div>
-        <div className="bg-[#181a24] border border-white/[0.06] p-5">
-          <div className="text-2xl font-heading font-black text-white/60">{past.length}</div>
-          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Tamamlanan</div>
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5">
+          <div className="text-2xl font-heading font-bold text-on-surface">{past.length}</div>
+          <div className="text-[12px] font-medium text-on-surface-variant mt-1">Tamamlanan</div>
         </div>
-        <div className="bg-[#181a24] border border-red-500/20 p-5">
-          <div className="text-2xl font-heading font-black text-red-400">{cancelled.length}</div>
-          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">İptal Edilen</div>
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5">
+          <div className="text-2xl font-heading font-bold text-red-600">{cancelled.length}</div>
+          <div className="text-[12px] font-medium text-on-surface-variant mt-1">İptal Edilen</div>
         </div>
-        <div className="bg-[#181a24] border border-blue-500/20 p-5">
-          <div className="text-2xl font-heading font-black text-blue-400">{avgAttendance}</div>
-          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest mt-1">Ort. Katılım</div>
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5">
+          <div className="text-2xl font-heading font-bold text-primary">{avgAttendance}</div>
+          <div className="text-[12px] font-medium text-on-surface-variant mt-1">Ort. Katılım</div>
         </div>
       </div>
 
       {/* En Aktif Kulüpler */}
       {topClubs.length > 0 && (
-        <div className="bg-[#181a24] border border-white/[0.06] p-5 mb-6">
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5 mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-4 h-4 text-amber-400" />
-            <h2 className="text-[12px] font-bold text-white/60 uppercase tracking-widest">En Aktif Kulüpler</h2>
+            <BarChart3 className="w-4 h-4 text-accent" />
+            <h2 className="text-[13px] font-bold text-on-surface tracking-tight">En Aktif Kulüpler</h2>
           </div>
           <div className="space-y-3">
             {topClubs.map((club, i) => {
               const pct = topClubs[0].count > 0 ? Math.round((club.count / topClubs[0].count) * 100) : 0;
               return (
                 <div key={i} className="flex items-center gap-4">
-                  <span className="text-[11px] text-white/30 w-4 text-right">{i + 1}</span>
-                  <span className="text-[12px] font-semibold text-white w-48 truncate">{club.name}</span>
-                  <div className="flex-1 bg-white/[0.04] h-1.5">
-                    <div className="bg-amber-400 h-1.5 transition-all" style={{ width: `${pct}%` }} />
+                  <span className="text-[11px] text-on-surface-variant w-4 text-right">{i + 1}</span>
+                  <span className="text-[12px] font-semibold text-on-surface w-48 truncate">{club.name}</span>
+                  <div className="flex-1 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-accent h-1.5 rounded-full transition-all" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-[11px] text-white/40 w-16 text-right">{club.count} etkinlik</span>
+                  <span className="text-[11px] text-on-surface-variant w-16 text-right">{club.count} etkinlik</span>
                 </div>
               );
             })}
@@ -96,52 +96,52 @@ export default async function AdminEventsPage() {
       )}
 
       {/* Etkinlik Listesi */}
-      <div className="bg-[#181a24] border border-white/[0.06] overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
-          <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Tüm Etkinlikler</h2>
-          <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{events.length} Etkinlik</span>
+      <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
+        <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
+          <h2 className="text-[14px] font-bold text-on-surface tracking-tight">Tüm Etkinlikler</h2>
+          <span className="text-[11px] font-semibold text-on-surface-variant">{events.length} Etkinlik</span>
         </div>
-        <div className="grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 border-b border-white/[0.06] bg-white/[0.02]">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Etkinlik</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Kulüp</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Konum</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Tarih</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">Kapasite</span>
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest text-center">Durum</span>
+        <div className="grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 border-b border-outline-variant bg-surface-container-low">
+          <span className="text-[11px] font-semibold text-on-surface-variant">Etkinlik</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">Kulüp</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">Konum</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant">Tarih</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant text-center">Kapasite</span>
+          <span className="text-[11px] font-semibold text-on-surface-variant text-center">Durum</span>
           <span />
         </div>
-        <div className="divide-y divide-white/[0.04]">
+        <div className="divide-y divide-outline-variant">
           {events.length > 0 ? events.map((event) => {
             const isPast = new Date(event.date) < now;
             return (
-              <div key={event.id} className={`grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 hover:bg-white/[0.02] transition-colors items-center ${event.cancelled ? "opacity-50" : ""}`}>
+              <div key={event.id} className={`grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 hover:bg-surface-container-low transition-colors items-center ${event.cancelled ? "opacity-50" : ""}`}>
                 <div className="min-w-0">
-                  <span className="text-[12px] font-semibold text-white truncate block">{event.title}</span>
+                  <span className="text-[13px] font-semibold text-on-surface truncate block">{event.title}</span>
                   {event.cancelled && (
-                    <span className="text-[10px] text-red-400/70 truncate block">İptal: {event.cancelReason}</span>
+                    <span className="text-[11px] text-red-600 truncate block">İptal: {event.cancelReason}</span>
                   )}
                   {!event.cancelled && (
-                    <span className="text-[10px] text-white/25 truncate block">{event.description.substring(0, 50)}…</span>
+                    <span className="text-[11px] text-on-surface-variant truncate block">{event.description.substring(0, 50)}…</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 min-w-0">
-                  <Shield className="w-3 h-3 text-emerald-400/50 shrink-0" />
-                  <span className="text-[11px] text-white/50 truncate">{event.organizer?.name ?? "—"}</span>
+                  <Shield className="w-3 h-3 text-primary shrink-0" />
+                  <span className="text-[12px] text-on-surface-variant truncate">{event.organizer?.name ?? "—"}</span>
                 </div>
                 <div className="flex items-center gap-1 min-w-0">
-                  <MapPin className="w-3 h-3 text-white/20 shrink-0" />
-                  <span className="text-[11px] text-white/40 truncate">{event.location || "Belirtilmemiş"}</span>
+                  <MapPin className="w-3 h-3 text-on-surface-variant shrink-0" />
+                  <span className="text-[12px] text-on-surface-variant truncate">{event.location || "Belirtilmemiş"}</span>
                 </div>
-                <div className="flex items-center gap-1 text-white/30">
+                <div className="flex items-center gap-1 text-on-surface-variant">
                   <Clock className="w-3 h-3" />
-                  <span className="text-[10px] font-medium">{new Date(event.date).toLocaleDateString("tr-TR")}</span>
+                  <span className="text-[11px] font-medium">{new Date(event.date).toLocaleDateString("tr-TR")}</span>
                 </div>
-                <span className="text-[11px] font-bold text-blue-400 text-center">{event.capacity || "∞"}</span>
+                <span className="text-[12px] font-bold text-primary text-center">{event.capacity || "∞"}</span>
                 <div className="flex justify-center">
-                  <span className={`text-[9px] font-black px-2 py-0.5 uppercase tracking-widest ${
-                    event.cancelled ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                    : isPast ? "bg-white/[0.04] text-white/30 border border-white/[0.06]"
-                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
+                    event.cancelled ? "bg-red-100 text-red-700"
+                    : isPast ? "bg-surface-container-high text-on-surface-variant"
+                    : "bg-emerald-100 text-emerald-700"
                   }`}>
                     {event.cancelled ? "İptal" : isPast ? "Tamamlandı" : "Aktif"}
                   </span>
@@ -154,7 +154,7 @@ export default async function AdminEventsPage() {
               </div>
             );
           }) : (
-            <div className="px-5 py-12 text-center text-[12px] text-white/20 font-medium">Henüz etkinlik oluşturulmamış.</div>
+            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">Henüz etkinlik oluşturulmamış.</div>
           )}
         </div>
       </div>

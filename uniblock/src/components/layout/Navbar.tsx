@@ -32,49 +32,31 @@ export default function Navbar({ user }: NavbarProps) {
         .toUpperCase()
     : "??";
 
+  const navLink = (active: boolean) =>
+    `text-[15px] font-medium py-1.5 px-3 rounded-lg border-b-2 transition-colors ${
+      active
+        ? "text-primary border-primary font-semibold"
+        : "text-on-surface-variant border-transparent hover:bg-surface-container-high hover:text-on-surface"
+    }`;
+
   return (
-    <header className="fixed top-0 w-full h-20 bg-black z-50 flex items-center justify-between px-8 border-b-2 border-accent transition-all duration-300">
-      <div className="flex items-center gap-12">
-        <Link href="/" className="font-heading font-extrabold text-[18px] tracking-tight text-white hover:text-accent transition-colors">
+    <header className="fixed top-0 w-full h-20 bg-surface z-50 flex items-center justify-between px-margin-desktop md:px-8 border-b border-outline-variant shadow-sm transition-all duration-300">
+      <div className="flex items-center gap-10">
+        <Link href="/" className="font-heading font-extrabold text-[20px] tracking-tight text-primary hover:opacity-80 transition-opacity">
           Uni<span className="text-accent">.</span>Block
         </Link>
-        
+
         {user && (
-          <nav className="hidden md:flex items-center gap-8">
-            <Link 
-              href="/feed" 
-              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/feed" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
-            >
-              Akış
-            </Link>
-            <Link 
-              href="/news" 
-              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/news" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
-            >
-              Haberler
-            </Link>
-            <Link 
-              href="/events" 
-              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/events" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
-            >
-              Etkinliklerim
-            </Link>
-            <Link
-              href="/clubs"
-              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/clubs" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
-            >
-              Kulüpler
-            </Link>
-            <Link
-              href="/teams"
-              className={`text-[13px] font-bold tracking-[0.05em] uppercase transition-all pb-1 border-b-2 ${pathname === "/teams" ? "text-accent border-accent" : "text-gray-300 border-transparent hover:text-white"}`}
-            >
-              Takımlar
-            </Link>
+          <nav className="hidden md:flex items-center gap-2">
+            <Link href="/feed" className={navLink(pathname === "/feed")}>Akış</Link>
+            <Link href="/news" className={navLink(pathname === "/news")}>Haberler</Link>
+            <Link href="/events" className={navLink(pathname === "/events")}>Etkinliklerim</Link>
+            <Link href="/clubs" className={navLink(pathname === "/clubs")}>Kulüpler</Link>
+            <Link href="/teams" className={navLink(pathname === "/teams")}>Takımlar</Link>
             {(user?.role === "SUPER_ADMIN" || user?.role === "PROJECT_ADMIN" || user?.role === "ADMIN") && (
               <Link
                 href="/admin"
-                className="text-[10px] font-black tracking-[0.2em] uppercase bg-white/10 border border-white/20 text-white/70 px-3 py-1.5 hover:bg-red-500 hover:border-red-500 hover:text-white transition-all duration-200"
+                className="ml-1 text-[11px] font-bold tracking-wide uppercase rounded-full bg-primary-fixed text-primary px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 Admin
               </Link>
@@ -82,68 +64,68 @@ export default function Navbar({ user }: NavbarProps) {
           </nav>
         )}
       </div>
-      
-      <div className="flex items-center gap-4">
+
+      <div className="flex items-center gap-3">
         {user ? (
           <>
             {/* Notifications */}
             <Popover>
-              <PopoverTrigger className="relative p-2 hover:bg-white/10 transition-colors group border-2 border-transparent hover:border-accent">
-                <Bell className="w-5 h-5 text-white group-hover:text-accent transition-colors" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full"></span>
+              <PopoverTrigger className="relative p-2.5 rounded-full hover:bg-surface-container-high transition-colors group text-on-surface-variant">
+                <Bell className="w-5 h-5 group-hover:text-primary transition-colors" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full"></span>
               </PopoverTrigger>
-              <PopoverContent className="w-80 rounded-none border-2 border-black p-0 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mr-8">
-                <div className="bg-black text-white p-3 border-b-2 border-black">
-                  <h3 className="font-heading text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+              <PopoverContent className="w-80 rounded-xl border border-outline-variant p-0 shadow-ambient-lg mr-4 overflow-hidden">
+                <div className="bg-primary text-primary-foreground px-4 py-3">
+                  <h3 className="font-heading text-[13px] font-semibold flex items-center gap-2">
                     Bildirimler
                   </h3>
                 </div>
-                <div className="p-0 bg-white text-black">
-                  <div className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer">
-                    <p className="text-[12px] font-medium leading-snug">
-                      <span className="font-bold">Sistem</span> Hoş geldiniz! Hesabınız aktif edildi.
+                <div className="bg-card text-card-foreground">
+                  <div className="p-4 border-b border-outline-variant hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <p className="text-[13px] leading-snug">
+                      <span className="font-semibold">Sistem</span> Hoş geldiniz! Hesabınız aktif edildi.
                     </p>
-                    <span className="text-[10px] text-gray-400 font-bold mt-1 block">ŞİMDİ</span>
+                    <span className="text-[11px] text-on-surface-variant font-medium mt-1 block">ŞİMDİ</span>
                   </div>
                 </div>
-                <div className="p-3 bg-gray-50 text-center">
-                  <Link href="#" className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent hover:underline">
-                    TÜMÜNÜ GÖR →
+                <div className="p-3 bg-surface-container-low text-center">
+                  <Link href="#" className="text-[12px] font-semibold text-primary hover:underline">
+                    Tümünü Gör →
                   </Link>
                 </div>
               </PopoverContent>
             </Popover>
 
-            <div className="hidden sm:block text-right ml-2">
+            <div className="hidden sm:block text-right ml-1">
               <Link href="/profile" className="group">
-                <div className={`text-[12px] font-bold tracking-[0.05em] uppercase leading-none transition-colors ${pathname === "/profile" ? "text-accent" : "text-white group-hover:text-accent"}`}>
+                <div className={`text-[13px] font-semibold leading-none transition-colors ${pathname === "/profile" ? "text-primary" : "text-on-surface group-hover:text-primary"}`}>
                   {user.name}
                 </div>
-                <div className="text-[10px] text-accent/70 font-medium tracking-[0.05em] uppercase mt-1">
-                  {user.department?.toUpperCase() || "ÖĞRENCİ"}
+                <div className="text-[11px] text-on-surface-variant font-medium mt-1">
+                  {user.department || "Öğrenci"}
                 </div>
               </Link>
             </div>
-            
+
             <Link href="/profile">
-              <div className={`h-10 w-10 flex items-center justify-center font-bold transition-all border-2 ${pathname === "/profile" ? "bg-accent text-white border-accent" : "bg-accent/10 text-accent border-accent/20 hover:border-accent"}`}>
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center text-[13px] font-bold transition-all ${pathname === "/profile" ? "bg-primary text-primary-foreground" : "bg-primary-fixed text-primary hover:ring-2 hover:ring-primary/30"}`}>
                 {initials}
               </div>
             </Link>
 
             <form action={logout}>
-              <Button type="submit" variant="outline" className="hidden lg:flex px-[20px] py-[10px] h-auto text-[10px] font-bold tracking-[0.15em] uppercase border-white/20 text-white hover:bg-white hover:text-black transition-colors rounded-none bg-transparent">
-                <LogOut className="w-3 h-3 mr-2" /> ÇIKIŞ YAP
+              <Button type="submit" variant="outline" className="hidden lg:flex h-10 rounded-full border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-4 text-[13px] font-medium">
+                <LogOut className="w-4 h-4 mr-2" /> Çıkış Yap
               </Button>
             </form>
           </>
         ) : (
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-[12px] font-bold text-white hover:text-accent uppercase tracking-widest transition-colors">
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-[14px] font-semibold text-on-surface-variant hover:text-primary transition-colors px-2">
               Giriş Yap
             </Link>
             <Link href="/register">
-              <Button className="rounded-none bg-accent text-white font-bold uppercase tracking-widest text-[11px] px-6 h-10 hover:bg-white hover:text-black transition-all">
+              <Button className="rounded-full h-10 px-6 text-[14px] font-semibold">
                 Kayıt Ol
               </Button>
             </Link>

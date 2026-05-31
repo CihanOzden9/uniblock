@@ -1,0 +1,16 @@
+haberler sekmesine gelince Feed sayfasında sayfa ortasındaki akış kısmı haberler olarak değişecek ve feed görüntüsü gibi olacak sağda ve soldaki paneller sabit kalacak.
+Takip ettiğim topluluklar Mevcut olan topluluklar sekmesine gitmeyecek katıldığı toplulukların olduğu bir sayfaya açılacak. Şu şekilde olabilir topluluklar sekmesine gider fakat filtre uygular. Takımlar içinde geçerli
+
+Duyuru paylaşma sekmesi yenilenmeli sadece duyuru ve haber paylaşılabiliyor. Haberi kaldıralım. Etkinlik paylaşılabilsin. Resim video eklenebilsin (Şuan için görsel ve video paylaşımına gerek yok).
+Haberler sekmesi en sona alınsın oraya etkinlikler olsun feed gibi görünsün. paylaşılan etkinlikler takvimde işaretlensin.
+Duyuru ve etkinlik sekmesi yenilenmeli. Duyuru seçilince Başlık ve mesaj yeterli ama etkinlik olunca yer zaman tarih gibi detaylara ihtiyacımız var.
+Sınırlı kontenjan olabilir, Bu gönderide uyarı olarak görülebilir. Yeni eklencek olan qr ile katılım doğrulaması için bi geliştirme ve tasarım planı hazırlanması lazım
+Kulüpler ve takımlar sekmesi için köklü bir tasarım değişikliğine ihtiyacımız var. kulüpler ve takımların kendilerine ait sayfalar olacak kullanıcı kulip sayfasına gidip paylaşımlarını etkinliklerini hakkında kısmını görebilecek.
+Yapılan haberler etkinlikler için kulp yönetim sayfaları güncellenmeli.
+Öğrenciler için ayarlar sekmesi şuan kaydettiklerim olarak görünüyor onun düzeltmesi ve ayarlar sayfasının baştan yazılması gerekiyor.
+
+ADMİN PANEL EKSİKLERİ:
+
+Admin paneli için kullanıcılar sekmesinde filtre özelliği getirilmeli 
+Kulüpler sekmesi içinde filtreleme özelliği getirilmeli
+Takımlar sekmesi için filtreleme özelliği getirilmeli

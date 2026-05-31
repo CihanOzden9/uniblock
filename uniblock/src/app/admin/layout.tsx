@@ -22,9 +22,9 @@ export default async function AdminLayout({
   ]);
 
   return (
-    <div className="min-h-screen flex bg-[#0f1117]">
-      <AdminSidebar 
-        user={{ name: user.name || "Admin", role: user.role, image: user.image }} 
+    <div className="min-h-screen flex bg-surface">
+      <AdminSidebar
+        user={{ name: user.name || "Admin", role: user.role, image: user.image }}
         pendingCounts={{
           users: pendingUsers,
           clubs: pendingClubs,
@@ -32,7 +32,7 @@ export default async function AdminLayout({
           complaints: pendingComplaints
         }}
       />
-      <main className="flex-1 ml-[260px] min-h-screen bg-[#0f1117]">
+      <main className="flex-1 ml-[260px] min-h-screen bg-surface">
         {children}
       </main>
     </div>

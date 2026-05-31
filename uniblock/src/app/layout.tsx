@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+// Academic Pulse — tek tip aile: Inter (gövde + başlık)
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "900"],
 });
 
-const spaceGrotesk = Space_Grotesk({
+const interHeading = Inter({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["500", "600", "700", "900"],
 });
 
 export const metadata: Metadata = {
@@ -26,9 +28,9 @@ export default function RootLayout({
   return (
     <html
       lang="tr"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${inter.variable} ${interHeading.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans text-[#525252] bg-white selection:bg-[#059669] selection:text-white">
+      <body className="min-h-full flex flex-col font-sans text-foreground bg-background">
         {children}
       </body>
     </html>

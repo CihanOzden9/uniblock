@@ -30,7 +30,7 @@ export default function StudentStatusActions({ userId, status }: StudentStatusAc
         <button
           onClick={() => onUpdate("ACTIVE")}
           disabled={isLoading}
-          className="p-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+          className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"
           title="Onayla"
         >
           <Check className="w-3.5 h-3.5" />
@@ -38,7 +38,7 @@ export default function StudentStatusActions({ userId, status }: StudentStatusAc
         <button
           onClick={() => onUpdate("REJECTED")}
           disabled={isLoading}
-          className="p-1.5 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+          className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
           title="Reddet"
         >
           <X className="w-3.5 h-3.5" />
@@ -53,7 +53,7 @@ export default function StudentStatusActions({ userId, status }: StudentStatusAc
         <button
           onClick={() => onUpdate("BANNED")}
           disabled={isLoading}
-          className="p-1.5 bg-white/[0.04] text-white/30 border border-white/[0.06] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all"
+          className="p-1.5 rounded-lg bg-surface-container-low text-on-surface-variant border border-outline-variant hover:bg-red-100 hover:text-red-700 hover:border-red-200 transition-all"
           title="Engelle"
         >
           <Ban className="w-3.5 h-3.5" />
@@ -64,8 +64,8 @@ export default function StudentStatusActions({ userId, status }: StudentStatusAc
 
   return (
     <div className="text-center">
-      <span className={`text-[9px] font-black px-2 py-0.5 uppercase tracking-widest ${
-        status === "REJECTED" ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-white/[0.04] text-white/30 border border-white/[0.06]"
+      <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${
+        status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-surface-container-high text-on-surface-variant"
       }`}>
         {status === "REJECTED" ? "Reddedildi" : "Engelli"}
       </span>

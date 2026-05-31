@@ -73,5 +73,8 @@ desktop.ini
 future/
 gelistirme_plani.md
 
+# Tasarım referans materyali (Academic Pulse / UniVerse mockup'ları) — repoya dahil edilmez
+tasarım_detayları/
+
 # Claude Code — makineye özel yerel ayarlar
 .claude/settings.local.json

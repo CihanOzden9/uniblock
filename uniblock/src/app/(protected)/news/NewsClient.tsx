@@ -31,33 +31,30 @@ export default function NewsClient({ user, posts }: NewsClientProps) {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar user={user} />
 
       <main className="flex-1 pt-20">
-        <section className="py-12 px-8 border-b-2 border-accent/10">
+        <section className="bg-surface-container-low py-14 px-8 border-b border-outline-variant">
           <div className="max-w-[1200px] mx-auto">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-accent">
-                03 — RESMİ HABERLER
-              </span>
-              <div className="flex-1 h-[1px] bg-gray-200"></div>
-            </div>
-            
-            <h1 className="font-heading text-[clamp(36px,5vw,64px)] font-extrabold tracking-tighter leading-[1.05] mb-4">
+            <span className="text-[12px] font-semibold tracking-wide uppercase text-primary">
+              Resmî Haberler
+            </span>
+
+            <h1 className="font-heading text-[clamp(32px,4.5vw,52px)] font-bold tracking-tight leading-[1.1] mt-3 mb-3 text-on-surface">
               {user.faculty || "Kampüs"} Gündemi
             </h1>
-            <p className="text-[15px] leading-[1.6] text-gray-600 max-w-[700px] mb-8">
+            <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[700px] mb-7">
               {user.department || "Bölümünüzden"} ve fakültenizden en güncel akademik haberler.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-5 border-2 border-black bg-black gap-[1px]">
+            <div className="flex flex-wrap gap-2.5">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`py-3 text-[10px] font-bold tracking-[0.15em] uppercase transition-all duration-200 ${activeCategory === cat
-                    ? "bg-black text-white"
-                    : "bg-white text-black hover:bg-gray-100"
+                  className={`px-5 py-2 rounded-full text-[14px] font-medium transition-all duration-200 border ${activeCategory === cat
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-surface text-on-surface-variant border-outline-variant hover:bg-surface-container-high hover:text-on-surface"
                     }`}
                 >
                   {cat}
@@ -67,64 +64,60 @@ export default function NewsClient({ user, posts }: NewsClientProps) {
           </div>
         </section>
 
-        <section className="bg-gray-100 py-12 px-8 min-h-[400px]">
+        <section className="py-12 px-8 min-h-[400px]">
           <div className="max-w-[1200px] mx-auto w-full">
             {filteredNews.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 bg-black border-2 border-black gap-[1px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
                 {filteredNews.map((item) => (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     onClick={() => setSelectedNews(item)}
-                    className="bg-white p-8 flex flex-col min-h-[320px] transition-all hover:bg-gray-50 group cursor-pointer"
+                    className="bg-card rounded-xl border border-outline-variant shadow-ambient p-7 flex flex-col min-h-[320px] transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 group cursor-pointer"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-accent"></div>
-                        <span className="text-[10px] font-semibold tracking-[0.15em] text-gray-400 uppercase">{item.category}</span>
-                      </div>
-                      <span className="text-[10px] font-medium tracking-[0.1em] text-gray-400 uppercase">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[11px] font-semibold tracking-wide text-primary bg-primary-fixed px-2.5 py-1 rounded-full">{item.category}</span>
+                      <span className="text-[12px] font-medium text-on-surface-variant">
                         {new Date(item.createdAt).toLocaleDateString("tr-TR")}
                       </span>
                     </div>
-                    <div className="h-[1px] w-full bg-gray-100 mb-5"></div>
-                    <h3 className="font-heading text-[17px] font-extrabold tracking-tight leading-[1.4] mb-3 group-hover:text-accent transition-colors">
+                    <h3 className="font-heading text-[18px] font-bold tracking-tight leading-[1.4] mb-3 group-hover:text-primary transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-[13px] leading-[1.6] text-gray-600 mb-8 line-clamp-3">
+                    <p className="text-[14px] leading-[1.6] text-on-surface-variant mb-8 line-clamp-3">
                       {item.content.substring(0, 150)}...
                     </p>
-                    
-                    <div className="mt-auto pt-6 border-t border-gray-100 flex items-center justify-between">
+
+                    <div className="mt-auto pt-5 border-t border-outline-variant flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5">
-                          <Heart className="w-4 h-4 text-gray-400" />
-                          <span className="text-[11px] font-bold text-gray-400">{item.likes?.length || 0}</span>
+                          <Heart className="w-4 h-4 text-on-surface-variant" />
+                          <span className="text-[12px] font-semibold text-on-surface-variant">{item.likes?.length || 0}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <MessageSquare className="w-4 h-4 text-gray-400" />
-                          <span className="text-[11px] font-bold text-gray-400">{item.comments?.length || 0}</span>
+                          <MessageSquare className="w-4 h-4 text-on-surface-variant" />
+                          <span className="text-[12px] font-semibold text-on-surface-variant">{item.comments?.length || 0}</span>
                         </div>
                       </div>
-                      <button className="p-2 hover:bg-gray-100 transition-colors">
-                        <Share2 className="w-4 h-4 text-gray-400" />
+                      <button className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
+                        <Share2 className="w-4 h-4 text-on-surface-variant" />
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="bg-white border-2 border-black p-20 text-center">
-                <div className="w-16 h-16 bg-accent/10 border-2 border-accent mx-auto mb-6 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-accent">!</span>
+              <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-20 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary-fixed mx-auto mb-6 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-primary">!</span>
                 </div>
-                <h3 className="font-heading text-2xl font-extrabold mb-2 uppercase tracking-tight">İçerik Bulunamadı</h3>
-                <p className="text-gray-400 uppercase tracking-widest text-xs font-semibold">
+                <h3 className="font-heading text-2xl font-bold mb-2 tracking-tight">İçerik Bulunamadı</h3>
+                <p className="text-on-surface-variant text-[15px]">
                   Bu kategoride henüz bir duyuru veya haber paylaşılmamış.
                 </p>
-                <Button 
+                <Button
                   onClick={() => setActiveCategory("Tümü")}
-                  variant="outline" 
-                  className="mt-8 rounded-none border-black hover:bg-black hover:text-white uppercase tracking-widest text-[10px] font-bold"
+                  variant="outline"
+                  className="mt-8 rounded-full border-outline-variant text-[14px] font-semibold"
                 >
                   Tüm Haberlere Dön
                 </Button>
@@ -135,29 +128,29 @@ export default function NewsClient({ user, posts }: NewsClientProps) {
       </main>
 
       <Sheet open={!!selectedNews} onOpenChange={() => setSelectedNews(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-[600px] p-0 rounded-none border-l-2 border-black overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-[600px] p-0 border-l border-outline-variant overflow-y-auto">
           {selectedNews && (
             <div className="flex flex-col h-full">
-              <SheetHeader className="p-10 border-b-2 border-gray-100 text-left">
+              <SheetHeader className="p-10 border-b border-outline-variant text-left">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest">
+                  <span className="bg-primary-fixed text-primary text-[11px] font-semibold px-3 py-1 rounded-full tracking-wide">
                     {selectedNews.category}
                   </span>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <span className="text-[12px] font-medium text-on-surface-variant">
                     {new Date(selectedNews.createdAt).toLocaleDateString("tr-TR")}
                   </span>
                 </div>
-                <SheetTitle className="font-heading text-3xl font-extrabold tracking-tighter leading-tight">
+                <SheetTitle className="font-heading text-3xl font-bold tracking-tight leading-tight">
                   {selectedNews.title}
                 </SheetTitle>
-                <SheetDescription className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px] pt-4">
+                <SheetDescription className="text-on-surface-variant text-[13px] pt-3">
                   Yayınlayan: {selectedNews.source || selectedNews.club?.name || selectedNews.team?.name}
                 </SheetDescription>
               </SheetHeader>
 
               <div className="p-10">
                 <div className="prose prose-slate max-w-none">
-                  <p className="text-[17px] leading-[1.8] text-gray-700 whitespace-pre-wrap">
+                  <p className="text-[17px] leading-[1.8] text-on-surface whitespace-pre-wrap">
                     {selectedNews.content}
                   </p>
                 </div>
@@ -167,18 +160,18 @@ export default function NewsClient({ user, posts }: NewsClientProps) {
         </SheetContent>
       </Sheet>
 
-      <footer className="bg-black text-white border-t-4 border-accent px-8 py-12 shrink-0">
+      <footer className="bg-card border-t border-outline-variant px-8 py-12 shrink-0">
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="font-heading font-extrabold text-[20px]">
+          <div className="font-heading font-extrabold text-[20px] text-primary">
             Uni<span className="text-accent">.</span>Block
           </div>
-          <div className="flex gap-8 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-500">
-            <Link href="#" className="hover:text-accent">Hakkımızda</Link>
-            <Link href="#" className="hover:text-accent">İletişim</Link>
-            <Link href="#" className="hover:text-accent">Gizlilik</Link>
+          <div className="flex gap-8 text-[14px] font-medium text-on-surface-variant">
+            <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
+            <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
+            <Link href="#" className="hover:text-primary transition-colors">Gizlilik</Link>
           </div>
-          <p className="text-[11px] uppercase tracking-[0.1em] text-accent font-semibold">
-            © 2026 KAMPÜS HABER AĞI
+          <p className="text-[13px] text-on-surface-variant">
+            © 2026 Kampüs Haber Ağı
           </p>
         </div>
       </footer>

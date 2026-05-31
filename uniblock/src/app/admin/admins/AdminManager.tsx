@@ -30,14 +30,14 @@ export function AddAdminForm() {
         value={email}
         onChange={e => setEmail(e.target.value)}
         placeholder="kullanici@universite.edu.tr"
-        className="flex-1 bg-[#0f1117] border border-white/[0.08] px-4 py-2.5 text-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-violet-500/50"
+        className="flex-1 bg-card border border-input rounded-full px-5 py-2.5 text-[14px] text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors"
         disabled={loading}
         required
       />
       <button
         type="submit"
         disabled={loading}
-        className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-[12px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
       >
         <UserPlus className="w-4 h-4" />
         {loading ? "Ekleniyor..." : "Yönetici Yap"}
@@ -63,7 +63,7 @@ export function RemoveAdminButton({ userId, name }: { userId: string; name: stri
       onClick={onClick}
       disabled={loading}
       title="Yetkiyi kaldır"
-      className="p-1.5 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+      className="p-1.5 rounded-lg text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
     >
       <Trash2 className="w-4 h-4" />
     </button>
@@ -92,10 +92,10 @@ export function VisibilityToggle({ adminsVisible }: { adminsVisible: boolean }) 
       onClick={onClick}
       disabled={loading}
       title={visible ? "Yöneticileri gizle" : "Yöneticileri göster"}
-      className={`flex items-center gap-2 px-4 py-2 text-[12px] font-bold uppercase tracking-wider border transition-colors disabled:opacity-50 ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold border transition-colors disabled:opacity-50 ${
         visible
-          ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
-          : "border-white/[0.08] text-white/30 hover:bg-white/[0.04]"
+          ? "border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+          : "border-outline-variant text-on-surface-variant hover:bg-surface-container-high"
       }`}
     >
       {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}

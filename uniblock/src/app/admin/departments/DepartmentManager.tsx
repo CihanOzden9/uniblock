@@ -64,20 +64,20 @@ export default function DepartmentManager({ faculties }: { faculties: Faculty[] 
   return (
     <div className="space-y-4">
       {/* Yeni Fakülte */}
-      <div className="bg-[#181a24] border border-white/[0.06] p-5">
-        <h3 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-3">Yeni Fakülte Ekle</h3>
+      <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-5">
+        <h3 className="text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-3">Yeni Fakülte Ekle</h3>
         <form onSubmit={handleAddFaculty} className="flex gap-3">
           <input
             value={newFaculty}
             onChange={e => setNewFaculty(e.target.value)}
             placeholder="Fakülte adı (ör. Mühendislik Fakültesi)"
-            className="flex-1 bg-[#0f1117] border border-white/[0.08] px-4 py-2.5 text-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
+            className="flex-1 bg-card border border-input rounded-full px-5 py-2.5 text-[14px] text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-[12px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white text-[13px] font-semibold transition-colors disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             Ekle
@@ -87,51 +87,51 @@ export default function DepartmentManager({ faculties }: { faculties: Faculty[] 
 
       {/* Fakülte Listesi */}
       {faculties.length === 0 ? (
-        <div className="bg-[#181a24] border border-white/[0.06] p-12 text-center text-[12px] text-white/20">
+        <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-12 text-center text-[13px] text-on-surface-variant">
           Henüz fakülte eklenmemiş.
         </div>
       ) : (
         <div className="space-y-2">
           {faculties.map(faculty => (
-            <div key={faculty.id} className="bg-[#181a24] border border-white/[0.06]">
-              <div className="flex items-center justify-between px-5 py-3">
+            <div key={faculty.id} className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3.5">
                 <button
                   onClick={() => setExpanded(e => ({ ...e, [faculty.id]: !e[faculty.id] }))}
                   className="flex items-center gap-3 text-left flex-1"
                 >
                   {expanded[faculty.id]
-                    ? <ChevronDown className="w-4 h-4 text-white/30 shrink-0" />
-                    : <ChevronRight className="w-4 h-4 text-white/30 shrink-0" />
+                    ? <ChevronDown className="w-4 h-4 text-on-surface-variant shrink-0" />
+                    : <ChevronRight className="w-4 h-4 text-on-surface-variant shrink-0" />
                   }
-                  <span className="text-[13px] font-semibold text-white">{faculty.name}</span>
-                  <span className="text-[10px] text-white/25">{faculty.departments.length} bölüm</span>
+                  <span className="text-[14px] font-semibold text-on-surface">{faculty.name}</span>
+                  <span className="text-[11px] text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full">{faculty.departments.length} bölüm</span>
                 </button>
                 <button
                   onClick={() => handleDeleteFaculty(faculty.id, faculty.name)}
                   disabled={loading}
-                  className="p-1.5 text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
 
               {expanded[faculty.id] && (
-                <div className="border-t border-white/[0.04] px-5 py-4">
+                <div className="border-t border-outline-variant px-5 py-4 bg-surface-container-low">
                   <div className="space-y-1.5 mb-4">
                     {faculty.departments.map(dept => (
-                      <div key={dept.id} className="flex items-center justify-between py-1.5 px-3 bg-white/[0.02]">
-                        <span className="text-[12px] text-white/60">{dept.name}</span>
+                      <div key={dept.id} className="flex items-center justify-between py-2 px-3 bg-card rounded-lg border border-outline-variant">
+                        <span className="text-[13px] text-on-surface">{dept.name}</span>
                         <button
                           onClick={() => handleDeleteDepartment(dept.id, dept.name)}
                           disabled={loading}
-                          className="p-1 text-red-400/40 hover:text-red-400 transition-colors disabled:opacity-40"
+                          className="p-1 rounded text-on-surface-variant hover:text-destructive transition-colors disabled:opacity-40"
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
                     ))}
                     {faculty.departments.length === 0 && (
-                      <p className="text-[11px] text-white/20 italic px-3">Henüz bölüm yok.</p>
+                      <p className="text-[12px] text-on-surface-variant italic px-3">Henüz bölüm yok.</p>
                     )}
                   </div>
                   <form onSubmit={e => handleAddDepartment(e, faculty.id)} className="flex gap-2">
@@ -139,13 +139,13 @@ export default function DepartmentManager({ faculties }: { faculties: Faculty[] 
                       value={newDept[faculty.id] || ""}
                       onChange={e => setNewDept(d => ({ ...d, [faculty.id]: e.target.value }))}
                       placeholder="Yeni bölüm adı"
-                      className="flex-1 bg-[#0f1117] border border-white/[0.06] px-3 py-2 text-[12px] text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
+                      className="flex-1 bg-card border border-input rounded-full px-4 py-2 text-[13px] text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors"
                       disabled={loading}
                     />
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 bg-cyan-600/70 hover:bg-cyan-600 text-white text-[11px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+                      className="px-4 py-2 rounded-full bg-primary hover:bg-primary-container text-white text-[12px] font-semibold transition-colors disabled:opacity-50"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>

@@ -51,34 +51,31 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Navbar user={user} />
 
       <main className="flex-1 pt-20">
-        <section className="py-12 px-8 border-b-2 border-accent/10">
+        <section className="bg-surface-container-low py-14 px-8 border-b border-outline-variant">
           <div className="max-w-[1200px] mx-auto">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-accent">
-                02 — KULÜPLER VE TOPLULUKLAR
-              </span>
-              <div className="flex-1 h-[1px] bg-gray-200"></div>
-            </div>
-            
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <span className="text-[12px] font-semibold tracking-wide uppercase text-primary">
+              Kulüpler ve Topluluklar
+            </span>
+
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mt-3">
               <div className="flex-1">
-                <h1 className="font-heading text-[clamp(36px,5vw,64px)] font-extrabold tracking-tighter leading-[1.05] mb-4">
+                <h1 className="font-heading text-[clamp(32px,4.5vw,52px)] font-bold tracking-tight leading-[1.1] mb-3 text-on-surface">
                   Kampüs Toplulukları
                 </h1>
-                <p className="text-[15px] leading-[1.6] text-gray-600 max-w-[700px] mb-2">
+                <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[700px]">
                   İlgi alanlarına uygun kulüpleri keşfet, projelerine dahil ol ve kampüs ağını genişlet.
                 </p>
               </div>
-              
-              <div className="relative w-full md:w-[300px] mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input 
-                  placeholder="Kulüp ara..." 
-                  className="pl-10 rounded-none border-2 border-black focus-visible:ring-accent h-12"
+
+              <div className="relative w-full md:w-[320px]">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                <Input
+                  placeholder="Kulüp ara..."
+                  className="pl-11 rounded-full bg-surface border-outline-variant h-12"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -87,13 +84,13 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
           </div>
         </section>
 
-        <section className="bg-gray-100 py-12 px-8 min-h-[400px]">
+        <section className="py-12 px-8 min-h-[400px]">
           <div className="max-w-[1200px] mx-auto w-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
               {filteredClubs.map((club) => {
                 // Separate current user's membership from board members
                 const userMembership = club.members?.find((m: any) => m.userId === user.id);
-                const boardMembers = club.members?.filter((m: any) => m.role !== "MEMBER" && m.userId !== user.id) || [];
+                const boardMembers = club.members?.filter((m: any) => m.role !== "MEMBER" && m.userId !== user.id && m.userId !== club.leader?.id) || [];
                 const userStatus = userMembership?.status;
                 const isLoading = isPending === club.id;
                 const isLeaving = leavingClub === club.id;
@@ -106,53 +103,53 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
                 ];
 
                 return (
-                  <Card key={club.id} className="border-black border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none bg-white overflow-hidden flex flex-col hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-                    <CardHeader className="border-b-2 border-gray-100 pb-4">
+                  <Card key={club.id} className="overflow-hidden flex flex-col hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
+                    <CardHeader className="pb-4">
                       <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/10 px-2 py-1 border border-accent/20">
+                        <span className="text-[11px] font-semibold text-primary tracking-wide bg-primary-fixed px-2.5 py-1 rounded-full">
                           {club.category || "Topluluk"}
                         </span>
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
-                          <Users className="w-3 h-3" />
-                          {club._count?.members || 0} ÜYE
+                        <div className="flex items-center gap-1.5 text-[12px] font-medium text-on-surface-variant">
+                          <Users className="w-3.5 h-3.5" />
+                          {club._count?.members || 0} üye
                         </div>
                       </div>
-                      <CardTitle className="font-heading text-xl font-extrabold tracking-tight mt-4">
+                      <CardTitle className="font-heading text-xl font-bold tracking-tight mt-4">
                         {club.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="py-6 flex-1 space-y-4">
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                    <CardContent className="flex-1 space-y-4">
+                      <p className="text-[14px] text-on-surface-variant leading-relaxed">
                         {club.description || "Henüz bir açıklama eklenmemiş."}
                       </p>
 
                       {/* Management Team Section */}
                       {managementTeam.length > 0 && (
                         <div>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setExpandedClub(isExpanded ? null : club.id);
                             }}
-                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-accent transition-colors w-full"
+                            className="flex items-center gap-2 text-[12px] font-semibold text-on-surface-variant hover:text-primary transition-colors w-full"
                           >
-                            <Crown className="w-3 h-3" />
-                            YÖNETİM KADROSU ({managementTeam.length})
-                            {isExpanded ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+                            <Crown className="w-3.5 h-3.5" />
+                            Yönetim Kadrosu ({managementTeam.length})
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
                           </button>
-                          
+
                           {isExpanded && (
-                            <div className="mt-3 space-y-2 border-l-2 border-accent/30 pl-3 animate-in slide-in-from-top-2">
+                            <div className="mt-3 space-y-2.5 border-l-2 border-primary/30 pl-3 animate-in slide-in-from-top-2">
                               {managementTeam.map((person: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between">
+                                <div key={idx} className="flex items-center justify-between gap-2">
                                   <div>
-                                    <p className="text-xs font-bold text-gray-800">{person.name}</p>
-                                    <p className="text-[9px] text-gray-400 font-medium">{person.department || "—"}</p>
+                                    <p className="text-[13px] font-semibold text-on-surface">{person.name}</p>
+                                    <p className="text-[11px] text-on-surface-variant">{person.department || "—"}</p>
                                   </div>
-                                  <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 ${
-                                    person.role === "BAŞKAN" 
-                                      ? "bg-accent/10 text-accent border border-accent/20" 
-                                      : "bg-gray-100 text-gray-500"
+                                  <span className={`text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full shrink-0 ${
+                                    person.role === "BAŞKAN"
+                                      ? "bg-accent/15 text-[color:var(--community-orange-deep)]"
+                                      : "bg-surface-container-high text-on-surface-variant"
                                   }`}>
                                     {person.role}
                                   </span>
@@ -163,25 +160,25 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
                         </div>
                       )}
                     </CardContent>
-                    <CardFooter className="pt-4 pb-6 border-t-2 border-gray-50 bg-[#fafafa] flex gap-3">
+                    <CardFooter className="border-t border-outline-variant bg-surface-container-low flex gap-3">
                       {(() => {
                         if (userStatus === "APPROVED") {
                           return (
                             <>
-                              <Button 
+                              <Button
                                 onClick={() => onLeaveClick(club.id)}
                                 disabled={isLeaving}
                                 variant="outline"
-                                className="flex-1 rounded-none uppercase tracking-widest text-[10px] font-bold h-10 border-2 border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all"
+                                className="flex-1 rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
                               >
                                 {isLeaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                                   <>
-                                    <LogOut className="w-3 h-3 mr-2" />
+                                    <LogOut className="w-3.5 h-3.5 mr-2" />
                                     Ayrıl
                                   </>
                                 )}
                               </Button>
-                              <Button disabled className="flex-1 rounded-none uppercase tracking-widest text-[10px] font-bold h-10 bg-green-50 text-green-600 border-green-100">
+                              <Button disabled className="flex-1 rounded-full text-[13px] font-semibold h-10 bg-primary-fixed text-primary border-transparent disabled:opacity-100">
                                 Üyesiniz
                               </Button>
                             </>
@@ -190,22 +187,22 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
 
                         if (userStatus === "PENDING" || isLoading) {
                           return (
-                            <Button disabled className="flex-1 rounded-none uppercase tracking-widest text-[10px] font-bold h-10 bg-gray-100 text-gray-400 border-gray-200">
+                            <Button disabled className="flex-1 rounded-full text-[13px] font-semibold h-10 bg-surface-container-high text-on-surface-variant border-transparent disabled:opacity-100">
                               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "İstek Gönderildi"}
                             </Button>
                           );
                         }
 
                         return (
-                          <Button 
+                          <Button
                             onClick={() => onJoinClick(club.id)}
-                            className="flex-1 rounded-none uppercase tracking-widest text-[10px] font-bold h-10 bg-accent text-white hover:bg-black border-accent hover:border-black transition-all"
+                            className="flex-1 rounded-full text-[13px] font-semibold h-10"
                           >
                             Katılma İsteği
                           </Button>
                         );
                       })()}
-                      <Button variant="outline" className="w-10 h-10 p-0 rounded-none border-black hover:bg-black hover:text-white transition-all">
+                      <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all">
                         <ExternalLink className="w-4 h-4" />
                       </Button>
                     </CardFooter>
@@ -217,18 +214,18 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
         </section>
       </main>
 
-      <footer className="bg-black text-white border-t-4 border-accent px-8 py-12 shrink-0">
+      <footer className="bg-card border-t border-outline-variant px-8 py-12 shrink-0">
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="font-heading font-extrabold text-[20px]">
+          <div className="font-heading font-extrabold text-[20px] text-primary">
             Uni<span className="text-accent">.</span>Block
           </div>
-          <div className="flex gap-8 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-500">
-            <Link href="#" className="hover:text-accent">Hakkımızda</Link>
-            <Link href="#" className="hover:text-accent">İletişim</Link>
-            <Link href="#" className="hover:text-accent">Gizlilik</Link>
+          <div className="flex gap-8 text-[14px] font-medium text-on-surface-variant">
+            <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
+            <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
+            <Link href="#" className="hover:text-primary transition-colors">Gizlilik</Link>
           </div>
-          <p className="text-[11px] uppercase tracking-[0.1em] text-accent font-semibold">
-            © 2026 KAMPÜS HABER AĞI
+          <p className="text-[13px] text-on-surface-variant">
+            © 2026 Kampüs Haber Ağı
           </p>
         </div>
       </footer>

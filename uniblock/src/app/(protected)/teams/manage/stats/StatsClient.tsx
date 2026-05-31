@@ -27,7 +27,10 @@ interface StatsClientProps {
   };
 }
 
-const COLORS = ["#FF3B30", "#000000", "#8E8E93", "#E5E5EA"];
+// Academic Pulse paleti
+const COLORS = ["#005bbf", "#dce9ff", "#9f4200", "#c1c6d6"];
+const ACCENT = "#fd6c00";
+const PRIMARY = "#005bbf";
 
 export default function StatsClient({ teamName, data }: StatsClientProps) {
   const eventShareData = [
@@ -41,163 +44,102 @@ export default function StatsClient({ teamName, data }: StatsClientProps) {
   ];
 
   return (
-    <div className="space-y-12 animate-fade-in">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-black text-white p-12 border-b-8 border-accent shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <div className="bg-primary text-white p-8 rounded-xl shadow-ambient">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-accent mb-3 block">
-              Performans Analizi
-            </span>
-            <h1 className="font-heading text-5xl font-black tracking-tighter uppercase leading-none">
-              İstatistikler<span className="text-accent">.</span>
-            </h1>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[11px] mt-4 flex items-center gap-2">
-              <Award className="w-4 h-4 text-accent" /> {teamName} Yönetim Paneli
-            </p>
+            <span className="text-[11px] font-semibold tracking-wide uppercase text-white/70 mb-1.5 block">Performans Analizi</span>
+            <h1 className="font-heading text-3xl font-bold tracking-tight">İstatistikler</h1>
+            <p className="text-white/80 text-[14px] mt-2 flex items-center gap-2"><Award className="w-4 h-4" /> {teamName} Yönetim Paneli</p>
           </div>
         </div>
       </div>
 
-      {/* Grid for Charts */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-        {/* Main Monthly Activity Chart */}
-        <Card className="xl:col-span-2 rounded-none border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white overflow-hidden">
-          <CardHeader className="border-b-2 border-black bg-gray-50 p-6">
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-gutter">
+        <Card className="xl:col-span-2 shadow-ambient overflow-hidden p-0">
+          <CardHeader className="border-b border-outline-variant bg-surface-container-low p-6">
             <div className="flex items-center justify-between">
-              <CardTitle className="font-heading text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                <TrendingUp className="w-6 h-6 text-accent" /> Aylık Etkinlik Trendi
+              <CardTitle className="font-heading text-lg font-bold tracking-tight flex items-center gap-3">
+                <TrendingUp className="w-5 h-5 text-accent" /> Aylık Etkinlik Trendi
               </CardTitle>
               <div className="flex gap-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-accent"></div>
-                  <span className="text-[10px] font-bold uppercase">{teamName}</span>
+                  <div className="w-3 h-3 rounded-sm bg-accent" />
+                  <span className="text-[12px] font-medium text-on-surface-variant">{teamName}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-black"></div>
-                  <span className="text-[10px] font-bold uppercase">Genel Toplam</span>
+                  <div className="w-3 h-3 rounded-sm bg-primary" />
+                  <span className="text-[12px] font-medium text-on-surface-variant">Genel Toplam</span>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-8 h-[400px]">
+          <CardContent className="p-6 h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data.monthlyData}>
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#000000" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#000000" stopOpacity={0}/>
+                    <stop offset="5%" stopColor={PRIMARY} stopOpacity={0.15} />
+                    <stop offset="95%" stopColor={PRIMARY} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="colorTeam" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF3B30" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#FF3B30" stopOpacity={0}/>
+                    <stop offset="5%" stopColor={ACCENT} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E5EA" />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#8E8E93' }}
-                  dy={10}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#8E8E93' }}
-                />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#c1c6d6" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: '#414754' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: '#414754' }} />
                 <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#000',
-                    border: 'none',
-                    borderRadius: '0',
-                    color: '#fff',
-                    fontFamily: 'inherit',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
-                  }}
-                  itemStyle={{ color: '#fff' }}
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #c1c6d6', borderRadius: '12px', color: '#0b1c30', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.06)' }}
+                  itemStyle={{ color: '#0b1c30' }}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="total"
-                  stroke="#000"
-                  strokeWidth={4}
-                  fillOpacity={1}
-                  fill="url(#colorTotal)"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="team"
-                  stroke="#FF3B30"
-                  strokeWidth={4}
-                  fillOpacity={1}
-                  fill="url(#colorTeam)"
-                />
+                <Area type="monotone" dataKey="total" stroke={PRIMARY} strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                <Area type="monotone" dataKey="team" stroke={ACCENT} strokeWidth={3} fillOpacity={1} fill="url(#colorTeam)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Share Distribution */}
-        <div className="flex flex-col gap-8">
-          {/* Event Share Pie */}
-          <Card className="rounded-none border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white h-1/2">
+        <div className="flex flex-col gap-gutter">
+          <Card className="shadow-ambient p-0">
             <CardHeader className="p-6 pb-0">
-              <CardTitle className="text-sm font-black uppercase tracking-widest text-center">Toplam Etkinlik Payı</CardTitle>
+              <CardTitle className="text-[14px] font-bold text-center">Toplam Etkinlik Payı</CardTitle>
             </CardHeader>
             <CardContent className="h-[200px] flex items-center justify-center relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={eventShareData}
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {eventShareData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                  <Pie data={eventShareData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                    {eventShareData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-4">
-                <span className="text-2xl font-black">%{(data.shares.events.team / (data.shares.events.team + data.shares.events.others || 1) * 100).toFixed(1)}</span>
-                <span className="text-[8px] font-bold text-gray-400 uppercase">PAYINIZ</span>
+                <span className="text-2xl font-bold text-primary">%{(data.shares.events.team / (data.shares.events.team + data.shares.events.others || 1) * 100).toFixed(1)}</span>
+                <span className="text-[11px] font-medium text-on-surface-variant">Payınız</span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Participant Share Pie */}
-          <Card className="rounded-none border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white h-1/2">
+          <Card className="shadow-ambient p-0">
             <CardHeader className="p-6 pb-0">
-              <CardTitle className="text-sm font-black uppercase tracking-widest text-center">Katılımcı Payı (RSVP)</CardTitle>
+              <CardTitle className="text-[14px] font-bold text-center">Katılımcı Payı (RSVP)</CardTitle>
             </CardHeader>
             <CardContent className="h-[200px] flex items-center justify-center relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={participantShareData}
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {participantShareData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                  <Pie data={participantShareData} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" stroke="none">
+                    {participantShareData.map((entry, index) => (<Cell key={`cell-${index}`} fill={index === 0 ? ACCENT : COLORS[1]} />))}
                   </Pie>
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-4">
-                <span className="text-2xl font-black text-accent">%{(data.shares.participants.team / (data.shares.participants.team + data.shares.participants.others || 1) * 100).toFixed(1)}</span>
-                <span className="text-[8px] font-bold text-gray-400 uppercase">PAYINIZ</span>
+                <span className="text-2xl font-bold text-accent">%{(data.shares.participants.team / (data.shares.participants.team + data.shares.participants.others || 1) * 100).toFixed(1)}</span>
+                <span className="text-[11px] font-medium text-on-surface-variant">Payınız</span>
               </div>
             </CardContent>
           </Card>
@@ -205,26 +147,28 @@ export default function StatsClient({ teamName, data }: StatsClientProps) {
       </div>
 
       {/* Quick Stats (sıralama/liderlik tablosu YOK) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-black text-white p-6 border-l-8 border-accent">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+        <div className="bg-primary text-white p-6 rounded-xl shadow-ambient">
           <div className="flex items-center gap-3 mb-2">
             <Zap className="w-4 h-4 text-accent" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Toplam Etkinlik</span>
+            <span className="text-[12px] font-semibold">Toplam Etkinlik</span>
           </div>
-          <p className="text-3xl font-black">{data.shares.events.team}</p>
-          <p className="text-[9px] text-gray-400 mt-2 font-bold uppercase">TAKIMINIZIN DÜZENLEDİĞİ</p>
+          <p className="text-3xl font-bold">{data.shares.events.team}</p>
+          <p className="text-[12px] text-white/70 mt-2">Takımınızın düzenlediği</p>
         </div>
 
-        <div className="bg-white border-2 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div className="flex items-center gap-3 mb-2 text-gray-400">
-            <Users className="w-4 h-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Aktif Üyeler</span>
-          </div>
-          <p className="text-3xl font-black">{data.activeMemberCount}</p>
-          <div className="w-full bg-gray-100 h-1 mt-4 overflow-hidden">
-            <div className="bg-accent h-full w-[65%]"></div>
-          </div>
-        </div>
+        <Card className="shadow-ambient">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-2 text-on-surface-variant">
+              <Users className="w-4 h-4" />
+              <span className="text-[12px] font-semibold">Aktif Üyeler</span>
+            </div>
+            <p className="text-3xl font-bold text-on-surface">{data.activeMemberCount}</p>
+            <div className="w-full bg-surface-container-high h-1.5 rounded-full mt-4 overflow-hidden">
+              <div className="bg-accent h-full w-[65%] rounded-full" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

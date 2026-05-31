@@ -3,191 +3,285 @@
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, ShieldCheck, Star, Calendar, LogOut, Loader2 } from "lucide-react";
+import {
+  Users, Calendar, LogOut, Loader2, ChevronLeft, ChevronRight,
+  CalendarClock, MapPin, ShieldCheck
+} from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 import { leaveClub } from "@/app/actions/club";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface EventsClientProps {
   user: any;
-  events: any[];
+  myEvents: any[];
+  calendarEvents: any[];
   memberships: any[];
 }
 
-export default function EventsClient({ user, events, memberships }: EventsClientProps) {
+const MONTHS = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+];
+const WEEKDAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+const CHIP_COLORS = [
+  "bg-primary text-white",
+  "bg-accent text-white",
+  "bg-primary-container text-white",
+];
+
+function dayKey(d: Date) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+export default function EventsClient({ user, myEvents, calendarEvents, memberships }: EventsClientProps) {
   const [leavingClub, setLeavingClub] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"calendar" | "memberships">("calendar");
+  const today = useMemo(() => new Date(), []);
+  const [viewDate, setViewDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
 
   const onLeaveClick = async (clubId: string) => {
     if (!confirm("Bu kulüpten ayrılmak istediğinize emin misiniz?")) return;
     setLeavingClub(clubId);
     const result = await leaveClub(clubId, user.id);
-    if (result.success) {
-      toast.success("Kulüpten başarıyla ayrıldınız.");
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) toast.success("Kulüpten başarıyla ayrıldınız.");
+    else toast.error(result.error);
     setLeavingClub(null);
   };
+
+  // Etkinlikleri gün anahtarına göre grupla (renk indeksi sabit kalsın diye sırayla)
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, { ev: any; color: string }[]>();
+    calendarEvents.forEach((ev, idx) => {
+      const d = new Date(ev.date);
+      const key = dayKey(d);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push({ ev, color: CHIP_COLORS[idx % CHIP_COLORS.length] });
+    });
+    return map;
+  }, [calendarEvents]);
+
+  // Görüntülenen ay için takvim hücreleri (Pazartesi başlangıçlı)
+  const cells = useMemo(() => {
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Pzt=0
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const arr: (Date | null)[] = [];
+    for (let i = 0; i < firstWeekday; i++) arr.push(null);
+    for (let d = 1; d <= daysInMonth; d++) arr.push(new Date(year, month, d));
+    while (arr.length % 7 !== 0) arr.push(null);
+    return arr;
+  }, [viewDate]);
+
+  // Sağ panel: bugünden itibaren yaklaşan etkinlikler
+  const upcoming = useMemo(() => {
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    return calendarEvents
+      .filter(e => new Date(e.date) >= t)
+      .sort((a, b) => +new Date(a.date) - +new Date(b.date))
+      .slice(0, 6);
+  }, [calendarEvents]);
+
+  const goPrev = () => setViewDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const goNext = () => setViewDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const isToday = (d: Date) => dayKey(d) === dayKey(today);
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen flex flex-col bg-surface">
       <Navbar user={user} />
 
       <main className="flex-1 pt-20">
-        <section className="py-12 px-8 border-b-2 border-accent/10">
-          <div className="max-w-[1200px] mx-auto">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-accent">
-                02 — PANELİM
-              </span>
-              <div className="flex-1 h-[1px] bg-gray-200"></div>
+        {/* Hero bandı */}
+        <header className="w-full bg-surface-container-low py-12 px-margin-mobile md:px-margin-desktop border-b border-outline-variant">
+          <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-5">
+            <div>
+              <span className="text-[12px] font-semibold tracking-wide uppercase text-primary">Etkinlikler</span>
+              <h1 className="font-heading text-[clamp(32px,4.5vw,48px)] font-bold tracking-tight leading-[1.1] mt-2 text-on-surface">
+                Etkinlik Takvimi
+              </h1>
+              <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[640px] mt-2">
+                Kampüsteki etkinlikleri keşfet, üyeliklerini yönet ve hiçbir şeyi kaçırma.
+              </p>
             </div>
-            
-            <h1 className="font-heading text-[clamp(36px,5vw,64px)] font-extrabold tracking-tighter leading-[1.05] mb-4">
-              Etkinlik ve Üyelikler
-            </h1>
-            <p className="text-[15px] leading-[1.6] text-gray-600 max-w-[700px] mb-6">
-              Katıldığınız etkinlikler, kazandığınız puanlar ve üyesi olduğunuz kampüs toplulukları.
-            </p>
+
+            {/* Sekme segmenti */}
+            <div className="flex gap-1 bg-surface p-1 rounded-full border border-outline-variant shrink-0 w-fit">
+              <button
+                onClick={() => setActiveTab("calendar")}
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === "calendar" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                <Calendar className="w-4 h-4" /> Takvim
+              </button>
+              <button
+                onClick={() => setActiveTab("memberships")}
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === "memberships" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                <Users className="w-4 h-4" /> Üyeliklerim
+              </button>
+            </div>
           </div>
-        </section>
+        </header>
 
-        <section className="bg-gray-100 py-12 px-8 min-h-[400px]">
-          <div className="max-w-[1200px] mx-auto w-full">
-            <Tabs defaultValue="events" className="w-full">
-              <TabsList className="flex flex-wrap w-full justify-start rounded-none bg-transparent p-0 border-b-2 border-accent/20 mb-8 h-auto gap-10">
-                <TabsTrigger value="events" className="rounded-none px-0 pb-4 pt-2 text-[13px] uppercase tracking-wider font-semibold text-[#a3a3a3] hover:text-accent transition-colors border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:text-accent !bg-transparent !shadow-none outline-none ring-0 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" /> Etkinliklerim
-                </TabsTrigger>
-                <TabsTrigger value="memberships" className="rounded-none px-0 pb-4 pt-2 text-[13px] uppercase tracking-wider font-semibold text-[#a3a3a3] hover:text-accent transition-colors border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:text-accent !bg-transparent !shadow-none outline-none ring-0 flex items-center gap-2">
-                  <Users className="w-4 h-4" /> Üyeliklerim
-                </TabsTrigger>
-              </TabsList>
+        <div className="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin-desktop py-stack-lg">
+          {activeTab === "calendar" ? (
+            <div className="flex flex-col lg:flex-row gap-gutter">
+              {/* Sol: Takvim grid */}
+              <div className="flex-1 min-w-0">
+                <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
+                  {/* Ay başlığı + navigasyon */}
+                  <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant bg-surface-container-low">
+                    <button onClick={goPrev} className="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <h2 className="font-heading text-xl font-bold tracking-tight text-on-surface">
+                      {MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}
+                    </h2>
+                    <button onClick={goNext} className="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
 
-              <TabsContent value="events" className="focus-visible:outline-none focus-visible:ring-0">
-                <Card className="border-accent border-2 shadow-[12px_12px_0px_0px_rgba(5,150,105,0.1)] rounded-none bg-white overflow-hidden">
-                  <CardHeader className="border-b-2 border-accent/10 pb-5 bg-[#fafafa]">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle className="font-heading text-xl font-extrabold tracking-tight">Etkinlik Geçmişi</CardTitle>
-                        <CardDescription className="text-xs uppercase tracking-widest text-accent font-medium mt-1">
-                          Geçmiş ve yaklaşan katılım durumları
-                        </CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">TOPLAM PUAN</div>
-                        <div className="text-3xl font-black text-accent leading-none mt-1">
-                          {events.reduce((acc, curr) => acc + (curr.points || 0), 0)}
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <div className="divide-y-2 divide-gray-100">
-                      {events.length > 0 ? events.map((event, i) => (
-                        <div key={i} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-black text-white flex flex-col items-center justify-center font-bold">
-                              <span className="text-[10px] leading-none mb-1">{new Date(event.date).toLocaleDateString("tr-TR", { month: 'short' }).toUpperCase()}</span>
-                              <span className="text-sm leading-none">{new Date(event.date).getDate()}</span>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-[15px]">{event.title}</h4>
-                              <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-1">{event.club?.name}</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className="text-[11px] font-black text-accent bg-accent/10 px-3 py-1 border border-accent/20">+{event.points || 0} P</span>
-                            <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-tight">Tamamlandı</span>
+                  {/* Hafta günleri */}
+                  <div className="grid grid-cols-7 border-b border-outline-variant">
+                    {WEEKDAYS.map(w => (
+                      <div key={w} className="py-2.5 text-center text-[12px] font-semibold text-on-surface-variant">{w}</div>
+                    ))}
+                  </div>
+
+                  {/* Gün hücreleri */}
+                  <div className="grid grid-cols-7">
+                    {cells.map((cell, i) => {
+                      if (!cell) return <div key={i} className="min-h-[92px] border-b border-r border-outline-variant/60 bg-surface-container-low/40" />;
+                      const dayEvents = eventsByDay.get(dayKey(cell)) || [];
+                      return (
+                        <div key={i} className={`min-h-[92px] border-b border-r border-outline-variant/60 p-1.5 ${isToday(cell) ? "bg-primary-fixed/30" : "hover:bg-surface-container-low transition-colors"}`}>
+                          <span className={`text-[13px] block mb-1 ${isToday(cell) ? "font-bold text-primary" : "text-on-surface"}`}>
+                            {cell.getDate()}
+                          </span>
+                          <div className="space-y-1">
+                            {dayEvents.slice(0, 2).map(({ ev, color }) => (
+                              <div key={ev.id} title={ev.title} className={`${color} text-[10px] font-medium rounded px-1.5 py-0.5 truncate cursor-pointer hover:opacity-80`}>
+                                {ev.title}
+                              </div>
+                            ))}
+                            {dayEvents.length > 2 && (
+                              <span className="text-[10px] text-on-surface-variant font-medium pl-1">+{dayEvents.length - 2} daha</span>
+                            )}
                           </div>
                         </div>
-                      )) : (
-                        <div className="p-12 text-center text-gray-400 uppercase tracking-widest text-xs font-bold">
-                          Henüz bir etkinliğe katılmadınız.
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-4 pb-5 border-t-2 border-accent/10 bg-[#fafafa]">
-                    <Link href="/feed" className="w-full">
-                      <Button variant="outline" className="w-full rounded-none uppercase tracking-[0.15em] text-[10px] font-bold border-black hover:bg-black hover:text-white transition-all">
-                        YENİ ETKİNLİKLER KEŞFET
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="memberships" className="focus-visible:outline-none focus-visible:ring-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {memberships.length > 0 ? memberships.map((membership, i) => (
-                    <Card key={i} className="border-black border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-none bg-white overflow-hidden hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all cursor-pointer group">
-                      <CardHeader className="border-b-2 border-gray-100 pb-4 flex flex-row items-center justify-between">
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/10 px-2 py-1 border border-accent/20">
-                          {membership.club.type || "KULÜP"}
-                        </span>
-                        <ShieldCheck className="w-5 h-5 text-accent" />
-                      </CardHeader>
-                      <CardContent className="py-6">
-                        <h3 className="font-heading text-xl font-extrabold tracking-tight mb-1 group-hover:text-accent transition-colors">
-                          {membership.club.name}
-                        </h3>
-                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">
-                          {membership.role}
-                        </p>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500">
-                          <Calendar className="w-3 h-3" />
-                          KATILIM: {new Date(membership.createdAt).toLocaleDateString("tr-TR").toUpperCase()}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="pt-0 pb-6 flex flex-col gap-3">
-                        <Button 
-                          onClick={() => onLeaveClick(membership.club.id)}
-                          disabled={leavingClub === membership.club.id}
-                          variant="outline"
-                          className="w-full rounded-none uppercase tracking-widest text-[10px] font-bold h-10 border-2 border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all"
-                        >
-                          {leavingClub === membership.club.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <>
-                              <LogOut className="w-3 h-3 mr-2" />
-                              Kulüpten Ayrıl
-                            </>
-                          )}
-                        </Button>
-                        <Button variant="link" className="p-0 h-auto text-accent text-[10px] font-bold uppercase tracking-widest hover:no-underline flex items-center gap-1 group/btn w-full justify-center">
-                          KULÜP SAYFASI <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  )) : (
-                    <div className="col-span-full bg-white border-2 border-black p-20 text-center">
-                       <p className="text-gray-400 uppercase tracking-widest text-xs font-bold">Henüz bir kulübe üye değilsiniz.</p>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </section>
+              </div>
+
+              {/* Sağ: Yaklaşan Etkinlikler + Toplam Puan */}
+              <aside className="w-full lg:w-80 shrink-0 space-y-stack-md">
+                <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
+                  <div className="px-5 py-4 border-b border-outline-variant bg-surface-container-low">
+                    <h3 className="font-heading text-[18px] font-bold tracking-tight text-on-surface flex items-center gap-2">
+                      <CalendarClock className="w-5 h-5 text-primary" /> Yaklaşan Etkinlikler
+                    </h3>
+                  </div>
+                  <div className="p-stack-md space-y-1">
+                    {upcoming.length > 0 ? upcoming.map((ev, idx) => {
+                      const d = new Date(ev.date);
+                      const colorBox = idx % 2 === 0 ? "bg-primary-fixed text-primary" : "bg-accent/15 text-[color:var(--community-orange-deep)]";
+                      return (
+                        <div key={ev.id} className="flex gap-3 p-2 -mx-2 rounded-lg hover:bg-surface-container-low transition-colors group cursor-pointer">
+                          <div className={`w-12 h-12 rounded-lg ${colorBox} flex flex-col items-center justify-center shrink-0`}>
+                            <span className="text-[11px] font-semibold uppercase leading-none">{MONTHS[d.getMonth()].slice(0, 3)}</span>
+                            <span className="text-[18px] font-bold leading-none mt-0.5">{d.getDate()}</span>
+                          </div>
+                          <div className="min-w-0 flex flex-col justify-center">
+                            <h4 className="text-[14px] font-semibold text-on-surface group-hover:text-primary transition-colors truncate">{ev.title}</h4>
+                            <p className="text-[12px] text-on-surface-variant truncate flex items-center gap-1">
+                              <MapPin className="w-3 h-3 shrink-0" /> {ev.location || ev.source}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }) : (
+                      <p className="text-[13px] text-on-surface-variant text-center py-6">Yaklaşan etkinlik yok.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Katılım puanı kartı */}
+                <div className="bg-primary rounded-xl shadow-ambient p-5 text-white">
+                  <p className="text-[12px] font-semibold uppercase tracking-wide opacity-80">Toplam Katılım Puanın</p>
+                  <p className="font-heading text-4xl font-bold mt-1.5">
+                    {myEvents.reduce((acc, c) => acc + (c.points || 0), 0)}
+                  </p>
+                  <p className="text-[13px] opacity-90 mt-1">{myEvents.length} etkinliğe katıldın</p>
+                </div>
+              </aside>
+            </div>
+          ) : (
+            /* Üyeliklerim sekmesi */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+              {memberships.length > 0 ? memberships.map((membership, i) => (
+                <div key={i} className="bg-card rounded-xl border border-outline-variant shadow-ambient p-stack-md flex flex-col hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all group">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[11px] font-semibold text-primary tracking-wide bg-primary-fixed px-2.5 py-1 rounded-full">
+                      {membership.club.type || "Kulüp"}
+                    </span>
+                    <ShieldCheck className="w-5 h-5 text-accent" />
+                  </div>
+                  <h3 className="font-heading text-xl font-bold tracking-tight text-on-surface mb-1 group-hover:text-primary transition-colors">
+                    {membership.club.name}
+                  </h3>
+                  <p className="text-[12px] font-medium text-on-surface-variant mb-4">{membership.role}</p>
+                  <div className="flex items-center gap-1.5 text-[12px] text-on-surface-variant mb-5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Katılım: {new Date(membership.createdAt).toLocaleDateString("tr-TR")}
+                  </div>
+                  <Button
+                    onClick={() => onLeaveClick(membership.club.id)}
+                    disabled={leavingClub === membership.club.id}
+                    variant="outline"
+                    className="w-full mt-auto rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
+                  >
+                    {leavingClub === membership.club.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <><LogOut className="w-3.5 h-3.5 mr-2" /> Kulüpten Ayrıl</>
+                    )}
+                  </Button>
+                </div>
+              )) : (
+                <div className="col-span-full bg-card rounded-xl border border-outline-variant shadow-ambient p-16 text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary-fixed mx-auto mb-5 flex items-center justify-center">
+                    <Users className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="font-heading text-xl font-bold tracking-tight mb-1.5">Henüz Üyeliğin Yok</h3>
+                  <p className="text-[14px] text-on-surface-variant mb-6">Kampüs topluluklarına katılarak etkinliklere erişim kazan.</p>
+                  <Link href="/clubs">
+                    <Button className="rounded-full text-[14px] font-semibold">Toplulukları Keşfet</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </main>
 
-      <footer className="bg-black text-white border-t-4 border-accent px-8 py-12 shrink-0">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="font-heading font-extrabold text-[20px]">
+      <footer className="mt-auto bg-card border-t border-outline-variant px-margin-desktop py-stack-lg shrink-0">
+        <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="font-heading font-extrabold text-[20px] text-primary">
             Uni<span className="text-accent">.</span>Block
           </div>
-          <div className="flex gap-8 text-[11px] font-bold tracking-[0.2em] uppercase text-gray-500">
-            <Link href="#" className="hover:text-accent">Hakkımızda</Link>
-            <Link href="#" className="hover:text-accent">İletişim</Link>
-            <Link href="#" className="hover:text-accent">Gizlilik</Link>
+          <div className="flex gap-8 text-[14px] font-medium text-on-surface-variant">
+            <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
+            <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
+            <Link href="#" className="hover:text-primary transition-colors">Gizlilik</Link>
           </div>
-          <p className="text-[11px] uppercase tracking-[0.1em] text-accent font-semibold">
-            © 2026 KAMPÜS HABER AĞI
-          </p>
+          <p className="text-[13px] text-on-surface-variant">© 2026 Kampüs Haber Ağı</p>
         </div>
       </footer>
 

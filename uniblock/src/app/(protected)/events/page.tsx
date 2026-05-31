@@ -10,7 +10,7 @@ export default async function EventsPage() {
     redirect("/login");
   }
 
-  // Fetch real events for the user
+  // Kullanıcının katıldığı (RSVP) etkinlikler
   const userEvents = await prisma.interaction.findMany({
     where: {
       userId: user.id,
@@ -26,24 +26,48 @@ export default async function EventsPage() {
     }
   });
 
-  // Map interactions to simple event objects
-  const events = userEvents.map(i => ({
-    id: i.event?.id,
-    title: i.event?.title,
-    date: i.event?.date,
-    club: i.event?.organizer || i.event?.team,
-    points: 100 // Default points for participation
-  }));
+  const myEvents = userEvents
+    .filter(i => i.event)
+    .map(i => ({
+      id: i.event!.id,
+      title: i.event!.title,
+      date: i.event!.date,
+      location: i.event!.location,
+      club: i.event!.organizer || i.event!.team,
+      points: 100
+    }));
 
-  // Fetch memberships
-  const memberships = await prisma.clubMember.findMany({
-    where: {
-      userId: user.id
-    },
-    include: {
-      club: true
-    }
+  // Takvim için tüm aktif (iptal edilmemiş) etkinlikler
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const allEventsRaw = await prisma.event.findMany({
+    where: { cancelled: false },
+    orderBy: { date: "asc" },
+    include: { organizer: true, team: true }
   });
 
-  return <EventsClient user={user} events={events} memberships={memberships} />;
+  const calendarEvents = allEventsRaw.map(e => ({
+    id: e.id,
+    title: e.title,
+    date: e.date,
+    location: e.location,
+    source: e.organizer?.name || e.team?.name || "Kampüs"
+  }));
+
+  // Üyelikler
+  const memberships = await prisma.clubMember.findMany({
+    where: { userId: user.id },
+    include: { club: true }
+  });
+
+  return (
+    <EventsClient
+      user={user}
+      myEvents={myEvents}
+      calendarEvents={calendarEvents}
+      memberships={memberships}
+    />
+  );
 }
