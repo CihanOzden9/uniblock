@@ -39,6 +39,30 @@ export default async function FeedPage() {
     take: 5
   });
 
+  // Yaklaşan topluluk etkinliklerini çeker (akışta gösterilecek)
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const eventsRaw = await prisma.event.findMany({
+    where: { cancelled: false, date: { gte: startOfToday } },
+    orderBy: { date: "asc" },
+    include: {
+      organizer: true,
+      team: true,
+      interactions: { where: { type: "RSVP" }, select: { userId: true } } as any,
+    },
+  });
+  const events = eventsRaw.map((e: any) => ({
+    id: e.id,
+    title: e.title,
+    description: e.description,
+    date: e.date,
+    location: e.location,
+    capacity: e.capacity,
+    source: e.organizer?.name || e.team?.name || "Kampüs",
+    rsvpCount: e.interactions?.length || 0,
+    userRsvped: currentUser ? e.interactions?.some((i: any) => i.userId === currentUser.id) : false,
+  }));
+
   // Aktif anketleri çeker
   const surveys = await prisma.survey.findMany({
     orderBy: { createdAt: "desc" },
@@ -65,6 +89,6 @@ export default async function FeedPage() {
     interactions: surveyInteractions.filter(i => i.surveyId === s.id)
   }));
 
-  return <FeedClient initialPosts={postsWithInteractions} topClubs={topClubs} initialSurveys={surveysWithInteractions} currentUser={currentUser} />;
+  return <FeedClient initialPosts={postsWithInteractions} initialEvents={events} topClubs={topClubs} initialSurveys={surveysWithInteractions} currentUser={currentUser} />;
 
 }

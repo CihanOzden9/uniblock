@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, FileText, Calendar, Activity, Plus, TrendingUp, Crown } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
+import { createCommunityEvent } from "@/app/actions/event";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
 import { addClubMember, removeClubMember, updateClubMemberRole, handleJoinRequest, checkUserExistence } from "@/app/actions/club";
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [contentSubTab, setContentSubTab] = useState<"posts" | "surveys">("posts");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sheetMode, setSheetMode] = useState<"create_post" | "edit_post" | "create_survey">("create_post");
+  const [sheetMode, setSheetMode] = useState<"create_post" | "edit_post" | "create_survey" | "create_event">("create_post");
   const [editingPost, setEditingPost] = useState<any>(null);
   const [memberSubTab, setMemberSubTab] = useState<"list" | "requests">("list");
   const [isPending, setIsPending] = useState(false);
@@ -49,6 +50,19 @@ export default function ClubDashboardClient({ club }: { club: any }) {
       toast.success(sheetMode === "edit_post" ? "İçerik güncellendi!" : "İçerik yayınlandı!");
       setIsSheetOpen(false);
       setEditingPost(null);
+    } else {
+      toast.error(result.error);
+    }
+    setIsPending(false);
+  }
+
+  async function handleEventSubmit(formData: FormData) {
+    setIsPending(true);
+    formData.append("clubId", club.id);
+    const result = await createCommunityEvent(formData);
+    if (result.success) {
+      toast.success("Etkinlik paylaşıldı! Takvimde işaretlendi.");
+      setIsSheetOpen(false);
     } else {
       toast.error(result.error);
     }
@@ -153,6 +167,11 @@ export default function ClubDashboardClient({ club }: { club: any }) {
 
   const openCreateSurvey = () => {
     setSheetMode("create_survey");
+    setIsSheetOpen(true);
+  };
+
+  const openCreateEvent = () => {
+    setSheetMode("create_event");
     setIsSheetOpen(true);
   };
 
@@ -390,14 +409,20 @@ export default function ClubDashboardClient({ club }: { club: any }) {
             {/* Posts & Surveys */}
             {activeTab === "posts" && (
               <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                   <button onClick={openCreatePost} className="group bg-primary p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
                     <div className="w-10 h-10 bg-white/20 text-white flex items-center justify-center rounded-lg mb-4"><Plus className="w-5 h-5" /></div>
                     <h3 className="text-white font-heading text-lg font-bold tracking-tight mb-1">Yeni Duyuru</h3>
-                    <p className="text-white/80 text-[13px]">Kampüs haberlerini paylaşın.</p>
+                    <p className="text-white/80 text-[13px]">Kampüs duyurusu paylaşın.</p>
                   </button>
 
-                  <button onClick={openCreateSurvey} className="group bg-accent p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
+                  <button onClick={openCreateEvent} className="group bg-accent p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
+                    <div className="w-10 h-10 bg-white/20 text-white flex items-center justify-center rounded-lg mb-4"><Calendar className="w-5 h-5" /></div>
+                    <h3 className="text-white font-heading text-lg font-bold tracking-tight mb-1">Yeni Etkinlik</h3>
+                    <p className="text-white/80 text-[13px]">Yer, tarih ve kontenjanlı etkinlik.</p>
+                  </button>
+
+                  <button onClick={openCreateSurvey} className="group bg-primary-container p-6 text-left rounded-xl shadow-ambient hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
                     <div className="w-10 h-10 bg-white/20 text-white flex items-center justify-center rounded-lg mb-4"><ListFilter className="w-5 h-5" /></div>
                     <h3 className="text-white font-heading text-lg font-bold tracking-tight mb-1">Yeni Anket</h3>
                     <p className="text-white/80 text-[13px]">Görüşleri toplayın.</p>
@@ -771,13 +796,14 @@ export default function ClubDashboardClient({ club }: { club: any }) {
           <SheetHeader className="p-8 border-b border-outline-variant bg-surface-container-low text-left">
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-primary-fixed text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                {sheetMode === "create_survey" ? "ANKET MERKEZİ" : "İÇERİK STÜDYOSU"}
+                {sheetMode === "create_survey" ? "ANKET MERKEZİ" : sheetMode === "create_event" ? "ETKİNLİK MERKEZİ" : "İÇERİK STÜDYOSU"}
               </span>
             </div>
             <SheetTitle className="font-heading text-2xl font-bold tracking-tight">
               {sheetMode === "create_post" ? "Yeni Duyuru Yayınla" :
                 sheetMode === "edit_post" ? "Duyuruyu Düzenle" :
-                  "Yeni Anket Oluştur"}
+                  sheetMode === "create_event" ? "Yeni Etkinlik Paylaş" :
+                    "Yeni Anket Oluştur"}
             </SheetTitle>
             <SheetDescription className="text-on-surface-variant text-[13px]">
               Bu işlem veritabanına kaydedilecek ve anında yayına alınacaktır.
@@ -796,16 +822,37 @@ export default function ClubDashboardClient({ club }: { club: any }) {
               </div>
               <Button type="submit" disabled={isPending} className="w-full rounded-full text-[14px] font-semibold h-12">{isPending ? "Oluşturuluyor..." : "Anketi Başlat"}</Button>
             </form>
+          ) : sheetMode === "create_event" ? (
+            <form action={handleEventSubmit} className="p-8 space-y-6">
+              <div className="space-y-1.5">
+                <label htmlFor="ev-title" className={labelClass}>Etkinlik Başlığı</label>
+                <input id="ev-title" name="title" required placeholder="Örn: Yapay Zeka Zirvesi 2026" className={inputClass + " h-12 font-medium"} />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="ev-desc" className={labelClass}>Açıklama</label>
+                <textarea id="ev-desc" name="description" required rows={4} placeholder="Etkinlik detaylarını yazın..." className="w-full p-4 rounded-lg border border-input bg-card text-[14px] outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring resize-none" />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="ev-location" className={labelClass}>Yer / Konum</label>
+                <input id="ev-location" name="location" placeholder="Örn: Ana Oditoryum" className={inputClass} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label htmlFor="ev-date" className={labelClass}>Tarih & Saat</label>
+                  <input id="ev-date" name="date" type="datetime-local" required className={inputClass} />
+                </div>
+                <div className="space-y-1.5">
+                  <label htmlFor="ev-capacity" className={labelClass}>Kontenjan</label>
+                  <input id="ev-capacity" name="capacity" type="number" min="1" placeholder="Sınırsız" className={inputClass} />
+                </div>
+              </div>
+              <div className="pt-5 border-t border-outline-variant flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="flex-1 rounded-full border-outline-variant text-[14px] font-semibold h-12">İptal</Button>
+                <Button type="submit" disabled={isPending} className="flex-1 rounded-full text-[14px] font-semibold h-12 bg-accent text-white hover:bg-accent/90">{isPending ? "Paylaşılıyor..." : "Etkinliği Paylaş"}</Button>
+              </div>
+            </form>
           ) : (
             <form action={handlePostSubmit} className="p-8 space-y-6">
-              <div className="space-y-1.5">
-                <label htmlFor="type" className={labelClass}>İçerik Tipi</label>
-                <select id="type" name="type" defaultValue={editingPost?.type || "ANNOUNCEMENT"} className={inputClass + " h-12 font-medium"}>
-                  <option value="ANNOUNCEMENT">Duyuru</option>
-                  <option value="NEWS">Haber</option>
-                </select>
-              </div>
-
               <div className="space-y-1.5">
                 <label htmlFor="title" className={labelClass}>Başlık</label>
                 <input id="title" name="title" required defaultValue={editingPost?.title || ""} placeholder="Başlık yazın..." className={inputClass + " h-12 font-medium"} />

@@ -2,21 +2,16 @@
 
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
-  Users, Calendar, LogOut, Loader2, ChevronLeft, ChevronRight,
-  CalendarClock, MapPin, ShieldCheck
+  Calendar, ChevronLeft, ChevronRight, CalendarClock, MapPin
 } from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
-import { leaveClub } from "@/app/actions/club";
-import { toast } from "sonner";
 import { useState, useMemo } from "react";
 
 interface EventsClientProps {
   user: any;
   myEvents: any[];
   calendarEvents: any[];
-  memberships: any[];
 }
 
 const MONTHS = [
@@ -34,20 +29,9 @@ function dayKey(d: Date) {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }
 
-export default function EventsClient({ user, myEvents, calendarEvents, memberships }: EventsClientProps) {
-  const [leavingClub, setLeavingClub] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"calendar" | "memberships">("calendar");
+export default function EventsClient({ user, myEvents, calendarEvents }: EventsClientProps) {
   const today = useMemo(() => new Date(), []);
   const [viewDate, setViewDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-
-  const onLeaveClick = async (clubId: string) => {
-    if (!confirm("Bu kulüpten ayrılmak istediğinize emin misiniz?")) return;
-    setLeavingClub(clubId);
-    const result = await leaveClub(clubId, user.id);
-    if (result.success) toast.success("Kulüpten başarıyla ayrıldınız.");
-    else toast.error(result.error);
-    setLeavingClub(null);
-  };
 
   // Etkinlikleri gün anahtarına göre grupla (renk indeksi sabit kalsın diye sırayla)
   const eventsByDay = useMemo(() => {
@@ -94,41 +78,21 @@ export default function EventsClient({ user, myEvents, calendarEvents, membershi
       <main className="flex-1 pt-20">
         {/* Hero bandı */}
         <header className="w-full bg-surface-container-low py-12 px-margin-mobile md:px-margin-desktop border-b border-outline-variant">
-          <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row md:items-end justify-between gap-5">
-            <div>
+          <div className="max-w-[1280px] mx-auto">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
               <span className="text-[12px] font-semibold tracking-wide uppercase text-primary">Etkinlikler</span>
-              <h1 className="font-heading text-[clamp(32px,4.5vw,48px)] font-bold tracking-tight leading-[1.1] mt-2 text-on-surface">
-                Etkinlik Takvimi
-              </h1>
-              <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[640px] mt-2">
-                Kampüsteki etkinlikleri keşfet, üyeliklerini yönet ve hiçbir şeyi kaçırma.
-              </p>
             </div>
-
-            {/* Sekme segmenti */}
-            <div className="flex gap-1 bg-surface p-1 rounded-full border border-outline-variant shrink-0 w-fit">
-              <button
-                onClick={() => setActiveTab("calendar")}
-                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${
-                  activeTab === "calendar" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
-                }`}
-              >
-                <Calendar className="w-4 h-4" /> Takvim
-              </button>
-              <button
-                onClick={() => setActiveTab("memberships")}
-                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${
-                  activeTab === "memberships" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
-                }`}
-              >
-                <Users className="w-4 h-4" /> Üyeliklerim
-              </button>
-            </div>
+            <h1 className="font-heading text-[clamp(32px,4.5vw,48px)] font-bold tracking-tight leading-[1.1] mt-2 text-on-surface">
+              Etkinlik Takvimi
+            </h1>
+            <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[640px] mt-2">
+              Kampüsteki tüm etkinlikleri takvim üzerinde keşfet ve hiçbir şeyi kaçırma.
+            </p>
           </div>
         </header>
 
         <div className="max-w-[1280px] mx-auto w-full px-margin-mobile md:px-margin-desktop py-stack-lg">
-          {activeTab === "calendar" ? (
             <div className="flex flex-col lg:flex-row gap-gutter">
               {/* Sol: Takvim grid */}
               <div className="flex-1 min-w-0">
@@ -222,52 +186,6 @@ export default function EventsClient({ user, myEvents, calendarEvents, membershi
                 </div>
               </aside>
             </div>
-          ) : (
-            /* Üyeliklerim sekmesi */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-              {memberships.length > 0 ? memberships.map((membership, i) => (
-                <div key={i} className="bg-card rounded-xl border border-outline-variant shadow-ambient p-stack-md flex flex-col hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all group">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[11px] font-semibold text-primary tracking-wide bg-primary-fixed px-2.5 py-1 rounded-full">
-                      {membership.club.type || "Kulüp"}
-                    </span>
-                    <ShieldCheck className="w-5 h-5 text-accent" />
-                  </div>
-                  <h3 className="font-heading text-xl font-bold tracking-tight text-on-surface mb-1 group-hover:text-primary transition-colors">
-                    {membership.club.name}
-                  </h3>
-                  <p className="text-[12px] font-medium text-on-surface-variant mb-4">{membership.role}</p>
-                  <div className="flex items-center gap-1.5 text-[12px] text-on-surface-variant mb-5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Katılım: {new Date(membership.createdAt).toLocaleDateString("tr-TR")}
-                  </div>
-                  <Button
-                    onClick={() => onLeaveClick(membership.club.id)}
-                    disabled={leavingClub === membership.club.id}
-                    variant="outline"
-                    className="w-full mt-auto rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
-                  >
-                    {leavingClub === membership.club.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <><LogOut className="w-3.5 h-3.5 mr-2" /> Kulüpten Ayrıl</>
-                    )}
-                  </Button>
-                </div>
-              )) : (
-                <div className="col-span-full bg-card rounded-xl border border-outline-variant shadow-ambient p-16 text-center">
-                  <div className="w-16 h-16 rounded-full bg-primary-fixed mx-auto mb-5 flex items-center justify-center">
-                    <Users className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="font-heading text-xl font-bold tracking-tight mb-1.5">Henüz Üyeliğin Yok</h3>
-                  <p className="text-[14px] text-on-surface-variant mb-6">Kampüs topluluklarına katılarak etkinliklere erişim kazan.</p>
-                  <Link href="/clubs">
-                    <Button className="rounded-full text-[14px] font-semibold">Toplulukları Keşfet</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </main>
 

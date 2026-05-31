@@ -1,20 +1,19 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
-const prisma = new PrismaClient();
 
 export async function createPost(formData: FormData) {
   try {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
-    const type = formData.get("type") as "NEWS" | "ANNOUNCEMENT";
+    // NEWS tipi kaldırıldı; kulüp/takım paylaşımı varsayılan olarak Duyuru (ANNOUNCEMENT).
+    const type = ((formData.get("type") as string) || "ANNOUNCEMENT") as "ANNOUNCEMENT";
     const clubId = formData.get("clubId") as string;
     const teamId = formData.get("teamId") as string;
     const authorId = formData.get("authorId") as string;
 
-    if (!title || !content || !type || !authorId || (!clubId && !teamId)) {
+    if (!title || !content || !authorId || (!clubId && !teamId)) {
       throw new Error("Tüm alanlar zorunludur.");
     }
 
@@ -46,9 +45,8 @@ export async function updatePost(formData: FormData) {
     const id = formData.get("id") as string;
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
-    const type = formData.get("type") as "NEWS" | "ANNOUNCEMENT";
 
-    if (!id || !title || !content || !type) {
+    if (!id || !title || !content) {
       throw new Error("Tüm alanlar zorunludur.");
     }
 
@@ -57,7 +55,6 @@ export async function updatePost(formData: FormData) {
       data: {
         title,
         content,
-        type,
       },
     });
 

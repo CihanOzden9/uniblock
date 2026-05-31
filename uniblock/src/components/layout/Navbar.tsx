@@ -49,10 +49,10 @@ export default function Navbar({ user }: NavbarProps) {
         {user && (
           <nav className="hidden md:flex items-center gap-2">
             <Link href="/feed" className={navLink(pathname === "/feed")}>Akış</Link>
-            <Link href="/news" className={navLink(pathname === "/news")}>Haberler</Link>
-            <Link href="/events" className={navLink(pathname === "/events")}>Etkinliklerim</Link>
+            <Link href="/events" className={navLink(pathname === "/events")}>Etkinlikler</Link>
             <Link href="/clubs" className={navLink(pathname === "/clubs")}>Kulüpler</Link>
             <Link href="/teams" className={navLink(pathname === "/teams")}>Takımlar</Link>
+            <Link href="/news" className={navLink(pathname === "/news")}>Haberler</Link>
             {(user?.role === "SUPER_ADMIN" || user?.role === "PROJECT_ADMIN" || user?.role === "ADMIN") && (
               <Link
                 href="/admin"

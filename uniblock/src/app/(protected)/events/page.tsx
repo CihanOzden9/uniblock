@@ -56,18 +56,11 @@ export default async function EventsPage() {
     source: e.organizer?.name || e.team?.name || "Kampüs"
   }));
 
-  // Üyelikler
-  const memberships = await prisma.clubMember.findMany({
-    where: { userId: user.id },
-    include: { club: true }
-  });
-
   return (
     <EventsClient
       user={user}
       myEvents={myEvents}
       calendarEvents={calendarEvents}
-      memberships={memberships}
     />
   );
 }

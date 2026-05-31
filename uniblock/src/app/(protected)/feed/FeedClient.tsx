@@ -17,16 +17,19 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { likePost, commentPost, voteSurvey, editComment, deleteComment, reportComment } from "@/app/actions/interaction";
+import { rsvpEvent } from "@/app/actions/event";
 import { toast } from "sonner";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 
 export default function FeedClient({
   initialPosts,
+  initialEvents = [],
   topClubs,
   initialSurveys,
   currentUser
 }: {
   initialPosts: any[],
+  initialEvents?: any[],
   topClubs: any[],
   initialSurveys: any[],
   currentUser: any
@@ -48,15 +51,44 @@ export default function FeedClient({
     excerpt: post.content.substring(0, 160) + (post.content.length > 160 ? "…" : "")
   })), [initialPosts]);
 
-  const visiblePosts = useMemo(() => {
+  // Etkinlikleri akış öğesine çevir
+  const feedEvents = useMemo(() => initialEvents.map(ev => ({
+    ...ev,
+    kind: "event" as const,
+    ts: new Date(ev.date).getTime(),
+    dateLabel: new Date(ev.date).toLocaleDateString("tr-TR", { day: "numeric", month: "long" }),
+    timeLabel: new Date(ev.date).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
+    excerpt: (ev.description || "").substring(0, 160) + ((ev.description || "").length > 160 ? "…" : ""),
+  })), [initialEvents]);
+
+  // Duyuru + etkinlikleri tek akışta birleştir (tarihe göre, yeni/yaklaşan üstte)
+  const akisItems = useMemo(() => {
+    const posts = feedPosts.map(p => ({ ...p, kind: "post" as const, ts: new Date(p.createdAt).getTime() }));
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return feedPosts;
-    return feedPosts.filter(p =>
-      p.title.toLowerCase().includes(q) ||
-      p.content.toLowerCase().includes(q) ||
-      p.source.toLowerCase().includes(q)
-    );
-  }, [feedPosts, searchQuery]);
+    let items = [...feedEvents, ...posts];
+    if (q) {
+      items = items.filter((it: any) =>
+        (it.title || "").toLowerCase().includes(q) ||
+        (it.content || it.description || "").toLowerCase().includes(q) ||
+        (it.source || "").toLowerCase().includes(q)
+      );
+    }
+    return items.sort((a, b) => b.ts - a.ts);
+  }, [feedPosts, feedEvents, searchQuery]);
+
+  async function handleRsvp(e: React.MouseEvent, eventId: string) {
+    e.stopPropagation();
+    if (!currentUser) return toast.error("Giriş yapmalısınız.");
+    setIsPending(true);
+    const res = await rsvpEvent(eventId, currentUser.id);
+    if (res.success) {
+      toast.success(res.joined ? "Etkinliğe katıldın!" : "Katılımın geri alındı.");
+      router.refresh();
+    } else {
+      toast.error(res.error);
+    }
+    setIsPending(false);
+  }
 
   // Polling: Her 30 saniyede bir veriyi sessizce yeniler
   useEffect(() => {
@@ -181,7 +213,7 @@ export default function FeedClient({
               <h3 className="text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-3">Kısayollar</h3>
               <ul className="space-y-1">
                 <li>
-                  <Link href="/clubs" className="flex items-center gap-3 text-[15px] text-on-surface hover:text-primary hover:bg-surface-container-low rounded-lg px-2.5 py-2 transition-colors">
+                  <Link href="/clubs?tab=takip" className="flex items-center gap-3 text-[15px] text-on-surface hover:text-primary hover:bg-surface-container-low rounded-lg px-2.5 py-2 transition-colors">
                     <Users className="w-[18px] h-[18px] text-outline" /> Takip Ettiğim Topluluklar
                   </Link>
                 </li>
@@ -203,7 +235,45 @@ export default function FeedClient({
           <section className="md:col-span-6 space-y-stack-md min-w-0">
             <h2 className="font-heading text-[22px] font-bold tracking-tight text-on-surface hidden md:block">Akış</h2>
 
-            {visiblePosts.length > 0 ? visiblePosts.map((item) => {
+            {akisItems.length > 0 ? akisItems.map((item: any) => {
+              if (item.kind === "event") {
+                const remaining = item.capacity != null ? item.capacity - item.rsvpCount : null;
+                const isFull = remaining != null && remaining <= 0 && !item.userRsvped;
+                return (
+                  <article key={"ev-" + item.id} className="bg-card rounded-xl border border-outline-variant shadow-ambient p-stack-md transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 group overflow-hidden">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-accent/15 text-[color:var(--community-orange-deep)] flex items-center justify-center font-bold text-[13px] shrink-0">{sourceInitials(item.source)}</div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[14px] font-semibold text-on-surface truncate">{item.source}</p>
+                        <p className="text-[12px] text-on-surface-variant">{item.dateLabel} · {item.timeLabel}</p>
+                      </div>
+                      <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 bg-accent/15 text-[color:var(--community-orange-deep)] flex items-center gap-1"><Calendar className="w-3 h-3" /> Etkinlik</span>
+                    </div>
+                    <h3 className="font-heading text-[18px] font-bold tracking-tight leading-snug mb-2 text-on-surface group-hover:text-primary transition-colors break-words overflow-wrap-anywhere">{item.title}</h3>
+                    <p className="text-[15px] leading-[1.6] text-on-surface-variant mb-3 line-clamp-3 break-words overflow-wrap-anywhere">{item.excerpt}</p>
+                    {item.capacity != null && (
+                      <div className="mb-3">
+                        <span className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1 rounded-full ${isFull ? "bg-destructive/10 text-destructive" : "bg-accent/15 text-[color:var(--community-orange-deep)]"}`}>
+                          <Users className="w-3.5 h-3.5" />
+                          {isFull ? "Kontenjan Doldu" : `Sınırlı Kontenjan · ${Math.max(0, remaining!)} yer kaldı`}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between pt-3 border-t border-outline-variant gap-3">
+                      <span className="flex items-center gap-1.5 text-[13px] text-on-surface-variant min-w-0">
+                        <MapPin className="w-[18px] h-[18px] shrink-0" /> <span className="truncate">{item.location || "Konum belirtilmemiş"}</span>
+                      </span>
+                      <button
+                        onClick={(e) => handleRsvp(e, item.id)}
+                        disabled={isPending || isFull}
+                        className={`shrink-0 rounded-full text-[13px] font-semibold px-5 h-9 transition-colors disabled:opacity-60 ${item.userRsvped ? "bg-primary-fixed text-primary" : isFull ? "bg-surface-container-high text-on-surface-variant" : "bg-primary text-white hover:bg-primary-container"}`}
+                      >
+                        {item.userRsvped ? "Katıldın ✓" : isFull ? "Dolu" : "Katıl"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              }
               const liked = item.interactions?.some((i: any) => i.type === "LIKE" && i.userId === currentUser?.id);
               const likeCount = item.interactions?.filter((i: any) => i.type === "LIKE").length || 0;
               const commentCount = item.interactions?.filter((i: any) => i.type === "COMMENT").length || 0;

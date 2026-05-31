@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,10 +18,16 @@ interface TeamsClientProps {
 }
 
 export default function TeamsClient({ user, teams }: TeamsClientProps) {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") === "takip" ? "joined" : "all";
+  const [activeTab, setActiveTab] = useState<"all" | "joined">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, setIsPending] = useState<string | null>(null);
   const [leavingTeam, setLeavingTeam] = useState<string | null>(null);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+
+  const isJoined = (team: any) =>
+    team.members?.some((m: any) => m.userId === user.id && m.status === "APPROVED");
 
   const onJoinClick = async (teamId: string) => {
     setIsPending(teamId);
@@ -46,9 +53,11 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
   };
 
   const filteredTeams = teams.filter(team =>
-    team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (team.description || "").toLowerCase().includes(searchQuery.toLowerCase())
+    (team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (team.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (activeTab === "all" || isJoined(team))
   );
+  const joinedCount = teams.filter(isJoined).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,11 +90,38 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
                 />
               </div>
             </div>
+
+            {/* Sekme: Tüm Takımlar / Takip Ettiklerim */}
+            <div className="flex gap-1 bg-surface p-1 rounded-full border border-outline-variant w-fit mt-7">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors ${activeTab === "all" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"}`}
+              >
+                Tüm Takımlar
+              </button>
+              <button
+                onClick={() => setActiveTab("joined")}
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${activeTab === "joined" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"}`}
+              >
+                Takip Ettiklerim
+                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${activeTab === "joined" ? "bg-white/20 text-white" : "bg-primary-fixed text-primary"}`}>{joinedCount}</span>
+              </button>
+            </div>
           </div>
         </section>
 
         <section className="py-12 px-8 min-h-[400px]">
           <div className="max-w-[1200px] mx-auto w-full">
+            {activeTab === "joined" && filteredTeams.length === 0 && (
+              <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary-fixed mx-auto mb-5 flex items-center justify-center">
+                  <Users className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-heading text-xl font-bold tracking-tight mb-1.5">Henüz Bir Takıma Katılmadın</h3>
+                <p className="text-[14px] text-on-surface-variant mb-6">Tüm Takımlar sekmesinden yarışma ve proje takımlarına katıl.</p>
+                <Button onClick={() => setActiveTab("all")} className="rounded-full text-[14px] font-semibold">Takımları Keşfet</Button>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
               {filteredTeams.map((team) => {
                 // Separate current user's membership from board members
