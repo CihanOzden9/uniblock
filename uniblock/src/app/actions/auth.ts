@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { randomClubColor } from "@/lib/colors";
 
 export async function register(formData: FormData) {
   const firstName = formData.get("firstName") as string;
@@ -50,7 +51,8 @@ export async function register(formData: FormData) {
           leaderId: newUser.id,
           status: "ACTIVE",
           contactEmail: email,
-        },
+          color: randomClubColor(),
+        } as any,
       });
 
       // Lideri aynı zamanda kulüp üyesi (BOARD_MEMBER) olarak ekle
@@ -73,7 +75,8 @@ export async function register(formData: FormData) {
           leaderId: newUser.id,
           status: "ACTIVE",
           contactEmail: email,
-        },
+          color: randomClubColor(),
+        } as any,
       });
 
       // Kaptanı aynı zamanda takım üyesi (BOARD_MEMBER) olarak ekle

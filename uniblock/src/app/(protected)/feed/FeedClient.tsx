@@ -48,8 +48,13 @@ export default function FeedClient({
     date: new Date(post.createdAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long" }),
     source: post.club?.name || post.team?.name || post.author?.name || "Bilinmeyen Kaynak",
     category: post.type === "NEWS" ? "Haber" : "Duyuru",
+    accent: post.club?.color || post.team?.color || null,
     excerpt: post.content.substring(0, 160) + (post.content.length > 160 ? "…" : "")
   })), [initialPosts]);
+
+  // Kulüp/takım rengi (yoksa varsayılan topluluk turuncusu) + alfa yardımcıları
+  const accentOf = (c?: string | null) => c || "#fd6c00";
+  const withAlpha = (hex: string, a: string) => /^#[0-9a-fA-F]{6}$/.test(hex) ? `${hex}${a}` : hex;
 
   // Etkinlikleri akış öğesine çevir
   const feedEvents = useMemo(() => initialEvents.map(ev => ({
@@ -168,6 +173,19 @@ export default function FeedClient({
   const sourceInitials = (name: string) =>
     name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
+  // Paylaş: içerik bağlantısını panoya kopyala
+  async function handleShare(e: React.MouseEvent, kind: "event" | "post", id: string) {
+    e.stopPropagation();
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${origin}/${kind === "event" ? "events" : "feed"}#${kind}-${id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Bağlantı kopyalandı!");
+    } catch {
+      toast.error("Bağlantı kopyalanamadı.");
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Navbar user={currentUser} />
@@ -239,21 +257,25 @@ export default function FeedClient({
               if (item.kind === "event") {
                 const remaining = item.capacity != null ? item.capacity - item.rsvpCount : null;
                 const isFull = remaining != null && remaining <= 0 && !item.userRsvped;
+                const accent = accentOf(item.color);
                 return (
-                  <article key={"ev-" + item.id} className="bg-card rounded-xl border border-outline-variant shadow-ambient p-stack-md transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 group overflow-hidden">
+                  <article key={"ev-" + item.id} style={{ borderLeftColor: accent, backgroundColor: withAlpha(accent, "0A") }} className="rounded-xl border border-outline-variant border-l-4 shadow-ambient p-stack-md transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 group overflow-hidden">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-accent/15 text-[color:var(--community-orange-deep)] flex items-center justify-center font-bold text-[13px] shrink-0">{sourceInitials(item.source)}</div>
+                      <div style={{ backgroundColor: withAlpha(accent, "26"), color: accent }} className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[13px] shrink-0">{sourceInitials(item.source)}</div>
                       <div className="min-w-0 flex-1">
                         <p className="text-[14px] font-semibold text-on-surface truncate">{item.source}</p>
                         <p className="text-[12px] text-on-surface-variant">{item.dateLabel} · {item.timeLabel}</p>
                       </div>
-                      <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 bg-accent/15 text-[color:var(--community-orange-deep)] flex items-center gap-1"><Calendar className="w-3 h-3" /> Etkinlik</span>
+                      <span style={{ backgroundColor: withAlpha(accent, "26"), color: accent }} className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 flex items-center gap-1"><Calendar className="w-3 h-3" /> Etkinlik</span>
                     </div>
                     <h3 className="font-heading text-[18px] font-bold tracking-tight leading-snug mb-2 text-on-surface group-hover:text-primary transition-colors break-words overflow-wrap-anywhere">{item.title}</h3>
                     <p className="text-[15px] leading-[1.6] text-on-surface-variant mb-3 line-clamp-3 break-words overflow-wrap-anywhere">{item.excerpt}</p>
                     {item.capacity != null && (
                       <div className="mb-3">
-                        <span className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1 rounded-full ${isFull ? "bg-destructive/10 text-destructive" : "bg-accent/15 text-[color:var(--community-orange-deep)]"}`}>
+                        <span
+                          style={!isFull ? { backgroundColor: withAlpha(accent, "26"), color: accent } : undefined}
+                          className={`inline-flex items-center gap-1.5 text-[12px] font-semibold px-2.5 py-1 rounded-full ${isFull ? "bg-destructive/10 text-destructive" : ""}`}
+                        >
                           <Users className="w-3.5 h-3.5" />
                           {isFull ? "Kontenjan Doldu" : `Sınırlı Kontenjan · ${Math.max(0, remaining!)} yer kaldı`}
                         </span>
@@ -263,13 +285,23 @@ export default function FeedClient({
                       <span className="flex items-center gap-1.5 text-[13px] text-on-surface-variant min-w-0">
                         <MapPin className="w-[18px] h-[18px] shrink-0" /> <span className="truncate">{item.location || "Konum belirtilmemiş"}</span>
                       </span>
-                      <button
-                        onClick={(e) => handleRsvp(e, item.id)}
-                        disabled={isPending || isFull}
-                        className={`shrink-0 rounded-full text-[13px] font-semibold px-5 h-9 transition-colors disabled:opacity-60 ${item.userRsvped ? "bg-primary-fixed text-primary" : isFull ? "bg-surface-container-high text-on-surface-variant" : "bg-primary text-white hover:bg-primary-container"}`}
-                      >
-                        {item.userRsvped ? "Katıldın ✓" : isFull ? "Dolu" : "Katıl"}
-                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={(e) => handleShare(e, "event", item.id)} title="Bağlantıyı kopyala" className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
+                          <Share2 className="w-[18px] h-[18px] text-on-surface-variant" />
+                        </button>
+                        <button
+                          onClick={(e) => handleRsvp(e, item.id)}
+                          disabled={isPending || isFull}
+                          className={`group/rsvp shrink-0 rounded-full text-[13px] font-semibold px-5 h-9 transition-colors disabled:opacity-60 ${item.userRsvped ? "bg-primary-fixed text-primary hover:bg-destructive/10 hover:text-destructive" : isFull ? "bg-surface-container-high text-on-surface-variant" : "bg-primary text-white hover:bg-primary-container"}`}
+                        >
+                          {item.userRsvped ? (
+                            <>
+                              <span className="hidden sm:inline sm:group-hover/rsvp:hidden">Katıldın ✓</span>
+                              <span className="inline sm:hidden sm:group-hover/rsvp:inline">İptal Et</span>
+                            </>
+                          ) : isFull ? "Dolu" : "Katıl"}
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );
@@ -277,26 +309,24 @@ export default function FeedClient({
               const liked = item.interactions?.some((i: any) => i.type === "LIKE" && i.userId === currentUser?.id);
               const likeCount = item.interactions?.filter((i: any) => i.type === "LIKE").length || 0;
               const commentCount = item.interactions?.filter((i: any) => i.type === "COMMENT").length || 0;
+              const accent = accentOf(item.accent);
               return (
                 <article
                   key={item.id}
                   onClick={() => setSelectedPost(item)}
-                  className="bg-card rounded-xl border border-outline-variant shadow-ambient p-stack-md transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 cursor-pointer group overflow-hidden"
+                  style={{ borderLeftColor: accent }}
+                  className="bg-card rounded-xl border border-outline-variant border-l-4 shadow-ambient p-stack-md transition-all hover:shadow-ambient-lg hover:-translate-y-0.5 cursor-pointer group overflow-hidden"
                 >
                   {/* Üst: avatar + kaynak + kategori */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold text-[13px] shrink-0">
+                    <div style={{ backgroundColor: withAlpha(accent, "26"), color: accent }} className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[13px] shrink-0">
                       {sourceInitials(item.source)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-semibold text-on-surface truncate">{item.source}</p>
                       <p className="text-[12px] text-on-surface-variant">{item.date}</p>
                     </div>
-                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                      item.category === "Haber"
-                        ? "bg-primary-fixed text-primary"
-                        : "bg-accent/15 text-[color:var(--community-orange-deep)]"
-                    }`}>
+                    <span style={{ backgroundColor: withAlpha(accent, "26"), color: accent }} className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0">
                       {item.category}
                     </span>
                   </div>
@@ -320,7 +350,8 @@ export default function FeedClient({
                       </span>
                     </div>
                     <button
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => handleShare(e, "post", item.id)}
+                      title="Bağlantıyı kopyala"
                       className="p-2 rounded-full hover:bg-surface-container-high transition-colors"
                     >
                       <Share2 className="w-[18px] h-[18px] text-on-surface-variant" />
@@ -353,14 +384,26 @@ export default function FeedClient({
           {/* --- Sağ kenar: Anketler + Popüler Topluluklar --- */}
           <aside className="md:col-span-3 space-y-stack-md hidden lg:block">
             {/* Aktif Anketler */}
-            {initialSurveys.length > 0 && initialSurveys.slice(0, 2).map((survey) => {
+            {initialSurveys.length > 0 && (
+            <div className="space-y-stack-md max-h-[75vh] overflow-y-auto pr-1">
+            {initialSurveys.map((survey) => {
               const totalVotes = survey.interactions?.length || 0;
               const hasVoted = survey.interactions?.some((i: any) => i.userId === currentUser?.id);
+              const expiresAt = new Date(survey.createdAt).getTime() + 24 * 60 * 60 * 1000;
+              const isExpired = Date.now() > expiresAt;
+              const hoursLeft = Math.max(0, Math.ceil((expiresAt - Date.now()) / (60 * 60 * 1000)));
+              const showResults = hasVoted || isExpired;
+              const locked = hasVoted || isExpired;
               return (
                 <div key={survey.id} className="bg-card rounded-xl p-stack-md shadow-ambient border border-outline-variant">
-                  <div className="flex items-center gap-2 mb-3">
-                    <BarChart3 className="w-5 h-5 text-accent" />
-                    <h2 className="font-heading text-[16px] font-bold text-on-surface">Aktif Anket</h2>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-accent" />
+                      <h2 className="font-heading text-[16px] font-bold text-on-surface">Aktif Anket</h2>
+                    </div>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${isExpired ? "bg-surface-container-high text-on-surface-variant" : "bg-accent/15 text-[color:var(--community-orange-deep)]"}`}>
+                      {isExpired ? "Süre doldu" : `${hoursLeft} saat kaldı`}
+                    </span>
                   </div>
                   <p className="text-[14px] font-medium text-on-surface mb-3.5">{survey.question}</p>
                   <div className="space-y-2.5">
@@ -371,17 +414,17 @@ export default function FeedClient({
                       return (
                         <button
                           key={option.id}
-                          onClick={() => !hasVoted && !isPending && handleVote(survey.id, option.id)}
-                          disabled={hasVoted}
+                          onClick={() => !locked && !isPending && handleVote(survey.id, option.id)}
+                          disabled={locked}
                           className={`w-full relative overflow-hidden flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-colors ${
                             isMyChoice ? "border-accent bg-accent/5" : "border-outline-variant hover:bg-surface-container-low"
-                          } ${hasVoted ? "cursor-default" : "cursor-pointer"}`}
+                          } ${locked ? "cursor-default" : "cursor-pointer"}`}
                         >
-                          {hasVoted && (
+                          {showResults && (
                             <div className="absolute inset-y-0 left-0 bg-accent/15 transition-all duration-700" style={{ width: `${pct}%` }} />
                           )}
                           <span className="relative z-10 flex-1 text-[13px] font-medium text-on-surface">{option.text}</span>
-                          {hasVoted && <span className="relative z-10 text-[12px] font-bold text-[color:var(--community-orange-deep)]">%{pct}</span>}
+                          {showResults && <span className="relative z-10 text-[12px] font-bold text-[color:var(--community-orange-deep)]">%{pct}</span>}
                         </button>
                       );
                     })}
@@ -392,6 +435,8 @@ export default function FeedClient({
                 </div>
               );
             })}
+            </div>
+            )}
 
             {/* Popüler Topluluklar */}
             <div className="bg-card rounded-xl p-stack-md shadow-ambient border border-outline-variant">

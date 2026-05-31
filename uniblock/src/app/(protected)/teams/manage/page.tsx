@@ -65,7 +65,12 @@ export default async function TeamManagePage() {
         orderBy: { createdAt: 'desc' },
         take: 10
       },
-      events: true,
+      events: {
+        orderBy: { date: "asc" },
+        include: {
+          _count: { select: { interactions: { where: { type: "RSVP" } } } }
+        }
+      },
       surveys: {
         include: {
           options: true

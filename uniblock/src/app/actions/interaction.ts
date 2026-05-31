@@ -61,6 +61,19 @@ export async function commentPost(postId: string, userId: string, content: strin
 
 export async function voteSurvey(surveyId: string, optionId: string, userId: string) {
   try {
+    // Anket 24 saatten eskiyse oy kullanılamaz
+    const survey = await prisma.survey.findUnique({
+      where: { id: surveyId },
+      select: { createdAt: true }
+    });
+    if (!survey) {
+      throw new Error("Anket bulunamadı.");
+    }
+    const expiresAt = new Date(survey.createdAt).getTime() + 24 * 60 * 60 * 1000;
+    if (Date.now() > expiresAt) {
+      throw new Error("Bu anketin süresi dolmuştur.");
+    }
+
     // Check if already voted in this survey
     const existing = await (prisma.interaction as any).findFirst({
       where: {

@@ -33,9 +33,11 @@ export default async function EventsPage() {
       title: i.event!.title,
       date: i.event!.date,
       location: i.event!.location,
-      club: i.event!.organizer || i.event!.team,
+      source: (i.event as any).organizer?.name || (i.event as any).team?.name || "Kampüs",
+      joinedAt: i.createdAt,
       points: 100
-    }));
+    }))
+    .sort((a, b) => +new Date(b.joinedAt) - +new Date(a.joinedAt));
 
   // Takvim için tüm aktif (iptal edilmemiş) etkinlikler
   const startOfMonth = new Date();

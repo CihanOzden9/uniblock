@@ -59,6 +59,7 @@ export default async function FeedPage() {
     location: e.location,
     capacity: e.capacity,
     source: e.organizer?.name || e.team?.name || "Kampüs",
+    color: e.organizer?.color || e.team?.color || null,
     rsvpCount: e.interactions?.length || 0,
     userRsvped: currentUser ? e.interactions?.some((i: any) => i.userId === currentUser.id) : false,
   }));
@@ -66,7 +67,7 @@ export default async function FeedPage() {
   // Aktif anketleri çeker
   const surveys = await prisma.survey.findMany({
     orderBy: { createdAt: "desc" },
-    take: 5,
+    take: 12,
     include: {
       club: true,
       team: true,

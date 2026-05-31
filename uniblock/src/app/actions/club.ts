@@ -135,6 +135,7 @@ export async function updateClubSettings(formData: FormData) {
     const website = formData.get("website") as string;
     const logo = formData.get("logo") as string;
     const leaderName = formData.get("leaderName") as string;
+    const color = formData.get("color") as string;
 
     await prisma.club.update({
       where: { id: clubId },
@@ -145,15 +146,18 @@ export async function updateClubSettings(formData: FormData) {
         presidentEmail: presidentEmail || null,
         website,
         logo: logo || null,
+        ...(color ? { color } : {}),
         leader: {
           update: {
             name: leaderName
           }
         }
-      }
+      } as any
     });
 
     revalidatePath("/clubs/manage");
+    revalidatePath("/feed");
+    revalidatePath("/clubs");
     return { success: true };
   } catch (error: any) {
     console.error("Update club settings error:", error);

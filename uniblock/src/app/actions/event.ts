@@ -89,3 +89,78 @@ export async function rsvpEvent(eventId: string, userId: string) {
     return { success: false, error: "İşlem gerçekleştirilemedi." };
   }
 }
+
+// Kulüp/takım etkinliğini düzenle. Sahiplik kontrolü: clubId/teamId eşleşmeli.
+export async function updateCommunityEvent(formData: FormData) {
+  try {
+    const id = formData.get("id") as string;
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const date = formData.get("date") as string;
+    const location = (formData.get("location") as string) || null;
+    const capacityRaw = formData.get("capacity") as string;
+    const clubId = (formData.get("clubId") as string) || null;
+    const teamId = (formData.get("teamId") as string) || null;
+
+    if (!id || !title || !description || !date) {
+      return { success: false, error: "Başlık, açıklama ve tarih zorunludur." };
+    }
+
+    const event = await prisma.event.findUnique({
+      where: { id },
+      select: { organizerId: true, teamId: true },
+    });
+    if (!event) return { success: false, error: "Etkinlik bulunamadı." };
+    // Sahiplik: sadece kendi kulübünün/takımının etkinliği
+    if ((clubId && event.organizerId !== clubId) || (teamId && event.teamId !== teamId)) {
+      return { success: false, error: "Bu etkinliği düzenleme yetkiniz yok." };
+    }
+
+    await prisma.event.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        date: new Date(date),
+        location,
+        capacity: capacityRaw ? parseInt(capacityRaw) : null,
+      },
+    });
+
+    revalidatePath("/feed");
+    revalidatePath("/events");
+    revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
+    return { success: true };
+  } catch (error: any) {
+    console.error("updateCommunityEvent error:", error);
+    return { success: false, error: "Etkinlik güncellenemedi." };
+  }
+}
+
+// Kulüp/takım etkinliğini sil. Sahiplik kontrolü dahil.
+export async function deleteCommunityEvent(id: string, ownerId: string) {
+  try {
+    if (!id || !ownerId) return { success: false, error: "Geçersiz istek." };
+
+    const event = await prisma.event.findUnique({
+      where: { id },
+      select: { organizerId: true, teamId: true },
+    });
+    if (!event) return { success: false, error: "Etkinlik bulunamadı." };
+    if (event.organizerId !== ownerId && event.teamId !== ownerId) {
+      return { success: false, error: "Bu etkinliği silme yetkiniz yok." };
+    }
+
+    await prisma.event.delete({ where: { id } });
+
+    revalidatePath("/feed");
+    revalidatePath("/events");
+    revalidatePath("/clubs/manage");
+    revalidatePath("/teams/manage");
+    return { success: true };
+  } catch (error: any) {
+    console.error("deleteCommunityEvent error:", error);
+    return { success: false, error: "Etkinlik silinemedi." };
+  }
+}

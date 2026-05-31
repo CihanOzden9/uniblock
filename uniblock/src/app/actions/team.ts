@@ -135,6 +135,7 @@ export async function updateTeamSettings(formData: FormData) {
     const website = formData.get("website") as string;
     const logo = formData.get("logo") as string;
     const leaderName = formData.get("leaderName") as string;
+    const color = formData.get("color") as string;
 
     await prisma.team.update({
       where: { id: teamId },
@@ -145,15 +146,18 @@ export async function updateTeamSettings(formData: FormData) {
         presidentEmail: presidentEmail || null,
         website,
         logo: logo || null,
+        ...(color ? { color } : {}),
         leader: {
           update: {
             name: leaderName
           }
         }
-      }
+      } as any
     });
 
     revalidatePath("/teams/manage");
+    revalidatePath("/feed");
+    revalidatePath("/teams");
     return { success: true };
   } catch (error: any) {
     console.error("Update team settings error:", error);

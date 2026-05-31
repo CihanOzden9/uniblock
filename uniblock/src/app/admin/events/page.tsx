@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Calendar, Clock, MapPin, Shield, Ban, BarChart3 } from "lucide-react";
-import { CancelEventButton, CreateEventButton } from "./EventActions";
+import { CancelEventButton, CreateEventButton, EventDetailButton } from "./EventActions";
 
 export default async function AdminEventsPage() {
   const [events, clubs] = await Promise.all([
@@ -101,7 +101,7 @@ export default async function AdminEventsPage() {
           <h2 className="text-[14px] font-bold text-on-surface tracking-tight">Tüm Etkinlikler</h2>
           <span className="text-[11px] font-semibold text-on-surface-variant">{events.length} Etkinlik</span>
         </div>
-        <div className="grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 border-b border-outline-variant bg-surface-container-low">
+        <div className="grid grid-cols-[1fr_150px_150px_120px_100px_100px_80px] px-5 py-3 border-b border-outline-variant bg-surface-container-low">
           <span className="text-[11px] font-semibold text-on-surface-variant">Etkinlik</span>
           <span className="text-[11px] font-semibold text-on-surface-variant">Kulüp</span>
           <span className="text-[11px] font-semibold text-on-surface-variant">Konum</span>
@@ -114,7 +114,7 @@ export default async function AdminEventsPage() {
           {events.length > 0 ? events.map((event) => {
             const isPast = new Date(event.date) < now;
             return (
-              <div key={event.id} className={`grid grid-cols-[1fr_150px_150px_120px_100px_100px_50px] px-5 py-3 hover:bg-surface-container-low transition-colors items-center ${event.cancelled ? "opacity-50" : ""}`}>
+              <div key={event.id} className={`grid grid-cols-[1fr_150px_150px_120px_100px_100px_80px] px-5 py-3 hover:bg-surface-container-low transition-colors items-center ${event.cancelled ? "opacity-50" : ""}`}>
                 <div className="min-w-0">
                   <span className="text-[13px] font-semibold text-on-surface truncate block">{event.title}</span>
                   {event.cancelled && (
@@ -146,7 +146,19 @@ export default async function AdminEventsPage() {
                     {event.cancelled ? "İptal" : isPast ? "Tamamlandı" : "Aktif"}
                   </span>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end items-center gap-0.5">
+                  <EventDetailButton event={{
+                    id: event.id,
+                    title: event.title,
+                    description: event.description,
+                    date: event.date,
+                    location: event.location,
+                    capacity: event.capacity,
+                    cancelled: event.cancelled,
+                    cancelReason: event.cancelReason,
+                    organizerName: event.organizer?.name ?? null,
+                    attendance: event._count.interactions,
+                  }} />
                   {!event.cancelled && (
                     <CancelEventButton eventId={event.id} title={event.title} />
                   )}

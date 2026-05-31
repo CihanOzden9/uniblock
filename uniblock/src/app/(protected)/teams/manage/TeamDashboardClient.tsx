@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, FileText, Calendar, Activity, Plus, Crown } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { createPost, updatePost, deletePost } from "@/app/actions/post";
-import { createCommunityEvent } from "@/app/actions/event";
+import { createCommunityEvent, updateCommunityEvent, deleteCommunityEvent } from "@/app/actions/event";
 import { createSurvey, deleteSurvey } from "@/app/actions/survey";
 import { addTeamMember, removeTeamMember, updateTeamMemberRole, handleJoinRequest, checkUserExistence } from "@/app/actions/team";
 import { toast } from "sonner";
@@ -18,8 +18,9 @@ export default function TeamDashboardClient({ team }: { team: any }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [contentSubTab, setContentSubTab] = useState<"posts" | "surveys">("posts");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [sheetMode, setSheetMode] = useState<"create_post" | "edit_post" | "create_survey" | "create_event">("create_post");
+  const [sheetMode, setSheetMode] = useState<"create_post" | "edit_post" | "create_survey" | "create_event" | "edit_event">("create_post");
   const [editingPost, setEditingPost] = useState<any>(null);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
   const [memberSubTab, setMemberSubTab] = useState<"list" | "requests">("list");
   const [isPending, setIsPending] = useState(false);
   const [memberSearchTerm, setMemberSearchTerm] = useState("");
@@ -59,15 +60,35 @@ export default function TeamDashboardClient({ team }: { team: any }) {
   async function handleEventSubmit(formData: FormData) {
     setIsPending(true);
     formData.append("teamId", team.id);
-    const result = await createCommunityEvent(formData);
+    let result;
+    if (sheetMode === "edit_event" && editingEvent) {
+      formData.append("id", editingEvent.id);
+      result = await updateCommunityEvent(formData);
+    } else {
+      result = await createCommunityEvent(formData);
+    }
     if (result.success) {
-      toast.success("Etkinlik paylaşıldı! Takvimde işaretlendi.");
+      toast.success(sheetMode === "edit_event" ? "Etkinlik güncellendi!" : "Etkinlik paylaşıldı! Takvimde işaretlendi.");
       setIsSheetOpen(false);
+      setEditingEvent(null);
     } else {
       toast.error(result.error);
     }
     setIsPending(false);
   }
+
+  async function handleDeleteEvent(id: string) {
+    if (!confirm("Bu etkinliği silmek istediğinize emin misiniz?")) return;
+    const result = await deleteCommunityEvent(id, team.id);
+    if (result.success) toast.success("Etkinlik silindi.");
+    else toast.error(result.error);
+  }
+
+  const toLocalInput = (d: any) => {
+    const dt = new Date(d);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  };
 
   async function handleSurveySubmit(formData: FormData) {
     setIsPending(true);
@@ -172,6 +193,13 @@ export default function TeamDashboardClient({ team }: { team: any }) {
 
   const openCreateEvent = () => {
     setSheetMode("create_event");
+    setEditingEvent(null);
+    setIsSheetOpen(true);
+  };
+
+  const openEditEvent = (ev: any) => {
+    setSheetMode("edit_event");
+    setEditingEvent(ev);
     setIsSheetOpen(true);
   };
 
@@ -719,10 +747,55 @@ export default function TeamDashboardClient({ team }: { team: any }) {
 
             {/* Events */}
             {activeTab === "events" && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-6"><Calendar className="w-8 h-8 text-primary" /></div>
-                <h3 className="font-heading text-2xl font-bold tracking-tight mb-2">Etkinlik Yönetimi</h3>
-                <p className="text-on-surface-variant max-w-md text-[14px]">Etkinlik takvimi ve QR kodlu katılım sistemi yakında eklenecek.</p>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <h3 className="font-heading text-lg font-bold tracking-tight flex items-center gap-3">
+                    Etkinlikler <span className="bg-primary-fixed text-primary text-[11px] px-2.5 py-0.5 rounded-full font-semibold">{team.events?.length || 0}</span>
+                  </h3>
+                  <Button onClick={openCreateEvent} className="rounded-full text-[13px] font-semibold h-10 bg-accent text-white hover:bg-accent/90">
+                    <Plus className="w-4 h-4 mr-1.5" /> Yeni Etkinlik
+                  </Button>
+                </div>
+
+                {team.events?.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {team.events.map((ev: any) => {
+                      const d = new Date(ev.date);
+                      const isPast = d.getTime() < Date.now();
+                      const rsvp = ev._count?.interactions ?? 0;
+                      return (
+                        <div key={ev.id} className={`border rounded-xl p-4 flex items-center gap-4 transition-all hover:shadow-ambient ${ev.cancelled ? "border-destructive/30 bg-destructive/5" : "border-outline-variant"}`}>
+                          <div className={`w-14 h-14 rounded-lg flex flex-col items-center justify-center shrink-0 ${isPast ? "bg-surface-container-high text-on-surface-variant" : "bg-primary-fixed text-primary"}`}>
+                            <span className="text-[11px] font-semibold uppercase leading-none">{d.toLocaleDateString("tr-TR", { month: "short" })}</span>
+                            <span className="text-[20px] font-bold leading-none mt-0.5">{d.getDate()}</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-semibold text-[15px] text-on-surface truncate">{ev.title}</h4>
+                              {ev.cancelled && <span className="text-[10px] font-semibold bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">İptal</span>}
+                              {isPast && !ev.cancelled && <span className="text-[10px] font-semibold bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full">Geçmiş</span>}
+                            </div>
+                            <p className="text-[12px] text-on-surface-variant flex items-center gap-3 mt-1 flex-wrap">
+                              <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {d.toLocaleString("tr-TR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</span>
+                              {ev.location && <span className="truncate">📍 {ev.location}</span>}
+                              <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {rsvp}{ev.capacity != null ? `/${ev.capacity}` : ""} katılımcı</span>
+                            </p>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <Button variant="outline" onClick={() => openEditEvent(ev)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-primary hover:text-primary"><Edit className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => handleDeleteEvent(ev.id)} className="w-10 h-10 p-0 rounded-full border-outline-variant hover:border-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-12 border border-dashed border-outline-variant rounded-xl text-center">
+                    <div className="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-5 mx-auto"><Calendar className="w-8 h-8 text-primary" /></div>
+                    <h3 className="font-heading text-xl font-bold tracking-tight mb-1.5">Henüz Etkinlik Yok</h3>
+                    <p className="text-on-surface-variant max-w-md text-[14px] mx-auto">"Yeni Etkinlik" ile ilk etkinliğini paylaş; akışta ve takvimde görünsün.</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -795,14 +868,15 @@ export default function TeamDashboardClient({ team }: { team: any }) {
           <SheetHeader className="p-8 border-b border-outline-variant bg-surface-container-low text-left">
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-primary-fixed text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                {sheetMode === "create_survey" ? "ANKET MERKEZİ" : sheetMode === "create_event" ? "ETKİNLİK MERKEZİ" : "İÇERİK STÜDYOSU"}
+                {sheetMode === "create_survey" ? "ANKET MERKEZİ" : (sheetMode === "create_event" || sheetMode === "edit_event") ? "ETKİNLİK MERKEZİ" : "İÇERİK STÜDYOSU"}
               </span>
             </div>
             <SheetTitle className="font-heading text-2xl font-bold tracking-tight">
               {sheetMode === "create_post" ? "Yeni Duyuru Yayınla" :
                 sheetMode === "edit_post" ? "Duyuruyu Düzenle" :
                   sheetMode === "create_event" ? "Yeni Etkinlik Paylaş" :
-                    "Yeni Anket Oluştur"}
+                    sheetMode === "edit_event" ? "Etkinliği Düzenle" :
+                      "Yeni Anket Oluştur"}
             </SheetTitle>
             <SheetDescription className="text-on-surface-variant text-[13px]">
               Bu işlem veritabanına kaydedilecek ve anında yayına alınacaktır.
@@ -821,33 +895,33 @@ export default function TeamDashboardClient({ team }: { team: any }) {
               </div>
               <Button type="submit" disabled={isPending} className="w-full rounded-full text-[14px] font-semibold h-12">{isPending ? "Oluşturuluyor..." : "Anketi Başlat"}</Button>
             </form>
-          ) : sheetMode === "create_event" ? (
-            <form action={handleEventSubmit} className="p-8 space-y-6">
+          ) : (sheetMode === "create_event" || sheetMode === "edit_event") ? (
+            <form key={editingEvent?.id || "new-event"} action={handleEventSubmit} className="p-8 space-y-6">
               <div className="space-y-1.5">
                 <label htmlFor="ev-title" className={labelClass}>Etkinlik Başlığı</label>
-                <input id="ev-title" name="title" required placeholder="Örn: Robotik Yarışması" className={inputClass + " h-12 font-medium"} />
+                <input id="ev-title" name="title" required defaultValue={editingEvent?.title || ""} placeholder="Örn: Robotik Yarışması" className={inputClass + " h-12 font-medium"} />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="ev-desc" className={labelClass}>Açıklama</label>
-                <textarea id="ev-desc" name="description" required rows={4} placeholder="Etkinlik detaylarını yazın..." className="w-full p-4 rounded-lg border border-input bg-card text-[14px] outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring resize-none" />
+                <textarea id="ev-desc" name="description" required rows={4} defaultValue={editingEvent?.description || ""} placeholder="Etkinlik detaylarını yazın..." className="w-full p-4 rounded-lg border border-input bg-card text-[14px] outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring resize-none" />
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="ev-location" className={labelClass}>Yer / Konum</label>
-                <input id="ev-location" name="location" placeholder="Örn: Mühendislik Fakültesi" className={inputClass} />
+                <input id="ev-location" name="location" defaultValue={editingEvent?.location || ""} placeholder="Örn: Mühendislik Fakültesi" className={inputClass} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="ev-date" className={labelClass}>Tarih & Saat</label>
-                  <input id="ev-date" name="date" type="datetime-local" required className={inputClass} />
+                  <input id="ev-date" name="date" type="datetime-local" required defaultValue={editingEvent ? toLocalInput(editingEvent.date) : ""} className={inputClass} />
                 </div>
                 <div className="space-y-1.5">
                   <label htmlFor="ev-capacity" className={labelClass}>Kontenjan</label>
-                  <input id="ev-capacity" name="capacity" type="number" min="1" placeholder="Sınırsız" className={inputClass} />
+                  <input id="ev-capacity" name="capacity" type="number" min="1" defaultValue={editingEvent?.capacity ?? ""} placeholder="Sınırsız" className={inputClass} />
                 </div>
               </div>
               <div className="pt-5 border-t border-outline-variant flex gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsSheetOpen(false)} className="flex-1 rounded-full border-outline-variant text-[14px] font-semibold h-12">İptal</Button>
-                <Button type="submit" disabled={isPending} className="flex-1 rounded-full text-[14px] font-semibold h-12 bg-accent text-white hover:bg-accent/90">{isPending ? "Paylaşılıyor..." : "Etkinliği Paylaş"}</Button>
+                <Button type="submit" disabled={isPending} className="flex-1 rounded-full text-[14px] font-semibold h-12 bg-accent text-white hover:bg-accent/90">{isPending ? "Kaydediliyor..." : (sheetMode === "edit_event" ? "Güncelle" : "Etkinliği Paylaş")}</Button>
               </div>
             </form>
           ) : (

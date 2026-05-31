@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Activity, User as UserIcon, Mail, Globe, Camera, Lock } from "lucide-react";
+import { Activity, User as UserIcon, Mail, Globe, Camera, Lock, Palette, Shuffle } from "lucide-react";
 import { updateClubSettings, updateClubPassword } from "@/app/actions/club";
+import { CLUB_COLORS, randomClubColor } from "@/lib/colors";
 import { toast } from "sonner";
 
 interface SettingsClientProps {
@@ -12,6 +13,7 @@ interface SettingsClientProps {
 
 export default function SettingsClient({ club }: SettingsClientProps) {
   const [isPending, setIsPending] = useState(false);
+  const [color, setColor] = useState<string>(club.color || "#005bbf");
 
   async function handleSettingsSubmit(formData: FormData) {
     setIsPending(true);
@@ -103,6 +105,35 @@ export default function SettingsClient({ club }: SettingsClientProps) {
                   <input name="logo" defaultValue={club.logo || ""} placeholder="https://resim-linki.com/logo.png" className={inputClass + " h-10 text-[13px]"} />
                   <p className="text-[12px] text-on-surface-variant">Logo URL'sini buraya yapıştırın veya boş bırakın.</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Vurgu Rengi */}
+            <div className="space-y-3 pt-2">
+              <label className={labelClass}><Palette className="w-3.5 h-3.5 text-on-surface-variant" /> Vurgu Rengi</label>
+              <p className="text-[12px] text-on-surface-variant -mt-1">Akıştaki içerik kartlarının vurgusu (kenarlık, rozet, avatar) bu renkte görünür.</p>
+              <input type="hidden" name="color" value={color} />
+              <div className="flex flex-wrap items-center gap-2">
+                {CLUB_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    style={{ backgroundColor: c }}
+                    aria-label={c}
+                    className={`w-8 h-8 rounded-full transition-transform ${color.toLowerCase() === c.toLowerCase() ? "ring-2 ring-offset-2 ring-on-surface scale-110" : "hover:scale-110"}`}
+                  />
+                ))}
+                <label className="w-8 h-8 rounded-full border border-outline-variant overflow-hidden cursor-pointer relative" title="Özel renk seç">
+                  <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer" />
+                </label>
+                <button type="button" onClick={() => setColor(randomClubColor())} className="flex items-center gap-1.5 h-8 px-3 rounded-full border border-outline-variant text-[12px] font-semibold text-on-surface-variant hover:bg-surface-container-high transition-colors">
+                  <Shuffle className="w-3.5 h-3.5" /> Rastgele
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full border border-outline-variant" style={{ backgroundColor: color }} />
+                <span className="text-[12px] font-medium text-on-surface-variant">{color}</span>
               </div>
             </div>
 
