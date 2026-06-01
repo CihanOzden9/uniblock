@@ -1,9 +1,26 @@
 import { prisma } from "@/lib/prisma";
 import { Users2, Users, Calendar } from "lucide-react";
 import TeamStatusActions from "./TeamStatusActions";
+import AdminFilters from "../AdminFilters";
 
-export default async function AdminTeamsPage() {
+export default async function AdminTeamsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q || "").trim();
+  const status = sp.status || "";
+
+  const where: any = {};
+  if (q) where.OR = [
+    { name: { contains: q, mode: "insensitive" } },
+    { slug: { contains: q, mode: "insensitive" } },
+  ];
+  if (status) where.status = status;
+
   const teams = await prisma.team.findMany({
+    where,
     orderBy: [
       { status: "asc" },
       { createdAt: "desc" }
@@ -22,8 +39,20 @@ export default async function AdminTeamsPage() {
           <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.2em]">Yönetim / Takımlar</span>
         </div>
         <h1 className="text-3xl font-heading font-bold text-on-surface tracking-tight">Takım Yönetimi</h1>
-        <p className="text-sm text-on-surface-variant mt-1">Sistemde {teams.length} takım kayıtlı.</p>
+        <p className="text-sm text-on-surface-variant mt-1">{teams.length} takım listeleniyor.</p>
       </div>
+
+      <AdminFilters
+        searchPlaceholder="Takım adı ara..."
+        selects={[
+          { key: "status", label: "Tüm Durumlar", options: [
+            { value: "ACTIVE", label: "Aktif" },
+            { value: "PENDING", label: "Bekliyor" },
+            { value: "REJECTED", label: "Reddedilmiş" },
+            { value: "BANNED", label: "Engelli" },
+          ] },
+        ]}
+      />
 
       <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
         <div className="px-5 py-4 border-b border-outline-variant">
@@ -73,7 +102,7 @@ export default async function AdminTeamsPage() {
               <TeamStatusActions teamId={team.id} status={team.status} />
             </div>
           )) : (
-            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">Henüz takım oluşturulmamış.</div>
+            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">{(q || status) ? "Filtreye uygun takım bulunamadı." : "Henüz takım oluşturulmamış."}</div>
           )}
         </div>
       </div>

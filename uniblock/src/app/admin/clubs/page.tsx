@@ -1,9 +1,26 @@
 import { prisma } from "@/lib/prisma";
 import { Shield, Users, Calendar, TrendingUp } from "lucide-react";
 import ClubStatusActions from "./ClubStatusActions";
+import AdminFilters from "../AdminFilters";
 
-export default async function AdminClubsPage() {
+export default async function AdminClubsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q || "").trim();
+  const status = sp.status || "";
+
+  const where: any = {};
+  if (q) where.OR = [
+    { name: { contains: q, mode: "insensitive" } },
+    { slug: { contains: q, mode: "insensitive" } },
+  ];
+  if (status) where.status = status;
+
   const clubs = await prisma.club.findMany({
+    where,
     orderBy: [
       { status: "asc" },
       { performanceScore: "desc" }
@@ -22,8 +39,20 @@ export default async function AdminClubsPage() {
           <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.2em]">Yönetim / Kulüpler</span>
         </div>
         <h1 className="text-3xl font-heading font-bold text-on-surface tracking-tight">Kulüp Yönetimi</h1>
-        <p className="text-sm text-on-surface-variant mt-1">Sistemde {clubs.length} kulüp kayıtlı.</p>
+        <p className="text-sm text-on-surface-variant mt-1">{clubs.length} kulüp listeleniyor.</p>
       </div>
+
+      <AdminFilters
+        searchPlaceholder="Kulüp adı ara..."
+        selects={[
+          { key: "status", label: "Tüm Durumlar", options: [
+            { value: "ACTIVE", label: "Aktif" },
+            { value: "PENDING", label: "Bekliyor" },
+            { value: "REJECTED", label: "Reddedilmiş" },
+            { value: "BANNED", label: "Engelli" },
+          ] },
+        ]}
+      />
 
       <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
         <div className="px-5 py-4 border-b border-outline-variant">
@@ -73,7 +102,7 @@ export default async function AdminClubsPage() {
               <ClubStatusActions clubId={club.id} status={club.status} />
             </div>
           )) : (
-            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">Henüz kulüp oluşturulmamış.</div>
+            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">{(q || status) ? "Filtreye uygun kulüp bulunamadı." : "Henüz kulüp oluşturulmamış."}</div>
           )}
         </div>
       </div>

@@ -27,10 +27,21 @@ export default async function FeedPage() {
     }
   }) as any[];
 
+  // Kullanıcının kaydettiği içerikler (SAVE)
+  const savedRows = currentUser
+    ? await prisma.interaction.findMany({
+        where: { userId: currentUser.id, type: "SAVE" },
+        select: { postId: true, eventId: true },
+      })
+    : [];
+  const savedPostIds = new Set(savedRows.map(r => r.postId).filter(Boolean));
+  const savedEventIds = new Set(savedRows.map(r => r.eventId).filter(Boolean));
+
   // Postları etkileşimleriyle birleştiriyoruz
   const postsWithInteractions = posts.map(p => ({
     ...p,
-    interactions: postInteractions.filter(i => i.postId === p.id)
+    interactions: postInteractions.filter(i => i.postId === p.id),
+    userSaved: savedPostIds.has(p.id),
   }));
 
   // Kulüplerin performans sıralamasını çeker
@@ -62,6 +73,7 @@ export default async function FeedPage() {
     color: e.organizer?.color || e.team?.color || null,
     rsvpCount: e.interactions?.length || 0,
     userRsvped: currentUser ? e.interactions?.some((i: any) => i.userId === currentUser.id) : false,
+    userSaved: savedEventIds.has(e.id),
   }));
 
   // Aktif anketleri çeker

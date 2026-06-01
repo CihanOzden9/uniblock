@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Heart, MessageSquare, Share2, User, Users, Calendar, Bookmark,
-  BarChart3, AlertTriangle, Trash2, Edit2, Search, MapPin
+  BarChart3, AlertTriangle, Trash2, Edit2, Search, MapPin, Settings
 } from "lucide-react";
 import {
   Sheet,
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { likePost, commentPost, voteSurvey, editComment, deleteComment, reportComment } from "@/app/actions/interaction";
+import { likePost, commentPost, voteSurvey, editComment, deleteComment, reportComment, toggleSave } from "@/app/actions/interaction";
 import { rsvpEvent } from "@/app/actions/event";
 import { toast } from "sonner";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
@@ -173,6 +173,19 @@ export default function FeedClient({
   const sourceInitials = (name: string) =>
     name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
 
+  // Kaydet / kaydı kaldır
+  async function handleSave(e: React.MouseEvent, target: { postId?: string; eventId?: string }) {
+    e.stopPropagation();
+    if (!currentUser) return toast.error("Giriş yapmalısınız.");
+    const res = await toggleSave(target, currentUser.id);
+    if (res.success) {
+      toast.success(res.saved ? "Kaydedildi." : "Kayıt kaldırıldı.");
+      router.refresh();
+    } else {
+      toast.error(res.error);
+    }
+  }
+
   // Paylaş: içerik bağlantısını panoya kopyala
   async function handleShare(e: React.MouseEvent, kind: "event" | "post", id: string) {
     e.stopPropagation();
@@ -241,8 +254,13 @@ export default function FeedClient({
                   </Link>
                 </li>
                 <li>
-                  <Link href="/profile" className="flex items-center gap-3 text-[15px] text-on-surface hover:text-primary hover:bg-surface-container-low rounded-lg px-2.5 py-2 transition-colors">
+                  <Link href="/saved" className="flex items-center gap-3 text-[15px] text-on-surface hover:text-primary hover:bg-surface-container-low rounded-lg px-2.5 py-2 transition-colors">
                     <Bookmark className="w-[18px] h-[18px] text-outline" /> Kaydettiklerim
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/profile" className="flex items-center gap-3 text-[15px] text-on-surface hover:text-primary hover:bg-surface-container-low rounded-lg px-2.5 py-2 transition-colors">
+                    <Settings className="w-[18px] h-[18px] text-outline" /> Ayarlar
                   </Link>
                 </li>
               </ul>
@@ -286,6 +304,9 @@ export default function FeedClient({
                         <MapPin className="w-[18px] h-[18px] shrink-0" /> <span className="truncate">{item.location || "Konum belirtilmemiş"}</span>
                       </span>
                       <div className="flex items-center gap-2 shrink-0">
+                        <button onClick={(e) => handleSave(e, { eventId: item.id })} title={item.userSaved ? "Kaydı kaldır" : "Kaydet"} className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
+                          <Bookmark className={`w-[18px] h-[18px] transition-colors ${item.userSaved ? "fill-primary text-primary" : "text-on-surface-variant"}`} />
+                        </button>
                         <button onClick={(e) => handleShare(e, "event", item.id)} title="Bağlantıyı kopyala" className="p-2 rounded-full hover:bg-surface-container-high transition-colors">
                           <Share2 className="w-[18px] h-[18px] text-on-surface-variant" />
                         </button>
@@ -349,13 +370,22 @@ export default function FeedClient({
                         <span className="text-[13px] font-semibold text-on-surface-variant">{commentCount}</span>
                       </span>
                     </div>
-                    <button
-                      onClick={(e) => handleShare(e, "post", item.id)}
-                      title="Bağlantıyı kopyala"
-                      className="p-2 rounded-full hover:bg-surface-container-high transition-colors"
-                    >
-                      <Share2 className="w-[18px] h-[18px] text-on-surface-variant" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleSave(e, { postId: item.id })}
+                        title={item.userSaved ? "Kaydı kaldır" : "Kaydet"}
+                        className="p-2 rounded-full hover:bg-surface-container-high transition-colors"
+                      >
+                        <Bookmark className={`w-[18px] h-[18px] transition-colors ${item.userSaved ? "fill-primary text-primary" : "text-on-surface-variant"}`} />
+                      </button>
+                      <button
+                        onClick={(e) => handleShare(e, "post", item.id)}
+                        title="Bağlantıyı kopyala"
+                        className="p-2 rounded-full hover:bg-surface-container-high transition-colors"
+                      >
+                        <Share2 className="w-[18px] h-[18px] text-on-surface-variant" />
+                      </button>
+                    </div>
                   </div>
                 </article>
               );

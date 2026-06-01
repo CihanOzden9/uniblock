@@ -1,19 +1,49 @@
 import { prisma } from "@/lib/prisma";
 import { GraduationCap, Clock } from "lucide-react";
 import StudentStatusActions from "./StudentStatusActions";
+import AdminFilters from "../AdminFilters";
 
-export default async function AdminStudentsPage() {
-  const users = await prisma.user.findMany({
-    where: { role: { in: ["STUDENT", "CLUB_ADMIN"] } },
-    orderBy: [
-      { status: "asc" },
-      { createdAt: "desc" }
-    ],
-    select: {
-      id: true, name: true, email: true, faculty: true, department: true, createdAt: true, image: true, status: true, role: true,
-      _count: { select: { clubMemberships: true, interactions: true } },
-    },
-  });
+export default async function AdminStudentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; role?: string; faculty?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q || "").trim();
+  const status = sp.status || "";
+  const role = sp.role || "";
+  const faculty = sp.faculty || "";
+
+  const where: any = { role: { in: ["STUDENT", "CLUB_ADMIN"] } };
+  if (q) where.OR = [
+    { name: { contains: q, mode: "insensitive" } },
+    { email: { contains: q, mode: "insensitive" } },
+  ];
+  if (status) where.status = status;
+  if (role) where.role = role;
+  if (faculty) where.faculty = faculty;
+
+  const [users, facultyRows] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+      select: {
+        id: true, name: true, email: true, faculty: true, department: true, createdAt: true, image: true, status: true, role: true,
+        _count: { select: { clubMemberships: true, interactions: true } },
+      },
+    }),
+    prisma.user.findMany({
+      where: { role: { in: ["STUDENT", "CLUB_ADMIN"] }, faculty: { not: null } },
+      select: { faculty: true },
+      distinct: ["faculty"],
+      orderBy: { faculty: "asc" },
+    }),
+  ]);
+
+  const facultyOptions = facultyRows
+    .map((f) => f.faculty)
+    .filter((f): f is string => !!f)
+    .map((f) => ({ value: f, label: f }));
 
   return (
     <div className="p-8">
@@ -23,8 +53,25 @@ export default async function AdminStudentsPage() {
           <span className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-[0.2em]">Yönetim / Kullanıcılar</span>
         </div>
         <h1 className="text-3xl font-heading font-bold text-on-surface tracking-tight">Kullanıcı Yönetimi</h1>
-        <p className="text-sm text-on-surface-variant mt-1">Sistemde {users.length} kayıtlı öğrenci ve başkan bulunuyor.</p>
+        <p className="text-sm text-on-surface-variant mt-1">Sistemde {users.length} kayıt listeleniyor.</p>
       </div>
+
+      <AdminFilters
+        searchPlaceholder="Ad veya e-posta ara..."
+        selects={[
+          { key: "status", label: "Tüm Durumlar", options: [
+            { value: "ACTIVE", label: "Aktif" },
+            { value: "PENDING", label: "Bekliyor" },
+            { value: "REJECTED", label: "Reddedilmiş" },
+            { value: "BANNED", label: "Engelli" },
+          ] },
+          { key: "role", label: "Tüm Roller", options: [
+            { value: "STUDENT", label: "Öğrenci" },
+            { value: "CLUB_ADMIN", label: "Kulüp Başkanı" },
+          ] },
+          { key: "faculty", label: "Tüm Fakülteler", options: facultyOptions },
+        ]}
+      />
 
       <div className="bg-card rounded-xl border border-outline-variant shadow-ambient overflow-hidden">
         <div className="px-5 py-4 border-b border-outline-variant flex items-center justify-between">
@@ -74,7 +121,7 @@ export default async function AdminStudentsPage() {
               <StudentStatusActions userId={user.id} status={user.status} />
             </div>
           )) : (
-            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">Henüz kayıtlı kullanıcı bulunmuyor.</div>
+            <div className="px-5 py-12 text-center text-[12px] text-on-surface-variant font-medium">{(q || status || role || faculty) ? "Filtreye uygun kullanıcı bulunamadı." : "Henüz kayıtlı kullanıcı bulunmuyor."}</div>
           )}
         </div>
       </div>

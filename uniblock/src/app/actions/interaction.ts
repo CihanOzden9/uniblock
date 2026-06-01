@@ -1,9 +1,7 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
-const prisma = new PrismaClient();
 
 export async function likePost(postId: string, userId: string) {
   try {
@@ -35,6 +33,40 @@ export async function likePost(postId: string, userId: string) {
   } catch (error) {
     console.error("Like error:", error);
     return { success: false };
+  }
+}
+
+// İçeriği kaydet / kaydı geri al (SAVE toggle) — post veya event
+export async function toggleSave(
+  target: { postId?: string; eventId?: string },
+  userId: string
+) {
+  try {
+    if (!userId || (!target.postId && !target.eventId)) {
+      return { success: false, error: "Geçersiz istek." };
+    }
+    const where: any = { userId, type: "SAVE" };
+    if (target.postId) where.postId = target.postId;
+    if (target.eventId) where.eventId = target.eventId;
+
+    const existing = await (prisma.interaction as any).findFirst({ where });
+
+    if (existing) {
+      await (prisma.interaction as any).delete({ where: { id: existing.id } });
+      revalidatePath("/feed");
+      revalidatePath("/saved");
+      return { success: true, saved: false };
+    }
+
+    await (prisma.interaction as any).create({
+      data: { userId, type: "SAVE", postId: target.postId || null, eventId: target.eventId || null },
+    });
+    revalidatePath("/feed");
+    revalidatePath("/saved");
+    return { success: true, saved: true };
+  } catch (error) {
+    console.error("Save error:", error);
+    return { success: false, error: "İşlem gerçekleştirilemedi." };
   }
 }
 
