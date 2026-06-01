@@ -136,6 +136,9 @@ export async function updateTeamSettings(formData: FormData) {
     const logo = formData.get("logo") as string;
     const leaderName = formData.get("leaderName") as string;
     const color = formData.get("color") as string;
+    const instagram = formData.get("instagram") as string;
+    const twitter = formData.get("twitter") as string;
+    const linkedin = formData.get("linkedin") as string;
 
     await prisma.team.update({
       where: { id: teamId },
@@ -147,6 +150,9 @@ export async function updateTeamSettings(formData: FormData) {
         website,
         logo: logo || null,
         ...(color ? { color } : {}),
+        ...(instagram ? { instagram } : {}),
+        ...(twitter ? { twitter } : {}),
+        ...(linkedin ? { linkedin } : {}),
         leader: {
           update: {
             name: leaderName

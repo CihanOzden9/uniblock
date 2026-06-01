@@ -76,6 +76,9 @@ model Club {
   presidentEmail   String?
   website          String?
   color            String?
+  instagram        String?
+  twitter          String?
+  linkedin         String?
   status           AccountStatus @default(PENDING)
   performanceScore Int       @default(0)
   createdAt        DateTime  @default(now())
@@ -120,6 +123,9 @@ model Team {
   presidentEmail   String?
   website          String?
   color            String?
+  instagram        String?
+  twitter          String?
+  linkedin         String?
   status           AccountStatus @default(PENDING)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

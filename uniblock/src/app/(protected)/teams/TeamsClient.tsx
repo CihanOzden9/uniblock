@@ -52,6 +52,17 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
     setLeavingTeam(null);
   };
 
+  const onCancelClick = async (teamId: string) => {
+    setLeavingTeam(teamId);
+    const result = await leaveTeam(teamId, user.id);
+    if (result.success) {
+      toast.success("Katılım isteği iptal edildi.");
+    } else {
+      toast.error(result.error);
+    }
+    setLeavingTeam(null);
+  };
+
   const filteredTeams = teams.filter(team =>
     (team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (team.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
@@ -151,7 +162,7 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
                         </div>
                       </div>
                       <CardTitle className="font-heading text-xl font-bold tracking-tight mt-4">
-                        {team.name}
+                        <Link href={`/teams/${team.slug}`} className="hover:text-primary transition-colors">{team.name}</Link>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 space-y-4">
@@ -221,10 +232,28 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
                           );
                         }
 
-                        if (userStatus === "PENDING" || isLoading) {
+                        if (userStatus === "PENDING") {
+                          return (
+                            <Button
+                              onClick={() => onCancelClick(team.id)}
+                              disabled={isLeaving}
+                              variant="outline"
+                              className="group/req flex-1 rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
+                            >
+                              {isLeaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                                <>
+                                  <span className="inline group-hover/req:hidden">İstek Gönderildi</span>
+                                  <span className="hidden group-hover/req:inline">İsteği İptal Et</span>
+                                </>
+                              )}
+                            </Button>
+                          );
+                        }
+
+                        if (isLoading) {
                           return (
                             <Button disabled className="flex-1 rounded-full text-[13px] font-semibold h-10 bg-surface-container-high text-on-surface-variant border-transparent disabled:opacity-100">
-                              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "İstek Gönderildi"}
+                              <Loader2 className="w-4 h-4 animate-spin" />
                             </Button>
                           );
                         }
@@ -238,9 +267,11 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
                           </Button>
                         );
                       })()}
-                      <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
+                      <Link href={`/teams/${team.slug}`}>
+                        <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all" title="Takım sayfası">
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </Link>
                     </CardFooter>
                   </Card>
                 );

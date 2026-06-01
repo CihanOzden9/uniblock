@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Activity, User as UserIcon, Mail, Globe, Camera, Lock, Palette, Shuffle } from "lucide-react";
+import { Activity, User as UserIcon, Mail, Globe, Camera, Lock, Palette, Shuffle, AtSign, Briefcase } from "lucide-react";
 import { updateClubSettings, updateClubPassword } from "@/app/actions/club";
 import { CLUB_COLORS, randomClubColor } from "@/lib/colors";
 import { toast } from "sonner";
@@ -87,6 +87,26 @@ export default function SettingsClient({ club }: SettingsClientProps) {
             <div className="space-y-1.5">
               <label className={labelClass}><Globe className="w-3.5 h-3.5 text-on-surface-variant" /> Web Sayfası</label>
               <input name="website" type="url" defaultValue={club.website || ""} placeholder="https://kulup.com" className={inputClass} />
+            </div>
+
+            {/* Sosyal Medya */}
+            <div className="space-y-3">
+              <label className={labelClass}>Sosyal Medya</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="relative">
+                  <Camera className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                  <input name="instagram" type="url" defaultValue={club.instagram || ""} placeholder="Instagram" className={inputClass + " pl-10"} />
+                </div>
+                <div className="relative">
+                  <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                  <input name="twitter" type="url" defaultValue={club.twitter || ""} placeholder="X / Twitter" className={inputClass + " pl-10"} />
+                </div>
+                <div className="relative">
+                  <Briefcase className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                  <input name="linkedin" type="url" defaultValue={club.linkedin || ""} placeholder="LinkedIn" className={inputClass + " pl-10"} />
+                </div>
+              </div>
+              <p className="text-[12px] text-on-surface-variant">Tam URL gir (örn. https://instagram.com/kulubunuz). Boş bıraktıkların gizlenir.</p>
             </div>
 
             <div className="space-y-1.5">
