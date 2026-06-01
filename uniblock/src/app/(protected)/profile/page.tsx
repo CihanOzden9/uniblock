@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/session";
 import ProfileClient from "./ProfileClient";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -9,5 +10,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  return <ProfileClient user={user} />;
+  const faculties = await prisma.faculty.findMany({
+    orderBy: { name: "asc" },
+    include: { departments: { orderBy: { name: "asc" } } }
+  });
+
+  return <ProfileClient user={user} faculties={faculties} />;
 }
+

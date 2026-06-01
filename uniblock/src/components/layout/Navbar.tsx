@@ -108,9 +108,21 @@ export default function Navbar({ user }: NavbarProps) {
             </div>
 
             <Link href="/profile">
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center text-[13px] font-bold transition-all ${pathname === "/profile" ? "bg-primary text-primary-foreground" : "bg-primary-fixed text-primary hover:ring-2 hover:ring-primary/30"}`}>
-                {initials}
-              </div>
+              {user.image ? (
+                <img
+                  src={user.image}
+                  alt={user.name}
+                  className={`h-10 w-10 rounded-full object-cover border-2 transition-all ${
+                    pathname === "/profile"
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-transparent hover:ring-2 hover:ring-primary/30"
+                  }`}
+                />
+              ) : (
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-[13px] font-bold transition-all ${pathname === "/profile" ? "bg-primary text-primary-foreground" : "bg-primary-fixed text-primary hover:ring-2 hover:ring-primary/30"}`}>
+                  {initials}
+                </div>
+              )}
             </Link>
 
             <form action={logout}>
