@@ -17,7 +17,7 @@ export default async function ClubsPage() {
   const clubs = await prisma.club.findMany({
     include: {
       _count: {
-        select: { members: { where: { status: "APPROVED" } } }
+        select: { members: { where: { status: "APPROVED" } }, followers: true }
       },
       members: {
         where: {

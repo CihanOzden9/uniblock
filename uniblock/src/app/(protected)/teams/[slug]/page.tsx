@@ -18,7 +18,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
       },
       events: { orderBy: { date: "asc" } },
       posts: { orderBy: { createdAt: "desc" }, take: 5, select: { id: true, title: true, content: true, createdAt: true } },
-      _count: { select: { members: { where: { status: "APPROVED" } } } },
+      _count: { select: { followers: true } },
     },
   }) as any;
 
@@ -51,7 +51,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
     twitter: team.twitter,
     linkedin: team.linkedin,
     createdAt: team.createdAt,
-    memberCount: team._count.members,
+    memberCount: team._count.followers,
     leader: { name: team.leader.name, department: team.leader.department, image: team.leader.image },
     board,
     upcomingEvents,

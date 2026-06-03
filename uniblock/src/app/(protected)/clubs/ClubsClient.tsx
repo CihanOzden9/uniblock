@@ -202,7 +202,7 @@ export default function ClubsClient({ user, clubs, followedIds }: ClubsClientPro
                     href={`/clubs/${club.slug}`}
                     name={club.name}
                     description={club.description}
-                    memberCount={club._count?.members || 0}
+                    memberCount={club._count?.followers || 0}
                     color={club.color}
                     typeLabel="Kulüp"
                     leaderLabel="Başkan"

@@ -18,7 +18,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
       },
       events: { orderBy: { date: "asc" } },
       posts: { orderBy: { createdAt: "desc" }, take: 5, select: { id: true, title: true, content: true, createdAt: true } },
-      _count: { select: { members: { where: { status: "APPROVED" } } } },
+      _count: { select: { followers: true } },
     },
   }) as any;
 
@@ -51,7 +51,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
     twitter: club.twitter,
     linkedin: club.linkedin,
     createdAt: club.createdAt,
-    memberCount: club._count.members,
+    memberCount: club._count.followers,
     leader: { name: club.leader.name, department: club.leader.department, image: club.leader.image },
     board,
     upcomingEvents,

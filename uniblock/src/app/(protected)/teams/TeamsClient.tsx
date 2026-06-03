@@ -202,7 +202,7 @@ export default function TeamsClient({ user, teams, followedIds }: TeamsClientPro
                     href={`/teams/${team.slug}`}
                     name={team.name}
                     description={team.description}
-                    memberCount={team._count?.members || 0}
+                    memberCount={team._count?.followers || 0}
                     color={team.color}
                     typeLabel="Takım"
                     leaderLabel="Kaptan"
