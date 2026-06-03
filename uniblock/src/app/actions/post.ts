@@ -28,11 +28,15 @@ export async function createPost(formData: FormData) {
       },
     });
 
+    // TODO(bildirim): Bu içerik bir kulüp/takıma aitse, takipçilere bildirim üret.
+    // Hedef kümesi: prisma.follow.findMany({ where: clubId ? { clubId } : { teamId } })
+    // → her takipçi için Notification kaydı (sonraki faz). Follow tablosu hazır.
+
     // Ana akışı ve kulüp/takım yönetim sayfasını yenile
     revalidatePath("/clubs/manage");
     revalidatePath("/teams/manage");
     revalidatePath("/feed");
-    
+
     return { success: true, post };
   } catch (error: any) {
     console.error("Post creation error:", error);

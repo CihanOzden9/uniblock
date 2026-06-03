@@ -28,6 +28,16 @@ export default function ClubDashboardClient({ club }: { club: any }) {
   const POST_CONTENT_MAX = 250;
   const [boardRoleSelect, setBoardRoleSelect] = useState("BAŞKAN YARDIMCISI");
   const [customRoleInput, setCustomRoleInput] = useState("");
+  const [roles, setRoles] = useState<string[]>([
+    "BAŞKAN YARDIMCISI",
+    "GENEL SEKRETER",
+    "SAYMAN",
+    "ETKİNLİK KOORDİNATÖRÜ",
+    "SOSYAL MEDYA SORUMLUSU",
+    "DIŞ İLİŞKİLER SORUMLUSU",
+    "TEKNİK SORUMLU",
+    "PROJE KOORDİNATÖRÜ",
+  ]);
   const [boardMemberEmail, setBoardMemberEmail] = useState("");
   const [selectedMemberForBoard, setSelectedMemberForBoard] = useState("");
   const [boardAddMode, setBoardAddMode] = useState<"existing" | "email">("existing");
@@ -215,16 +225,18 @@ export default function ClubDashboardClient({ club }: { club: any }) {
     (m.user.department && m.user.department.toLowerCase().includes(memberSearchTerm.toLowerCase()))
   );
 
-  const PREDEFINED_ROLES = [
-    "BAŞKAN YARDIMCISI",
-    "GENEL SEKRETER",
-    "SAYMAN",
-    "ETKİNLİK KOORDİNATÖRÜ",
-    "SOSYAL MEDYA SORUMLUSU",
-    "DIŞ İLİŞKİLER SORUMLUSU",
-    "TEKNİK SORUMLU",
-    "PROJE KOORDİNATÖRÜ"
-  ];
+  // Yeni rol eklendiğinde listeye katılır (liste state olarak tutulur)
+  function addCustomRole() {
+    const r = customRoleInput.trim().toUpperCase();
+    if (!r) { toast.error("Lütfen bir rol adı girin."); return; }
+    if (!roles.includes(r)) {
+      setRoles((prev) => [...prev, r]);
+    }
+    setBoardRoleSelect(r);
+    setCustomRoleInput("");
+    toast.success("Rol listeye eklendi.");
+  }
+
   async function handleBoardAssignment() {
     const role = boardRoleSelect === "DİĞER" ? customRoleInput.trim().toUpperCase() : boardRoleSelect;
     if (!role) { toast.error("Lütfen bir rol belirleyin."); return; }
@@ -728,15 +740,28 @@ export default function ClubDashboardClient({ club }: { club: any }) {
                     <div className="space-y-1.5">
                       <label className={labelClass}>Yönetim Rolü</label>
                       <select value={boardRoleSelect} onChange={(e) => setBoardRoleSelect(e.target.value)} className={inputClass + " font-medium"}>
-                        {PREDEFINED_ROLES.map((role) => (<option key={role} value={role}>{role}</option>))}
-                        <option value="DİĞER">DİĞER (Manuel Giriş)</option>
+                        {roles.map((role) => (<option key={role} value={role}>{role}</option>))}
+                        <option value="DİĞER">DİĞER (Listeye Ekle)</option>
                       </select>
                     </div>
 
                     {boardRoleSelect === "DİĞER" && (
                       <div className="space-y-1.5">
-                        <label className={labelClass}>Manuel Rol Adı</label>
-                        <input type="text" value={customRoleInput} onChange={(e) => setCustomRoleInput(e.target.value)} placeholder="Örn: Araştırma Koordinatörü" className={inputClass} />
+                        <label className={labelClass}>Yeni Rol Adı</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={customRoleInput}
+                            onChange={(e) => setCustomRoleInput(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomRole(); } }}
+                            placeholder="Örn: Araştırma Koordinatörü"
+                            className={inputClass}
+                          />
+                          <Button type="button" onClick={addCustomRole} className="shrink-0 rounded-full text-[13px] font-semibold h-10 px-4 bg-primary text-white hover:bg-primary/90">
+                            Listeye Ekle
+                          </Button>
+                        </div>
+                        <p className="text-[11px] text-on-surface-variant">Eklenen rol listeye kaydedilir ve seçili hale gelir.</p>
                       </div>
                     )}
 

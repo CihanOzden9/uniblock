@@ -33,10 +33,13 @@ export async function createSurvey(formData: FormData) {
       }
     });
 
+    // TODO(bildirim): Anket bir kulüp/takıma aitse takipçilere bildirim üret.
+    // Hedef: prisma.follow.findMany({ where: clubId ? { clubId } : { teamId } }) (sonraki faz).
+
     revalidatePath("/clubs/manage");
     revalidatePath("/teams/manage");
     revalidatePath("/feed");
-    
+
     return { success: true, survey };
   } catch (error: any) {
     console.error("Survey creation error:", error);

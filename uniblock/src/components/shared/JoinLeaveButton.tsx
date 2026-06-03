@@ -65,10 +65,10 @@ export default function JoinLeaveButton({ entity, id, userId, status, color, isL
         className="group/jl inline-flex items-center justify-center gap-2 h-11 px-6 rounded-full border border-outline-variant bg-card text-on-surface text-[14px] font-semibold transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60 min-w-[120px]"
       >
         {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-          <>
-            <span className="inline-flex items-center gap-2 group-hover/jl:hidden"><Check className="w-4 h-4" /> Üyesin</span>
-            <span className="hidden group-hover/jl:inline">Ayrıl</span>
-          </>
+          <span className="grid">
+            <span className="col-start-1 row-start-1 flex items-center justify-center gap-2 transition-opacity group-hover/jl:opacity-0"><Check className="w-4 h-4" /> Üyesin</span>
+            <span className="col-start-1 row-start-1 flex items-center justify-center opacity-0 transition-opacity group-hover/jl:opacity-100">Ayrıl</span>
+          </span>
         )}
       </button>
     );
@@ -82,10 +82,10 @@ export default function JoinLeaveButton({ entity, id, userId, status, color, isL
         className="group/jl inline-flex items-center justify-center h-11 px-6 rounded-full border border-outline-variant bg-card text-on-surface-variant text-[14px] font-semibold transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60 min-w-[150px]"
       >
         {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-          <>
-            <span className="inline group-hover/jl:hidden">İstek Gönderildi</span>
-            <span className="hidden group-hover/jl:inline">İsteği İptal Et</span>
-          </>
+          <span className="grid">
+            <span className="col-start-1 row-start-1 flex items-center justify-center transition-opacity group-hover/jl:opacity-0">İstek Gönderildi</span>
+            <span className="col-start-1 row-start-1 flex items-center justify-center opacity-0 transition-opacity group-hover/jl:opacity-100">İsteği İptal Et</span>
+          </span>
         )}
       </button>
     );

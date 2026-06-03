@@ -34,6 +34,10 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
     .map((m: any) => ({ name: m.user.name, department: m.user.department, image: m.user.image, role: m.role }));
 
   const myMembership = team.members.find((m: any) => m.userId === user.id);
+  const myFollow = await prisma.follow.findUnique({
+    where: { userId_teamId: { userId: user.id, teamId: team.id } },
+    select: { id: true },
+  });
 
   const data: CommunityDetailData = {
     entity: "team",
@@ -61,6 +65,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
       user={user}
       membershipStatus={myMembership?.status ?? null}
       isLeader={team.leaderId === user.id}
+      isFollowing={!!myFollow}
     />
   );
 }

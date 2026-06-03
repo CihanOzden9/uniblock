@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Eye, Loader2, Check, Crown } from "lucide-react";
+import { Users, Eye, Loader2, Check, Crown, Plus, UserPlus } from "lucide-react";
 import { accentOf, withAlpha } from "@/lib/colors";
 
 interface CommunityListCardProps {
@@ -12,10 +12,14 @@ interface CommunityListCardProps {
   color?: string | null;
   typeLabel: string; // "Kulüp" | "Takım"
   leaderLabel: string; // "Başkan" | "Kaptan"
-  status: "APPROVED" | "PENDING" | "REJECTED" | null;
   isLeader: boolean;
-  busyJoin: boolean;
-  busyLeave: boolean;
+  // Takip (anlık, onaysız)
+  isFollowing: boolean;
+  busyFollow: boolean;
+  onToggleFollow: () => void;
+  // Üyelik / yönetime katılma (onaylı)
+  membershipStatus: "APPROVED" | "PENDING" | "REJECTED" | null;
+  busyMembership: boolean;
   onJoin: () => void;
   onLeave: () => void;
   onCancel: () => void;
@@ -29,16 +33,65 @@ export default function CommunityListCard({
   color,
   typeLabel,
   leaderLabel,
-  status,
   isLeader,
-  busyJoin,
-  busyLeave,
+  isFollowing,
+  busyFollow,
+  onToggleFollow,
+  membershipStatus,
+  busyMembership,
   onJoin,
   onLeave,
   onCancel,
 }: CommunityListCardProps) {
   const accent = accentOf(color);
   const initial = (name?.trim()?.[0] || "?").toUpperCase();
+
+  // Üyelik butonu (Katıl / İstek Gönderildi / Üyesin)
+  const membershipButton = (
+    membershipStatus === "APPROVED" ? (
+      <button
+        onClick={onLeave}
+        disabled={busyMembership}
+        className="group/ms flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface-container-low text-[13px] font-semibold text-on-surface transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60"
+      >
+        {busyMembership ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <span className="grid">
+            <span className="col-start-1 row-start-1 flex items-center justify-center gap-1.5 transition-opacity group-hover/ms:opacity-0">
+              <Check className="h-3.5 w-3.5" /> Üyesin
+            </span>
+            <span className="col-start-1 row-start-1 flex items-center justify-center opacity-0 transition-opacity group-hover/ms:opacity-100">
+              Ayrıl
+            </span>
+          </span>
+        )}
+      </button>
+    ) : membershipStatus === "PENDING" ? (
+      <button
+        onClick={onCancel}
+        disabled={busyMembership}
+        className="group/ms flex h-10 flex-1 items-center justify-center rounded-full border border-outline-variant bg-surface-container-low text-[13px] font-semibold text-on-surface-variant transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60"
+      >
+        {busyMembership ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <span className="grid">
+            <span className="col-start-1 row-start-1 flex items-center justify-center transition-opacity group-hover/ms:opacity-0">İstek Gönderildi</span>
+            <span className="col-start-1 row-start-1 flex items-center justify-center opacity-0 transition-opacity group-hover/ms:opacity-100">İsteği İptal Et</span>
+          </span>
+        )}
+      </button>
+    ) : (
+      <button
+        onClick={onJoin}
+        disabled={busyMembership}
+        className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full border border-outline-variant bg-surface text-[13px] font-semibold text-on-surface transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+      >
+        {busyMembership ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><UserPlus className="h-3.5 w-3.5" /> Katıl</>)}
+      </button>
+    )
+  );
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-card shadow-ambient transition-all hover:-translate-y-1 hover:shadow-ambient-lg">
@@ -90,65 +143,70 @@ export default function CommunityListCard({
         </p>
 
         {/* Aksiyonlar */}
-        <div className="mt-4 flex items-center gap-2">
+        <div className="mt-4 flex flex-col gap-2">
           {isLeader ? (
-            <span
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full text-[13px] font-semibold"
-              style={{ backgroundColor: withAlpha(accent, 0.12), color: accent }}
-            >
-              <Crown className="h-3.5 w-3.5" />
-              {leaderLabel}sın
-            </span>
-          ) : status === "APPROVED" ? (
-            <button
-              onClick={onLeave}
-              disabled={busyLeave}
-              className="group/jl flex h-10 flex-1 items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-container-low text-[13px] font-semibold text-on-surface transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60"
-            >
-              {busyLeave ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <span className="inline-flex items-center gap-1.5 group-hover/jl:hidden">
-                    <Check className="h-3.5 w-3.5" /> Üyesin
-                  </span>
-                  <span className="hidden group-hover/jl:inline">Ayrıl</span>
-                </>
-              )}
-            </button>
-          ) : status === "PENDING" ? (
-            <button
-              onClick={onCancel}
-              disabled={busyLeave}
-              className="group/req flex h-10 flex-1 items-center justify-center rounded-full border border-outline-variant bg-surface-container-low text-[13px] font-semibold text-on-surface-variant transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60"
-            >
-              {busyLeave ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <span className="inline group-hover/req:hidden">İstek Gönderildi</span>
-                  <span className="hidden group-hover/req:inline">İsteği İptal Et</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <span
+                className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full text-[13px] font-semibold"
+                style={{ backgroundColor: withAlpha(accent, 0.12), color: accent }}
+              >
+                <Crown className="h-3.5 w-3.5" />
+                {leaderLabel}sın
+              </span>
+              <Link
+                href={href}
+                title="Detayları gör"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
+              >
+                <Eye className="h-4 w-4" />
+              </Link>
+            </div>
           ) : (
-            <button
-              onClick={onJoin}
-              disabled={busyJoin}
-              style={{ backgroundColor: accent }}
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
-              {busyJoin ? <Loader2 className="h-4 w-4 animate-spin" /> : "Katıl"}
-            </button>
-          )}
+            <>
+              {/* Takip (birincil) */}
+              {isFollowing ? (
+                <button
+                  onClick={onToggleFollow}
+                  disabled={busyFollow}
+                  className="group/fl flex h-10 w-full items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-container-low text-[13px] font-semibold text-on-surface transition-colors hover:border-destructive hover:text-destructive disabled:opacity-60"
+                >
+                  {busyFollow ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span className="grid">
+                      <span className="col-start-1 row-start-1 flex items-center justify-center gap-1.5 transition-opacity group-hover/fl:opacity-0">
+                        <Check className="h-3.5 w-3.5" /> Takip Ediliyor
+                      </span>
+                      <span className="col-start-1 row-start-1 flex items-center justify-center opacity-0 transition-opacity group-hover/fl:opacity-100">
+                        Takibi Bırak
+                      </span>
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={onToggleFollow}
+                  disabled={busyFollow}
+                  style={{ backgroundColor: accent }}
+                  className="flex h-10 w-full items-center justify-center gap-2 rounded-full text-[13px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                >
+                  {busyFollow ? <Loader2 className="h-4 w-4 animate-spin" /> : (<><Plus className="h-3.5 w-3.5" /> Takip Et</>)}
+                </button>
+              )}
 
-          <Link
-            href={href}
-            title="Detayları gör"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
-          >
-            <Eye className="h-4 w-4" />
-          </Link>
+              {/* Üyelik (Katıl) + Detay */}
+              <div className="flex items-center gap-2">
+                {membershipButton}
+                <Link
+                  href={href}
+                  title="Detayları gör"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant text-on-surface-variant transition-colors hover:border-primary hover:text-primary"
+                >
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

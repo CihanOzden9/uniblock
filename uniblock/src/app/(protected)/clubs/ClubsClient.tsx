@@ -9,57 +9,88 @@ import { Button } from "@/components/ui/button";
 import { Search, Users, Compass } from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 import CommunityListCard from "@/components/shared/CommunityListCard";
+import { toggleFollow } from "@/app/actions/follow";
 import { requestJoinClub, leaveClub } from "@/app/actions/club";
 import { toast } from "sonner";
 
 interface ClubsClientProps {
   user: any;
   clubs: any[];
+  followedIds: string[];
 }
 
-export default function ClubsClient({ user, clubs }: ClubsClientProps) {
+export default function ClubsClient({ user, clubs, followedIds }: ClubsClientProps) {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") === "takip" ? "joined" : "all";
   const [activeTab, setActiveTab] = useState<"all" | "joined">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isPending, setIsPending] = useState<string | null>(null);
-  const [leavingClub, setLeavingClub] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyMembershipId, setBusyMembershipId] = useState<string | null>(null);
+  const [followed, setFollowed] = useState<Set<string>>(new Set(followedIds));
 
-  const isJoined = (club: any) =>
-    club.members?.some((m: any) => m.userId === user.id && m.status === "APPROVED");
+  const isFollowing = (club: any) => followed.has(club.id);
+  const membershipStatus = (club: any) =>
+    club.members?.find((m: any) => m.userId === user.id)?.status ?? null;
 
   const onJoinClick = async (clubId: string) => {
-    setIsPending(clubId);
+    setBusyMembershipId(clubId);
     const result = await requestJoinClub(clubId, user.id);
-    if (result.success) toast.success("Katılım isteğiniz başarıyla gönderildi!");
+    if (result.success) toast.success("Katılım isteğiniz yönetime gönderildi!");
     else toast.error(result.error);
-    setIsPending(null);
+    setBusyMembershipId(null);
   };
 
   const onLeaveClick = async (clubId: string) => {
     if (!confirm("Bu kulüpten ayrılmak istediğinize emin misiniz?")) return;
-    setLeavingClub(clubId);
+    setBusyMembershipId(clubId);
     const result = await leaveClub(clubId, user.id);
     if (result.success) toast.success("Kulüpten başarıyla ayrıldınız.");
     else toast.error(result.error);
-    setLeavingClub(null);
+    setBusyMembershipId(null);
   };
 
   const onCancelClick = async (clubId: string) => {
-    setLeavingClub(clubId);
+    setBusyMembershipId(clubId);
     const result = await leaveClub(clubId, user.id);
     if (result.success) toast.success("Katılım isteği iptal edildi.");
     else toast.error(result.error);
-    setLeavingClub(null);
+    setBusyMembershipId(null);
+  };
+
+  const onToggleFollow = async (clubId: string) => {
+    setBusyId(clubId);
+    // İyimser güncelleme
+    const wasFollowing = followed.has(clubId);
+    setFollowed((prev) => {
+      const next = new Set(prev);
+      if (wasFollowing) next.delete(clubId);
+      else next.add(clubId);
+      return next;
+    });
+
+    const result = await toggleFollow({ clubId });
+    if (result.success) {
+      toast.success(result.following ? "Takip etmeye başladın." : "Takip bırakıldı.");
+    } else {
+      // Hata: geri al
+      setFollowed((prev) => {
+        const next = new Set(prev);
+        if (wasFollowing) next.add(clubId);
+        else next.delete(clubId);
+        return next;
+      });
+      toast.error(result.error);
+    }
+    setBusyId(null);
   };
 
   const filteredClubs = clubs.filter(
     (club) =>
       (club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (club.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (activeTab === "all" || isJoined(club))
+      (activeTab === "all" || isFollowing(club))
   );
-  const joinedCount = clubs.filter(isJoined).length;
+  const joinedCount = clubs.filter(isFollowing).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,11 +181,11 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
                   <Users className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="mb-1.5 font-heading text-xl font-bold tracking-tight">
-                  {activeTab === "joined" ? "Henüz Bir Topluluğa Katılmadın" : "Sonuç Bulunamadı"}
+                  {activeTab === "joined" ? "Henüz Bir Topluluğu Takip Etmiyorsun" : "Sonuç Bulunamadı"}
                 </h3>
                 <p className="mb-6 text-[14px] text-on-surface-variant">
                   {activeTab === "joined"
-                    ? "Tüm topluluklar arasından ilgi alanına uygun kulüplere katıl."
+                    ? "İlgi alanına uygun kulüpleri takip et, duyuru ve etkinliklerinden haberdar ol."
                     : "Aramana uygun bir topluluk bulunamadı."}
                 </p>
                 {activeTab === "joined" && (
@@ -165,28 +196,27 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredClubs.map((club) => {
-                  const userMembership = club.members?.find((m: any) => m.userId === user.id);
-                  return (
-                    <CommunityListCard
-                      key={club.id}
-                      href={`/clubs/${club.slug}`}
-                      name={club.name}
-                      description={club.description}
-                      memberCount={club._count?.members || 0}
-                      color={club.color}
-                      typeLabel="Kulüp"
-                      leaderLabel="Başkan"
-                      status={userMembership?.status ?? null}
-                      isLeader={club.leader?.id === user.id}
-                      busyJoin={isPending === club.id}
-                      busyLeave={leavingClub === club.id}
-                      onJoin={() => onJoinClick(club.id)}
-                      onLeave={() => onLeaveClick(club.id)}
-                      onCancel={() => onCancelClick(club.id)}
-                    />
-                  );
-                })}
+                {filteredClubs.map((club) => (
+                  <CommunityListCard
+                    key={club.id}
+                    href={`/clubs/${club.slug}`}
+                    name={club.name}
+                    description={club.description}
+                    memberCount={club._count?.members || 0}
+                    color={club.color}
+                    typeLabel="Kulüp"
+                    leaderLabel="Başkan"
+                    isLeader={club.leader?.id === user.id}
+                    isFollowing={isFollowing(club)}
+                    busyFollow={busyId === club.id}
+                    onToggleFollow={() => onToggleFollow(club.id)}
+                    membershipStatus={membershipStatus(club)}
+                    busyMembership={busyMembershipId === club.id}
+                    onJoin={() => onJoinClick(club.id)}
+                    onLeave={() => onLeaveClick(club.id)}
+                    onCancel={() => onCancelClick(club.id)}
+                  />
+                ))}
               </div>
             )}
           </div>

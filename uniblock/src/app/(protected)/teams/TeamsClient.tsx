@@ -9,57 +9,88 @@ import { Button } from "@/components/ui/button";
 import { Search, Users, Compass } from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 import CommunityListCard from "@/components/shared/CommunityListCard";
+import { toggleFollow } from "@/app/actions/follow";
 import { requestJoinTeam, leaveTeam } from "@/app/actions/team";
 import { toast } from "sonner";
 
 interface TeamsClientProps {
   user: any;
   teams: any[];
+  followedIds: string[];
 }
 
-export default function TeamsClient({ user, teams }: TeamsClientProps) {
+export default function TeamsClient({ user, teams, followedIds }: TeamsClientProps) {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") === "takip" ? "joined" : "all";
   const [activeTab, setActiveTab] = useState<"all" | "joined">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isPending, setIsPending] = useState<string | null>(null);
-  const [leavingTeam, setLeavingTeam] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyMembershipId, setBusyMembershipId] = useState<string | null>(null);
+  const [followed, setFollowed] = useState<Set<string>>(new Set(followedIds));
 
-  const isJoined = (team: any) =>
-    team.members?.some((m: any) => m.userId === user.id && m.status === "APPROVED");
+  const isFollowing = (team: any) => followed.has(team.id);
+  const membershipStatus = (team: any) =>
+    team.members?.find((m: any) => m.userId === user.id)?.status ?? null;
 
   const onJoinClick = async (teamId: string) => {
-    setIsPending(teamId);
+    setBusyMembershipId(teamId);
     const result = await requestJoinTeam(teamId, user.id);
-    if (result.success) toast.success("Katılım isteğiniz başarıyla gönderildi!");
+    if (result.success) toast.success("Katılım isteğiniz yönetime gönderildi!");
     else toast.error(result.error);
-    setIsPending(null);
+    setBusyMembershipId(null);
   };
 
   const onLeaveClick = async (teamId: string) => {
     if (!confirm("Bu takımdan ayrılmak istediğinize emin misiniz?")) return;
-    setLeavingTeam(teamId);
+    setBusyMembershipId(teamId);
     const result = await leaveTeam(teamId, user.id);
     if (result.success) toast.success("Takımdan başarıyla ayrıldınız.");
     else toast.error(result.error);
-    setLeavingTeam(null);
+    setBusyMembershipId(null);
   };
 
   const onCancelClick = async (teamId: string) => {
-    setLeavingTeam(teamId);
+    setBusyMembershipId(teamId);
     const result = await leaveTeam(teamId, user.id);
     if (result.success) toast.success("Katılım isteği iptal edildi.");
     else toast.error(result.error);
-    setLeavingTeam(null);
+    setBusyMembershipId(null);
+  };
+
+  const onToggleFollow = async (teamId: string) => {
+    setBusyId(teamId);
+    // İyimser güncelleme
+    const wasFollowing = followed.has(teamId);
+    setFollowed((prev) => {
+      const next = new Set(prev);
+      if (wasFollowing) next.delete(teamId);
+      else next.add(teamId);
+      return next;
+    });
+
+    const result = await toggleFollow({ teamId });
+    if (result.success) {
+      toast.success(result.following ? "Takip etmeye başladın." : "Takip bırakıldı.");
+    } else {
+      // Hata: geri al
+      setFollowed((prev) => {
+        const next = new Set(prev);
+        if (wasFollowing) next.add(teamId);
+        else next.delete(teamId);
+        return next;
+      });
+      toast.error(result.error);
+    }
+    setBusyId(null);
   };
 
   const filteredTeams = teams.filter(
     (team) =>
       (team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (team.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (activeTab === "all" || isJoined(team))
+      (activeTab === "all" || isFollowing(team))
   );
-  const joinedCount = teams.filter(isJoined).length;
+  const joinedCount = teams.filter(isFollowing).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,11 +181,11 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
                   <Users className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="mb-1.5 font-heading text-xl font-bold tracking-tight">
-                  {activeTab === "joined" ? "Henüz Bir Takıma Katılmadın" : "Sonuç Bulunamadı"}
+                  {activeTab === "joined" ? "Henüz Bir Takımı Takip Etmiyorsun" : "Sonuç Bulunamadı"}
                 </h3>
                 <p className="mb-6 text-[14px] text-on-surface-variant">
                   {activeTab === "joined"
-                    ? "Tüm takımlar arasından yarışma ve proje takımlarına katıl."
+                    ? "Yarışma ve proje takımlarını takip et, duyuru ve etkinliklerinden haberdar ol."
                     : "Aramana uygun bir takım bulunamadı."}
                 </p>
                 {activeTab === "joined" && (
@@ -165,28 +196,27 @@ export default function TeamsClient({ user, teams }: TeamsClientProps) {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredTeams.map((team) => {
-                  const userMembership = team.members?.find((m: any) => m.userId === user.id);
-                  return (
-                    <CommunityListCard
-                      key={team.id}
-                      href={`/teams/${team.slug}`}
-                      name={team.name}
-                      description={team.description}
-                      memberCount={team._count?.members || 0}
-                      color={team.color}
-                      typeLabel="Takım"
-                      leaderLabel="Kaptan"
-                      status={userMembership?.status ?? null}
-                      isLeader={team.leader?.id === user.id}
-                      busyJoin={isPending === team.id}
-                      busyLeave={leavingTeam === team.id}
-                      onJoin={() => onJoinClick(team.id)}
-                      onLeave={() => onLeaveClick(team.id)}
-                      onCancel={() => onCancelClick(team.id)}
-                    />
-                  );
-                })}
+                {filteredTeams.map((team) => (
+                  <CommunityListCard
+                    key={team.id}
+                    href={`/teams/${team.slug}`}
+                    name={team.name}
+                    description={team.description}
+                    memberCount={team._count?.members || 0}
+                    color={team.color}
+                    typeLabel="Takım"
+                    leaderLabel="Kaptan"
+                    isLeader={team.leader?.id === user.id}
+                    isFollowing={isFollowing(team)}
+                    busyFollow={busyId === team.id}
+                    onToggleFollow={() => onToggleFollow(team.id)}
+                    membershipStatus={membershipStatus(team)}
+                    busyMembership={busyMembershipId === team.id}
+                    onJoin={() => onJoinClick(team.id)}
+                    onLeave={() => onLeaveClick(team.id)}
+                    onCancel={() => onCancelClick(team.id)}
+                  />
+                ))}
               </div>
             )}
           </div>

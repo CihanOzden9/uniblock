@@ -64,6 +64,7 @@ model User {
   reports         Report[]      @relation("Reporter")
   clubMemberships ClubMember[]
   teamMemberships TeamMember[]
+  follows         Follow[]
 }
 
 model Club {
@@ -91,6 +92,7 @@ model Club {
   events           Event[]
   surveys          Survey[]
   members          ClubMember[]
+  followers        Follow[]
 }
 
 enum MembershipStatus {
@@ -137,6 +139,7 @@ model Team {
   events           Event[]
   surveys          Survey[]
   members          TeamMember[]
+  followers        Follow[]
 }
 
 model TeamMember {
@@ -150,6 +153,24 @@ model TeamMember {
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   team      Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, teamId])
+}
+
+// Topluluk takibi — üyelikten (onaylı kadro üyeliği) bağımsız, anlık abonelik.
+// İçerik sahipliği gibi XOR: clubId VEYA teamId set edilir (uygulama katmanında zorlanır).
+// İleride bildirim sistemi bu tabloyu hedef kümesi olarak kullanır.
+model Follow {
+  id        String   @id @default(cuid())
+  userId    String
+  clubId    String?
+  teamId    String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  club      Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clubId])
   @@unique([userId, teamId])
 }
 

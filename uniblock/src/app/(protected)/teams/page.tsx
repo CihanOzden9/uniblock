@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import TeamsClient from "./TeamsClient";
+import { getFollowedTeamIds } from "@/app/actions/follow";
 import { redirect } from "next/navigation";
 
 export default async function TeamsPage() {
@@ -9,6 +10,8 @@ export default async function TeamsPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const followedIds = await getFollowedTeamIds(user.id);
 
   // Fetch real teams with current user's membership status
   const teams = await prisma.team.findMany({
@@ -36,5 +39,5 @@ export default async function TeamsPage() {
     }
   });
 
-  return <TeamsClient user={user} teams={teams} />;
+  return <TeamsClient user={user} teams={teams} followedIds={followedIds} />;
 }

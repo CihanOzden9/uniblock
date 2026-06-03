@@ -31,6 +31,9 @@ export async function createCommunityEvent(formData: FormData) {
       },
     });
 
+    // TODO(bildirim): Yeni etkinlik için takipçilere bildirim üret.
+    // Hedef: prisma.follow.findMany({ where: clubId ? { clubId } : { teamId } }) (sonraki faz).
+
     revalidatePath("/feed");
     revalidatePath("/events");
     revalidatePath("/clubs/manage");

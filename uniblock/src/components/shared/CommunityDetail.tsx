@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
 import JoinLeaveButton from "@/components/shared/JoinLeaveButton";
+import FollowButton from "@/components/shared/FollowButton";
 import { Users, Calendar, Globe, Mail, Megaphone, Clock, Crown, Camera, AtSign, Briefcase } from "lucide-react";
 
 interface Person { name: string; department?: string | null; image?: string | null; role?: string }
@@ -32,12 +33,13 @@ const initials = (name: string) => name.split(" ").map(n => n[0]).join("").slice
 const withAlpha = (hex: string, a: string) => /^#[0-9a-fA-F]{6}$/.test(hex) ? `${hex}${a}` : hex;
 
 export default function CommunityDetail({
-  data, user, membershipStatus, isLeader,
+  data, user, membershipStatus, isLeader, isFollowing,
 }: {
   data: CommunityDetailData;
   user: any;
   membershipStatus: "APPROVED" | "PENDING" | "REJECTED" | null;
   isLeader: boolean;
+  isFollowing: boolean;
 }) {
   const accent = data.color || "#fd6c00";
   const leaderTitle = data.entity === "club" ? "Başkan" : "Kaptan";
@@ -67,7 +69,10 @@ export default function CommunityDetail({
                   </p>
                 </div>
                 {user && (
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex items-center gap-2.5">
+                    {!isLeader && (
+                      <FollowButton entity={data.entity} id={data.id} isFollowing={isFollowing} color={accent} />
+                    )}
                     <JoinLeaveButton entity={data.entity} id={data.id} userId={user.id} status={membershipStatus} color={accent} isLeader={isLeader} />
                   </div>
                 )}

@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import ClubsClient from "./ClubsClient";
+import { getFollowedClubIds } from "@/app/actions/follow";
 import { redirect } from "next/navigation";
 
 export default async function ClubsPage() {
@@ -9,6 +10,8 @@ export default async function ClubsPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const followedIds = await getFollowedClubIds(user.id);
 
   // Fetch real clubs with current user's membership status
   const clubs = await prisma.club.findMany({
@@ -36,5 +39,5 @@ export default async function ClubsPage() {
     }
   });
 
-  return <ClubsClient user={user} clubs={clubs} />;
+  return <ClubsClient user={user} clubs={clubs} followedIds={followedIds} />;
 }
