@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, Users, ExternalLink, Loader2, Crown, LogOut, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Users, Compass } from "lucide-react";
 import MessagingOverlay from "@/components/shared/MessagingOverlay";
+import CommunityListCard from "@/components/shared/CommunityListCard";
 import { requestJoinClub, leaveClub } from "@/app/actions/club";
 import { toast } from "sonner";
 
@@ -24,7 +24,6 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, setIsPending] = useState<string | null>(null);
   const [leavingClub, setLeavingClub] = useState<string | null>(null);
-  const [expandedClub, setExpandedClub] = useState<string | null>(null);
 
   const isJoined = (club: any) =>
     club.members?.some((m: any) => m.userId === user.id && m.status === "APPROVED");
@@ -32,11 +31,8 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
   const onJoinClick = async (clubId: string) => {
     setIsPending(clubId);
     const result = await requestJoinClub(clubId, user.id);
-    if (result.success) {
-      toast.success("Katılım isteğiniz başarıyla gönderildi!");
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) toast.success("Katılım isteğiniz başarıyla gönderildi!");
+    else toast.error(result.error);
     setIsPending(null);
   };
 
@@ -44,29 +40,24 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
     if (!confirm("Bu kulüpten ayrılmak istediğinize emin misiniz?")) return;
     setLeavingClub(clubId);
     const result = await leaveClub(clubId, user.id);
-    if (result.success) {
-      toast.success("Kulüpten başarıyla ayrıldınız.");
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) toast.success("Kulüpten başarıyla ayrıldınız.");
+    else toast.error(result.error);
     setLeavingClub(null);
   };
 
   const onCancelClick = async (clubId: string) => {
     setLeavingClub(clubId);
     const result = await leaveClub(clubId, user.id);
-    if (result.success) {
-      toast.success("Katılım isteği iptal edildi.");
-    } else {
-      toast.error(result.error);
-    }
+    if (result.success) toast.success("Katılım isteği iptal edildi.");
+    else toast.error(result.error);
     setLeavingClub(null);
   };
 
-  const filteredClubs = clubs.filter(club =>
-    (club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (club.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
-    (activeTab === "all" || isJoined(club))
+  const filteredClubs = clubs.filter(
+    (club) =>
+      (club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (club.description || "").toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (activeTab === "all" || isJoined(club))
   );
   const joinedCount = clubs.filter(isJoined).length;
 
@@ -75,225 +66,144 @@ export default function ClubsClient({ user, clubs }: ClubsClientProps) {
       <Navbar user={user} />
 
       <main className="flex-1 pt-20">
-        <section className="bg-surface-container-low py-14 px-8 border-b border-outline-variant">
-          <div className="max-w-[1200px] mx-auto">
-            <span className="text-[12px] font-semibold tracking-wide uppercase text-primary">
-              Kulüpler ve Topluluklar
-            </span>
-
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mt-3">
-              <div className="flex-1">
-                <h1 className="font-heading text-[clamp(32px,4.5vw,52px)] font-bold tracking-tight leading-[1.1] mb-3 text-on-surface">
+        {/* Hero */}
+        <section className="bg-surface-container-low px-8 py-12 border-b border-outline-variant">
+          <div className="mx-auto max-w-[1280px]">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-[640px]">
+                <span className="text-[12px] font-semibold uppercase tracking-wide text-primary">
                   Kampüs Toplulukları
+                </span>
+                <h1 className="mt-2 font-heading text-[clamp(30px,4vw,46px)] font-bold leading-[1.1] tracking-tight text-on-surface">
+                  Topluluğunu Keşfet
                 </h1>
-                <p className="text-[16px] leading-[1.6] text-on-surface-variant max-w-[700px]">
-                  İlgi alanlarına uygun kulüpleri keşfet, projelerine dahil ol ve kampüs ağını genişlet.
+                <p className="mt-3 text-[16px] leading-[1.6] text-on-surface-variant">
+                  İlgi alanlarına uygun kulüpleri keşfet, projelere dahil ol ve kampüs ağını genişlet.
                 </p>
               </div>
 
-              <div className="relative w-full md:w-[320px]">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+              {/* Kulüpler / Takımlar geçişi */}
+              <div className="flex w-fit rounded-full border border-outline-variant bg-surface p-1">
+                <span className="rounded-full bg-primary px-6 py-2 text-[14px] font-semibold text-white shadow-sm">
+                  Kulüpler
+                </span>
+                <Link
+                  href="/teams"
+                  className="rounded-full px-6 py-2 text-[14px] font-semibold text-on-surface-variant transition-colors hover:text-on-surface"
+                >
+                  Takımlar
+                </Link>
+              </div>
+            </div>
+
+            {/* Arama + filtre */}
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
                 <Input
-                  placeholder="Kulüp ara..."
-                  className="pl-11 rounded-full bg-surface border-outline-variant h-12"
+                  placeholder="İsim veya anahtar kelime ile ara..."
+                  className="h-12 rounded-full border-outline-variant bg-surface pl-11"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-            </div>
-
-            {/* Sekme: Tüm Topluluklar / Takip Ettiklerim */}
-            <div className="flex gap-1 bg-surface p-1 rounded-full border border-outline-variant w-fit mt-7">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors ${activeTab === "all" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"}`}
-              >
-                Tüm Topluluklar
-              </button>
-              <button
-                onClick={() => setActiveTab("joined")}
-                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${activeTab === "joined" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"}`}
-              >
-                Takip Ettiklerim
-                <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${activeTab === "joined" ? "bg-white/20 text-white" : "bg-primary-fixed text-primary"}`}>{joinedCount}</span>
-              </button>
+              <div className="flex w-fit shrink-0 rounded-full border border-outline-variant bg-surface p-1">
+                <button
+                  onClick={() => setActiveTab("all")}
+                  className={`rounded-full px-5 py-2 text-[13px] font-semibold transition-colors ${
+                    activeTab === "all" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
+                  }`}
+                >
+                  Tümü
+                </button>
+                <button
+                  onClick={() => setActiveTab("joined")}
+                  className={`flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-semibold transition-colors ${
+                    activeTab === "joined" ? "bg-primary text-white" : "text-on-surface-variant hover:text-on-surface"
+                  }`}
+                >
+                  Takip Ettiklerim
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${
+                      activeTab === "joined" ? "bg-white/20 text-white" : "bg-primary-fixed text-primary"
+                    }`}
+                  >
+                    {joinedCount}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="py-12 px-8 min-h-[400px]">
-          <div className="max-w-[1200px] mx-auto w-full">
-            {activeTab === "joined" && filteredClubs.length === 0 && (
-              <div className="bg-card rounded-xl border border-outline-variant shadow-ambient p-16 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary-fixed mx-auto mb-5 flex items-center justify-center">
-                  <Users className="w-7 h-7 text-primary" />
+        {/* Liste */}
+        <section className="min-h-[400px] px-8 py-10">
+          <div className="mx-auto w-full max-w-[1280px]">
+            <div className="mb-6 flex items-center gap-2 text-[13px] font-medium text-on-surface-variant">
+              <Compass className="h-4 w-4" />
+              {filteredClubs.length} topluluk listeleniyor
+            </div>
+
+            {filteredClubs.length === 0 ? (
+              <div className="rounded-xl border border-outline-variant bg-card p-16 text-center shadow-ambient">
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary-fixed">
+                  <Users className="h-7 w-7 text-primary" />
                 </div>
-                <h3 className="font-heading text-xl font-bold tracking-tight mb-1.5">Henüz Bir Topluluğa Katılmadın</h3>
-                <p className="text-[14px] text-on-surface-variant mb-6">Tüm Topluluklar sekmesinden ilgi alanına uygun kulüplere katıl.</p>
-                <Button onClick={() => setActiveTab("all")} className="rounded-full text-[14px] font-semibold">Toplulukları Keşfet</Button>
+                <h3 className="mb-1.5 font-heading text-xl font-bold tracking-tight">
+                  {activeTab === "joined" ? "Henüz Bir Topluluğa Katılmadın" : "Sonuç Bulunamadı"}
+                </h3>
+                <p className="mb-6 text-[14px] text-on-surface-variant">
+                  {activeTab === "joined"
+                    ? "Tüm topluluklar arasından ilgi alanına uygun kulüplere katıl."
+                    : "Aramana uygun bir topluluk bulunamadı."}
+                </p>
+                {activeTab === "joined" && (
+                  <Button onClick={() => setActiveTab("all")} className="rounded-full text-[14px] font-semibold">
+                    Toplulukları Keşfet
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredClubs.map((club) => {
+                  const userMembership = club.members?.find((m: any) => m.userId === user.id);
+                  return (
+                    <CommunityListCard
+                      key={club.id}
+                      href={`/clubs/${club.slug}`}
+                      name={club.name}
+                      description={club.description}
+                      memberCount={club._count?.members || 0}
+                      color={club.color}
+                      typeLabel="Kulüp"
+                      leaderLabel="Başkan"
+                      status={userMembership?.status ?? null}
+                      isLeader={club.leader?.id === user.id}
+                      busyJoin={isPending === club.id}
+                      busyLeave={leavingClub === club.id}
+                      onJoin={() => onJoinClick(club.id)}
+                      onLeave={() => onLeaveClick(club.id)}
+                      onCancel={() => onCancelClick(club.id)}
+                    />
+                  );
+                })}
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-              {filteredClubs.map((club) => {
-                // Separate current user's membership from board members
-                const userMembership = club.members?.find((m: any) => m.userId === user.id);
-                const boardMembers = club.members?.filter((m: any) => m.role !== "MEMBER" && m.userId !== user.id && m.userId !== club.leader?.id) || [];
-                const userStatus = userMembership?.status;
-                const isLoading = isPending === club.id;
-                const isLeaving = leavingClub === club.id;
-                const isExpanded = expandedClub === club.id;
-
-                // Build management team: leader + board members
-                const managementTeam = [
-                  ...(club.leader ? [{ name: club.leader.name, department: club.leader.department, role: "BAŞKAN" }] : []),
-                  ...boardMembers.map((m: any) => ({ name: m.user.name, department: m.user.department, role: m.role }))
-                ];
-
-                return (
-                  <Card key={club.id} className="overflow-hidden flex flex-col hover:shadow-ambient-lg hover:-translate-y-0.5 transition-all">
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[11px] font-semibold text-primary tracking-wide bg-primary-fixed px-2.5 py-1 rounded-full">
-                          {club.category || "Topluluk"}
-                        </span>
-                        <div className="flex items-center gap-1.5 text-[12px] font-medium text-on-surface-variant">
-                          <Users className="w-3.5 h-3.5" />
-                          {club._count?.members || 0} üye
-                        </div>
-                      </div>
-                      <CardTitle className="font-heading text-xl font-bold tracking-tight mt-4">
-                        <Link href={`/clubs/${club.slug}`} className="hover:text-primary transition-colors">{club.name}</Link>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 space-y-4">
-                      <p className="text-[14px] text-on-surface-variant leading-relaxed">
-                        {club.description || "Henüz bir açıklama eklenmemiş."}
-                      </p>
-
-                      {/* Management Team Section */}
-                      {managementTeam.length > 0 && (
-                        <div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedClub(isExpanded ? null : club.id);
-                            }}
-                            className="flex items-center gap-2 text-[12px] font-semibold text-on-surface-variant hover:text-primary transition-colors w-full"
-                          >
-                            <Crown className="w-3.5 h-3.5" />
-                            Yönetim Kadrosu ({managementTeam.length})
-                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 ml-auto" />}
-                          </button>
-
-                          {isExpanded && (
-                            <div className="mt-3 space-y-2.5 border-l-2 border-primary/30 pl-3 animate-in slide-in-from-top-2">
-                              {managementTeam.map((person: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between gap-2">
-                                  <div>
-                                    <p className="text-[13px] font-semibold text-on-surface">{person.name}</p>
-                                    <p className="text-[11px] text-on-surface-variant">{person.department || "—"}</p>
-                                  </div>
-                                  <span className={`text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full shrink-0 ${
-                                    person.role === "BAŞKAN"
-                                      ? "bg-accent/15 text-[color:var(--community-orange-deep)]"
-                                      : "bg-surface-container-high text-on-surface-variant"
-                                  }`}>
-                                    {person.role}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                    <CardFooter className="border-t border-outline-variant bg-surface-container-low flex gap-3">
-                      {(() => {
-                        if (userStatus === "APPROVED") {
-                          return (
-                            <>
-                              <Button
-                                onClick={() => onLeaveClick(club.id)}
-                                disabled={isLeaving}
-                                variant="outline"
-                                className="flex-1 rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
-                              >
-                                {isLeaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                                  <>
-                                    <LogOut className="w-3.5 h-3.5 mr-2" />
-                                    Ayrıl
-                                  </>
-                                )}
-                              </Button>
-                              <Button disabled className="flex-1 rounded-full text-[13px] font-semibold h-10 bg-primary-fixed text-primary border-transparent disabled:opacity-100">
-                                Üyesiniz
-                              </Button>
-                            </>
-                          );
-                        }
-
-                        if (userStatus === "PENDING") {
-                          return (
-                            <Button
-                              onClick={() => onCancelClick(club.id)}
-                              disabled={isLeaving}
-                              variant="outline"
-                              className="group/req flex-1 rounded-full text-[13px] font-semibold h-10 border-outline-variant text-on-surface-variant hover:border-destructive hover:text-destructive transition-all"
-                            >
-                              {isLeaving ? <Loader2 className="w-4 h-4 animate-spin" /> : (
-                                <>
-                                  <span className="inline group-hover/req:hidden">İstek Gönderildi</span>
-                                  <span className="hidden group-hover/req:inline">İsteği İptal Et</span>
-                                </>
-                              )}
-                            </Button>
-                          );
-                        }
-
-                        if (isLoading) {
-                          return (
-                            <Button disabled className="flex-1 rounded-full text-[13px] font-semibold h-10 bg-surface-container-high text-on-surface-variant border-transparent disabled:opacity-100">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            </Button>
-                          );
-                        }
-
-                        return (
-                          <Button
-                            onClick={() => onJoinClick(club.id)}
-                            className="flex-1 rounded-full text-[13px] font-semibold h-10"
-                          >
-                            Katılma İsteği
-                          </Button>
-                        );
-                      })()}
-                      <Link href={`/clubs/${club.slug}`}>
-                        <Button variant="outline" className="w-10 h-10 p-0 rounded-full border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-all" title="Kulüp sayfası">
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
-            </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-card border-t border-outline-variant px-8 py-12 shrink-0">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="font-heading font-extrabold text-[20px] text-primary">
+      <footer className="shrink-0 border-t border-outline-variant bg-card px-8 py-12">
+        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-8 md:flex-row">
+          <div className="font-heading text-[20px] font-extrabold text-primary">
             Uni<span className="text-accent">.</span>Block
           </div>
           <div className="flex gap-8 text-[14px] font-medium text-on-surface-variant">
-            <Link href="#" className="hover:text-primary transition-colors">Hakkımızda</Link>
-            <Link href="#" className="hover:text-primary transition-colors">İletişim</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Gizlilik</Link>
+            <Link href="#" className="transition-colors hover:text-primary">Hakkımızda</Link>
+            <Link href="#" className="transition-colors hover:text-primary">İletişim</Link>
+            <Link href="#" className="transition-colors hover:text-primary">Gizlilik</Link>
           </div>
-          <p className="text-[13px] text-on-surface-variant">
-            © 2026 Kampüs Haber Ağı
-          </p>
+          <p className="text-[13px] text-on-surface-variant">© 2026 Kampüs Haber Ağı</p>
         </div>
       </footer>
 
